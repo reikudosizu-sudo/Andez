@@ -156,21 +156,6 @@ AddToggle("Mega Jump", function(v) if LocalPlayer.Character then LocalPlayer.Cha
 AddToggle("Ultimate Fling GUI", function(v) if v then loadstring(game:HttpGet("https://raw.githubusercontent.com/K1LAS1K/Ultimate-Fling-GUI/main/flingscript.lua"))() end end)
 AddToggle("Wallhack ESP", function(v) if v then for _,p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then local hl = Instance.new("Highlight", p.Character); hl.Name = "AndezESP"; hl.FillColor = Color3.fromRGB(255,0,0) end end else for _,p in pairs(game.Players:GetPlayers()) do if p.Character and p.Character:FindFirstChild("AndezESP") then p.Character.AndezESP:Destroy() end end end end)
 AddToggle("Noclip (Tembus)", function(v) _G.nc = v; if v then _G.NoclipConn = RunService.Stepped:Connect(function() if _G.nc and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end) else if _G.NoclipConn then _G.NoclipConn:Disconnect() _G.NoclipConn = nil end; if LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = true end end end end end)
-AddToggle("Infinite Jump", function(v)
-    _G.InfJumpEnabled = v
-    if _G.InfJumpConn then _G.InfJumpConn:Disconnect() end
-    
-    if _G.InfJumpEnabled then
-        _G.InfJumpConn = game:GetService("UserInputService").JumpRequest:Connect(function()
-            if _G.InfJumpEnabled then
-                local character = game:GetService("Players").LocalPlayer.Character
-                if character and character:FindFirstChildOfClass("Humanoid") then
-                    character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-                end
-            end
-        end)
-    end
-end)
 
 -- Mapping Movement
 Up.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, -1) end); Up.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
