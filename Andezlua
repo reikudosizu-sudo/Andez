@@ -16,7 +16,7 @@ local function TotalKill()
 end
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "AndezVip_V79"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 999
+ScreenGui.Name = "AndezVip_V1"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 999
 
 local function MakeNeon(obj)
     task.spawn(function()
