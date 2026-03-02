@@ -1,28 +1,25 @@
--- [[ ANDEZ VIP ⚡ V1.1 - ULTIMATE VERSION ]]
--- REPAIRED, OPTIMIZED, & REAL-TIME VERIFIED
-
+-- [[ ANDEZ VIP ⚡ V1.1 - FULL VERSION ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- 1. KONFIGURASI VERSI (Sangat Teliti)
+-- 1. SISTEM VERSI REAL-TIME
 local LocalVersion = "1.1" 
 local VersionURL = "https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/version.txt"
 local GitHubVersion = "Checking..."
 
--- Fungsi Ambil Versi Real-time
 task.spawn(function()
     local success, result = pcall(function() return game:HttpGet(VersionURL) end)
     if success then GitHubVersion = result:gsub("%s+", "") else GitHubVersion = "Error" end
 end)
 
--- 2. SETUP GUI UTAMA
+-- 2. SETUP SCREEN GUI UTAMA
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "AndezVip_Project"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 999
+ScreenGui.Name = "AndezVip_Project"; ScreenGui.ResetOnSpawn = false
 
--- 3. ANIMASI SCANNER MERAH XL (BAGIAN PEMBUKA)
+-- 3. ANIMASI SCANNER MERAH XL
 task.spawn(function()
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 450, 0, 200)
@@ -34,6 +31,81 @@ task.spawn(function()
     local Stroke = Instance.new("UIStroke", LoadingFrame)
     Stroke.Color = Color3.fromRGB(255, 0, 0); Stroke.Thickness = 3
 
+    local ScanLine = Instance.new("Frame", LoadingFrame)
+    ScanLine.Size = UDim2.new(1, 0, 0, 2); ScanLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0); ScanLine.BorderSizePixel = 0
+
+    local LoadText = Instance.new("TextLabel", LoadingFrame)
+    LoadText.Size = UDim2.new(1, 0, 0.5, 0); LoadText.Text = "ANDEZ VIP"; LoadText.TextColor3 = Color3.fromRGB(255, 0, 0)
+    LoadText.Font = Enum.Font.GothamBold; LoadText.TextSize = 35; LoadText.BackgroundTransparency = 1
+
+    local VersionText = Instance.new("TextLabel", LoadingFrame)
+    VersionText.Size = UDim2.new(1, 0, 0.2, 0); VersionText.Position = UDim2.new(0, 0, 0.55, 0)
+    VersionText.Text = "INITIALIZING SCAN..."; VersionText.TextColor3 = Color3.new(1, 1, 1)
+    VersionText.Font = Enum.Font.GothamMedium; VersionText.TextSize = 14; VersionText.BackgroundTransparency = 1
+
+    -- Efek Loop Animasi
+    task.spawn(function()
+        while LoadingFrame and LoadingFrame.Parent do
+            ScanLine.Position = UDim2.new(0, 0, 0, 0)
+            TweenService:Create(ScanLine, TweenInfo.new(1.5), {Position = UDim2.new(0, 0, 1, 0)}):Play()
+            task.wait(1.5)
+        end
+    end)
+
+    -- Tunggu Cek Versi Selesai
+    repeat task.wait() until GitHubVersion ~= "Checking..."
+    if GitHubVersion == LocalVersion then
+        VersionText.Text = "STATUS: UP TO DATE [V" .. GitHubVersion .. "]"
+        VersionText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        VersionText.Text = "UPDATE FOUND: V" .. GitHubVersion
+        VersionText.TextColor3 = Color3.fromRGB(255, 255, 0)
+    end
+    task.wait(2)
+
+    -- Tutup Loading & Munculkan Fitur
+    local Out = TweenService:Create(LoadingFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back), {BackgroundTransparency = 1, Size = UDim2.new(0,0,0,0)})
+    Out:Play()
+    Out.Completed:Connect(function()
+        LoadingFrame:Destroy()
+        -- DI SINI FITUR DIMUNCULKAN
+        if LogoBtn then LogoBtn.Visible = true end
+    end)
+end)
+
+-- 4. SEMUA FITUR ANDEZ VIP (LOGO, MENU, FLY, TP, ESP)
+local function MakeNeon(obj)
+    task.spawn(function()
+        local h = 0
+        while obj and obj.Parent do
+            h = h + 0.01; if h >= 1 then h = 0 end
+            obj.TextColor3 = Color3.fromHSV(h, 1, 1); task.wait(0.05)
+        end
+    end)
+end
+
+-- Tombol Logo A
+local LogoBtn = Instance.new("TextButton", ScreenGui)
+LogoBtn.Size = UDim2.new(0, 45, 0, 45); LogoBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+LogoBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); LogoBtn.Text = "A"; LogoBtn.Font = "GothamBold"; LogoBtn.TextSize = 25
+LogoBtn.Visible = false; LogoBtn.Active = true; LogoBtn.Draggable = true; Instance.new("UICorner", LogoBtn); MakeNeon(LogoBtn)
+
+-- Main Frame Menu
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
+
+local TitleBar = Instance.new("Frame", MainFrame)
+TitleBar.Size = UDim2.new(1, 0, 0, 35); TitleBar.BackgroundColor3 = Color3.fromRGB(120, 0, 0); Instance.new("UICorner", TitleBar)
+
+local TitleText = Instance.new("TextLabel", TitleBar)
+TitleText.Text = "ANDEZ VIP"; TitleText.Size = UDim2.new(1, -70, 1, 0); TitleText.Position = UDim2.new(0, 8, 0, 0)
+TitleText.Font = "GothamBold"; TitleText.TextSize = 14; TitleText.BackgroundTransparency = 1; TitleText.TextXAlignment = "Left"; MakeNeon(TitleText)
+
+LogoBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+-- [ LANJUTKAN TEMPEL SEMUA KODE FLY, SASA TP, DAN TOGGLE ANDA DI BAWAH INI ] --
+-- (Sesuai script 7.9 yang Anda kirim tadi)
     local ScanLine = Instance.new("Frame", LoadingFrame)
     ScanLine.Size = UDim2.new(1, 0, 0, 2); ScanLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0); ScanLine.BorderSizePixel = 0
 
