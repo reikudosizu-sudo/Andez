@@ -9,7 +9,7 @@ local Camera = workspace.CurrentCamera
 
 -- 1. KONFIGURASI VERSI (Sangat Teliti)
 local LocalVersion = "1.1" 
-local VersionURL = "https://raw.githubusercontent.com/reikudosizu-sudo/Andez/main/version.txt"
+local VersionURL = "https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/version.txt"
 local GitHubVersion = "Checking..."
 
 -- Fungsi Ambil Versi Real-time
