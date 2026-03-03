@@ -44,59 +44,63 @@ MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
 
 -- [[ 4. ANIMASI LOADING SYSTEM ]]
+-- [[ 4. ANIMASI LOADING SYSTEM - CYBERPUNK STYLE ]]
 task.spawn(function()
     local LoadingFrame = Instance.new("Frame", ScreenGui)
-    LoadingFrame.Size = UDim2.new(0, 300, 0, 100); LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -50)
-    LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 15)
-    local Stroke = Instance.new("UIStroke", LoadingFrame); Stroke.Color = Color3.fromRGB(255, 0, 0); Stroke.Thickness = 2
-    -- Efek Glow Berdenyut
-task.spawn(function()
-    while LoadingFrame and LoadingFrame.Parent do
-        local t1 = TweenService:Create(Stroke, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Thickness = 4, Transparency = 0})
-        t1:Play()
-        t1.Completed:Wait()
-        local t2 = TweenService:Create(Stroke, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Thickness = 2, Transparency = 0.6})
-        t2:Play()
-        t2.Completed:Wait()
-    end
-end)
+    LoadingFrame.Size = UDim2.new(0, 380, 0, 150)
+    LoadingFrame.Position = UDim2.new(0.5, -190, 0.5, -75)
+    LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    LoadingFrame.ClipsDescendants = true -- Sesuai gambar
+    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 10)
+    
+    -- Efek Grid Merah (Sesuai Gambar)
+    local Grid = Instance.new("ImageLabel", LoadingFrame)
+    Grid.Size = UDim2.new(1, 0, 1, 0)
+    Grid.BackgroundTransparency = 1
+    Grid.Image = "rbxassetid://12567115160" -- ID pola Grid
+    Grid.ImageColor3 = Color3.fromRGB(255, 0, 0)
+    Grid.ImageTransparency = 0.8 -- Tipis saja agar elegan
+
+    local LogoA = Instance.new("TextLabel", LoadingFrame)
+    LogoA.Text = "A"; LogoA.Size = UDim2.new(0, 60, 0, 60); LogoA.Position = UDim2.new(0.05, 0, 0.15, 0)
+    LogoA.BackgroundColor3 = Color3.fromRGB(20, 0, 0); LogoA.TextColor3 = Color3.new(1, 1, 1)
+    LogoA.Font = "GothamBlack"; LogoA.TextSize = 40; Instance.new("UICorner", LogoA)
 
     local StatusText = Instance.new("TextLabel", LoadingFrame)
-    StatusText.Size = UDim2.new(1, 0, 0.4, 0); StatusText.Text = "LOADING ANDEZ VIP..."; StatusText.TextColor3 = Color3.new(1, 1, 1)
-    StatusText.Font = "GothamBold"; StatusText.TextSize = 14; StatusText.BackgroundTransparency = 1
+    StatusText.Size = UDim2.new(0, 200, 0, 20); StatusText.Position = UDim2.new(0.25, 0, 0.2, 0)
+    StatusText.Text = "INITIALIZING SYSTEM..."; StatusText.TextColor3 = Color3.new(1, 1, 1)
+    StatusText.BackgroundTransparency = 1; StatusText.Font = "GothamBold"; StatusText.TextSize = 14; StatusText.TextXAlignment = "Left"
 
     local BarBg = Instance.new("Frame", LoadingFrame)
-    BarBg.Size = UDim2.new(0.8, 0, 0, 10); BarBg.Position = UDim2.new(0.1, 0, 0.6, 0); BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Instance.new("UICorner", BarBg)
+    BarBg.Size = UDim2.new(0.9, 0, 0, 5); BarBg.Position = UDim2.new(0.05, 0, 0.8, 0)
+    BarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Instance.new("UICorner", BarBg)
 
     local BarFill = Instance.new("Frame", BarBg)
     BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Instance.new("UICorner", BarFill)
-    -- [[ FITUR NOMOR 2: TEKS DINAMIS ]]
-task.spawn(function()
-    local logs = {
-        "SCANNING FILES...", 
-        "BYPASSING ANTICHEAT...", 
-        "INJECTING DATABASE...", 
-        "VERIFYING PERMISSION...", 
-        "SUCCESS!"
-    }
-    for _, msg in ipairs(logs) do
-        if StatusText and StatusText.Parent then
-            StatusText.Text = msg
-            task.wait(0.6) -- Mengatur kecepatan ganti teks
-        end
-    end
-end)
 
-    local tween = TweenService:Create(BarFill, TweenInfo.new(3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
+    -- Animasi Progress Bar
+    local tween = TweenService:Create(BarFill, TweenInfo.new(4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
     tween:Play()
 
+    -- Animasi Teks Status (Fade In/Out)
+    task.spawn(function()
+        local msgs = {"SCANNING DATA...", "BYPASSING SECURITY...", "READY TO USE!"}
+        for _, m in pairs(msgs) do
+            StatusText.TextTransparency = 1; StatusText.Text = m
+            TweenService:Create(StatusText, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+            task.wait(1.2)
+        end
+    end)
+
     tween.Completed:Connect(function()
-        StatusText.Text = "SUCCESSFULLY LOADED!"; StatusText.TextColor3 = Color3.fromRGB(0, 255, 0)
-        task.wait(1); LoadingFrame:Destroy()
+        task.wait(0.5)
+        -- Efek menutup halus
+        TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {Size = UDim2.new(0,0,0,150), BackgroundTransparency = 1}):Play()
+        task.wait(0.5)
+        LoadingFrame:Destroy()
         LogoBtn.Visible = true 
     end)
 end)
-
 -- [[ 5. TITLE BAR & NAVIGASI MENU ]]
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1, 0, 0, 35); TitleBar.BackgroundColor3 = Color3.fromRGB(120, 0, 0); Instance.new("UICorner", TitleBar)
