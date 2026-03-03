@@ -108,7 +108,8 @@ TitleText.Font = Enum.Font.GothamBlack
 TitleText.TextScaled = true -- Teks otomatis besar sesuai kotak tanpa terpotong
 TitleText.BackgroundTransparency = 1
 TitleText.TextColor3 = Color3.new(1,1,1)
-TitleText.TextXAlignment = Enum.TextXAlignment.Left 
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+MakeNeon(TitleText)
 local MainClose = Instance.new("TextButton", TitleBar); MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
 local MainMin = Instance.new("TextButton", TitleBar); MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin)
 
