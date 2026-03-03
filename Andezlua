@@ -49,6 +49,17 @@ task.spawn(function()
     LoadingFrame.Size = UDim2.new(0, 300, 0, 100); LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -50)
     LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 15)
     local Stroke = Instance.new("UIStroke", LoadingFrame); Stroke.Color = Color3.fromRGB(255, 0, 0); Stroke.Thickness = 2
+    -- Efek Glow Berdenyut
+task.spawn(function()
+    while LoadingFrame and LoadingFrame.Parent do
+        local t1 = TweenService:Create(Stroke, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Thickness = 4, Transparency = 0})
+        t1:Play()
+        t1.Completed:Wait()
+        local t2 = TweenService:Create(Stroke, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Thickness = 2, Transparency = 0.6})
+        t2:Play()
+        t2.Completed:Wait()
+    end
+end)
 
     local StatusText = Instance.new("TextLabel", LoadingFrame)
     StatusText.Size = UDim2.new(1, 0, 0.4, 0); StatusText.Text = "LOADING ANDEZ VIP..."; StatusText.TextColor3 = Color3.new(1, 1, 1)
@@ -59,6 +70,22 @@ task.spawn(function()
 
     local BarFill = Instance.new("Frame", BarBg)
     BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Instance.new("UICorner", BarFill)
+    -- [[ FITUR NOMOR 2: TEKS DINAMIS ]]
+task.spawn(function()
+    local logs = {
+        "SCANNING FILES...", 
+        "BYPASSING ANTICHEAT...", 
+        "INJECTING DATABASE...", 
+        "VERIFYING PERMISSION...", 
+        "SUCCESS!"
+    }
+    for _, msg in ipairs(logs) do
+        if StatusText and StatusText.Parent then
+            StatusText.Text = msg
+            task.wait(0.6) -- Mengatur kecepatan ganti teks
+        end
+    end
+end)
 
     local tween = TweenService:Create(BarFill, TweenInfo.new(3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
     tween:Play()
