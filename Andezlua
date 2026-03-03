@@ -15,7 +15,16 @@ end
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "AndezVip_V79"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 999
 
--- [[ TAMBAHAN ANIMASI LOADING ]]
+-- BUAT DULU TOMBOLNYA TAPI SEMBUNYIKAN
+local LogoBtn = Instance.new("TextButton", ScreenGui)
+LogoBtn.Size = UDim2.new(0, 45, 0, 45); LogoBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+LogoBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); LogoBtn.Text = "A"; LogoBtn.Font = "GothamBold"; LogoBtn.TextSize = 25
+LogoBtn.Visible = false; -- <--- WAJIB FALSE AGAR TIDAK MUNCUL DULU
+LogoBtn.Active = true; LogoBtn.Draggable = true; Instance.new("UICorner", LogoBtn); MakeNeon(LogoBtn)
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
 local function JalankanLoading()
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 100)
@@ -69,7 +78,44 @@ LogoBtn.Active = true; LogoBtn.Draggable = true; Instance.new("UICorner", LogoBt
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
+-- [[ TEMPEL DI SINI (ANTARA MAINFRAME DAN TITLEBAR) ]]
+task.spawn(function()
+    local LoadingFrame = Instance.new("Frame", ScreenGui)
+    LoadingFrame.Size = UDim2.new(0, 350, 0, 120)
+    LoadingFrame.Position = UDim2.new(0.5, -175, 0.5, -60)
+    LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
+    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 15)
+    local Stroke = Instance.new("UIStroke", LoadingFrame)
+    Stroke.Color = Color3.fromRGB(255, 0, 0); Stroke.Thickness = 2
 
+    local StatusText = Instance.new("TextLabel", LoadingFrame)
+    StatusText.Size = UDim2.new(1, 0, 0.4, 0); StatusText.Position = UDim2.new(0, 0, 0.1, 0)
+    StatusText.Text = "VERIFYING DATABASE..."; StatusText.TextColor3 = Color3.new(1, 1, 1)
+    StatusText.Font = "GothamBold"; StatusText.TextSize = 14; StatusText.BackgroundTransparency = 1
+
+    local BarBg = Instance.new("Frame", LoadingFrame)
+    BarBg.Size = UDim2.new(0.8, 0, 0, 8); BarBg.Position = UDim2.new(0.1, 0, 0.6, 0)
+    BarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Instance.new("UICorner", BarBg)
+
+    local BarFill = Instance.new("Frame", BarBg)
+    BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Instance.new("UICorner", BarFill)
+
+    -- Sembunyikan Ikon A di awal animasi
+    LogoBtn.Visible = false
+
+    local tween = game:GetService("TweenService"):Create(BarFill, TweenInfo.new(3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
+    tween:Play()
+
+    -- Tunggu verifikasi
+    repeat task.wait() until GitHubVersion ~= "Checking..."
+
+    tween.Completed:Connect(function()
+        StatusText.Text = "SUCCESSFULLY VERIFIED!"; StatusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+        task.wait(1.5)
+        LoadingFrame:Destroy()
+        LogoBtn.Visible = true -- BARU MUNCUL DI SINI
+    end)
+end)
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1, 0, 0, 35); TitleBar.BackgroundColor3 = Color3.fromRGB(120, 0, 0); Instance.new("UICorner", TitleBar)
 
@@ -81,9 +127,15 @@ local MainClose = Instance.new("TextButton", TitleBar)
 MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
 
 local MainMin = Instance.new("TextButton", TitleBar)
-MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin); MainMin.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin);MainMin.MouseButton1Click:Connect(function() 
+    MainFrame.Visible = false 
+    LogoBtn.Visible = true -- Tambahkan baris ini
+end)
 
-LogoBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true end)
+LogoBtn.MouseButton1Click:Connect(function() 
+    MainFrame.Visible = true 
+    LogoBtn.Visible = false -- Tambahkan baris ini
+end)
 
 local function CreateRestoreBtn(txt, pos, color)
     local b = Instance.new("TextButton", ScreenGui); b.Size = UDim2.new(0, 45, 0, 45); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(10,10,10); b.Text = txt; b.TextColor3 = color; b.Font = "GothamBold"; b.TextSize = 10; b.Visible = false; b.Draggable = true; Instance.new("UICorner", b, {CornerRadius = UDim.new(1,0)}); local s = Instance.new("UIStroke", b); s.Color = color; s.Thickness = 2; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; return b
