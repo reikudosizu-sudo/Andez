@@ -1,25 +1,7 @@
--- [[ 1. SETTING VERSI LOKAL ]]
-local LocalVersion = "1.1" 
-local VersionURL = "https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/version.txt"
-local GitHubVersion = "Checking..."
-
--- [[ 2. FUNGSI CEK VERSI KE GITHUB ]]
-task.spawn(function()
-    local success, result = pcall(function() 
-        return game:HttpGet(VersionURL) 
-    end)
-    if success then 
-        GitHubVersion = result:gsub("%s+", "") -- Mengambil angka saja tanpa spasi
-    else 
-        GitHubVersion = "Error" 
-    end
-end)
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local TweenService = game:GetService("TweenService")
 
 local function TotalKill()
     _G.nc = false; _G.SpecLoop = false
@@ -33,45 +15,42 @@ end
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "AndezVip_V79"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 999
 
-local MainFrame = Instance.new("Frame", ScreenGui) -- Dibuat lebih awal agar bisa dipanggil di animasi
-MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
-
--- [[ 3. ANIMASI SCANNER & VERIFIKASI ]]
-task.spawn(function()
+-- [[ TAMBAHAN ANIMASI LOADING ]]
+local function JalankanLoading()
     local LoadingFrame = Instance.new("Frame", ScreenGui)
-    LoadingFrame.Size = UDim2.new(0, 450, 0, 200)
-    LoadingFrame.Position = UDim2.new(0.5, -225, 0.5, -100)
-    LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
-    LoadingFrame.ClipsDescendants = true
-    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 20)
-    Instance.new("UIStroke", LoadingFrame).Color = Color3.fromRGB(255, 0, 0)
+    LoadingFrame.Size = UDim2.new(0, 300, 0, 100)
+    LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -50)
+    LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 15)
+    local Stroke = Instance.new("UIStroke", LoadingFrame)
+    Stroke.Color = Color3.fromRGB(255, 0, 0); Stroke.Thickness = 2
 
-    local VersionText = Instance.new("TextLabel", LoadingFrame)
-    VersionText.Size = UDim2.new(1, 0, 1, 0)
-    VersionText.Text = "VERIFYING VERSION..."
-    VersionText.TextColor3 = Color3.new(1, 1, 1)
-    VersionText.BackgroundTransparency = 1
-    VersionText.Font = Enum.Font.GothamBold; VersionText.TextSize = 18
+    local BarBg = Instance.new("Frame", LoadingFrame)
+    BarBg.Size = UDim2.new(0.8, 0, 0, 10); BarBg.Position = UDim2.new(0.1, 0, 0.6, 0)
+    BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Instance.new("UICorner", BarBg)
 
-    repeat task.wait() until GitHubVersion ~= "Checking..."
+    local BarFill = Instance.new("Frame", BarBg)
+    BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Instance.new("UICorner", BarFill)
 
-    if GitHubVersion == LocalVersion then
-        VersionText.Text = "STATUS: UP TO DATE [V" .. GitHubVersion .. "]"
-        VersionText.TextColor3 = Color3.fromRGB(0, 255, 0)
-    else
-        VersionText.Text = "NEW UPDATE FOUND: V" .. GitHubVersion
-        VersionText.TextColor3 = Color3.fromRGB(255, 255, 0)
-    end
+    local LoadingText = Instance.new("TextLabel", LoadingFrame)
+    LoadingText.Size = UDim2.new(1, 0, 0.4, 0); LoadingText.Text = "LOADING ANDEZ VIP..."; LoadingText.TextColor3 = Color3.new(1, 1, 1)
+    LoadingText.Font = "GothamBold"; LoadingText.TextSize = 14; LoadingText.BackgroundTransparency = 1
 
-    task.wait(2.5)
-    LoadingFrame:Destroy()
-    
-    -- [[ PERBAIKAN: AUTO-OPEN MENU ]]
-    MainFrame.Visible = true -- Menu otomatis terbuka
-    if LogoBtn then LogoBtn.Visible = true end
+   LogoBtn.MouseButton1Click:Connect(function() 
+    MainFrame.Visible = true 
+    LogoBtn.Visible = false -- Biar Logo A hilang pas menu buka
 end)
 
+    local Tween = game:GetService("TweenService"):Create(BarFill, TweenInfo.new(3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
+    Tween:Play()
+
+    Tween.Completed:Connect(function()
+        LoadingText.Text = "SUCCESSFULLY LOADED!"; LoadingText.TextColor3 = Color3.fromRGB(0, 255, 0)
+        task.wait(1); LoadingFrame:Destroy()
+        LogoBtn.Visible = true -- HANYA Munculkan Logo A setelah selesai
+    end)
+end
+task.spawn(JalankanLoading)
 local function MakeNeon(obj)
     task.spawn(function()
         local h = 0
@@ -85,7 +64,11 @@ end
 local LogoBtn = Instance.new("TextButton", ScreenGui)
 LogoBtn.Size = UDim2.new(0, 45, 0, 45); LogoBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
 LogoBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); LogoBtn.Text = "A"; LogoBtn.Font = "GothamBold"; LogoBtn.TextSize = 25
-LogoBtn.Visible = false; LogoBtn.Active = true; LogoBtn.Draggable = true; Instance.new("UICorner", LogoBtn); MakeNeon(LogoBtn)
+LogoBtn.Active = true; LogoBtn.Draggable = true; Instance.new("UICorner", LogoBtn); MakeNeon(LogoBtn)
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
 
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1, 0, 0, 35); TitleBar.BackgroundColor3 = Color3.fromRGB(120, 0, 0); Instance.new("UICorner", TitleBar)
@@ -98,16 +81,9 @@ local MainClose = Instance.new("TextButton", TitleBar)
 MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
 
 local MainMin = Instance.new("TextButton", TitleBar)
-MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin); MainMin.MouseButton1Click:Connect(function() 
-    MainFrame.Visible = false 
-    LogoBtn.Visible = true  -- Menampilkan kembali Ikon A agar bisa dibuka lagi
-end)
+MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin); MainMin.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
 
 LogoBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true end)
-LogoBtn.MouseButton1Click:Connect(function() 
-    MainFrame.Visible = true 
-    LogoBtn.Visible = false -- Sembunyikan Ikon A saat menu sedang terbuka
-end)
 
 local function CreateRestoreBtn(txt, pos, color)
     local b = Instance.new("TextButton", ScreenGui); b.Size = UDim2.new(0, 45, 0, 45); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(10,10,10); b.Text = txt; b.TextColor3 = color; b.Font = "GothamBold"; b.TextSize = 10; b.Visible = false; b.Draggable = true; Instance.new("UICorner", b, {CornerRadius = UDim.new(1,0)}); local s = Instance.new("UIStroke", b); s.Color = color; s.Thickness = 2; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; return b
@@ -172,11 +148,13 @@ local SpeedLabel = Instance.new("TextLabel", FlyPanel); local curSpeed = 45; Spe
 local Minus = Instance.new("TextButton", FlyPanel); Minus.Text = "-"; Minus.Size = UDim2.new(0, 40, 0, 25); Minus.Position = UDim2.new(0.1, 0, 0.75, 0); Minus.BackgroundColor3 = Color3.fromRGB(40,40,40); Minus.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", Minus)
 local Plus = Instance.new("TextButton", FlyPanel); Plus.Text = "+"; Plus.Size = UDim2.new(0, 40, 0, 25); Plus.Position = UDim2.new(0.65, 0, 0.75, 0); Plus.BackgroundColor3 = Color3.fromRGB(40,40,40); Plus.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", Plus)
 
+-- FIX SPEED LOGIC
 Minus.MouseButton1Click:Connect(function() curSpeed = math.max(10, curSpeed - 10); SpeedLabel.Text = "Kecepatan: "..curSpeed end)
 Plus.MouseButton1Click:Connect(function() curSpeed = math.min(500, curSpeed + 10); SpeedLabel.Text = "Kecepatan: "..curSpeed end)
 
 FlyMinBtn.MouseButton1Click:Connect(function() flyMin = not flyMin; FlyToggleBtn.Visible, SpeedLabel.Visible, Minus.Visible, Plus.Visible = not flyMin, not flyMin, not flyMin, not flyMin; FlyPanel.Size = flyMin and UDim2.new(0, 160, 0, 25) or UDim2.new(0, 160, 0, 115); FlyMinBtn.Text = flyMin and "+" or "-" end)
 
+-- FIX ARROWS VISIBILITY
 local ArrowFrame = Instance.new("Frame", FlyUI); ArrowFrame.Size = UDim2.new(0, 180, 0, 180); ArrowFrame.Position = UDim2.new(0.08, 0, 0.4, -100); ArrowFrame.BackgroundTransparency = 1; ArrowFrame.Visible = false 
 local function MakeArrow(txt, pos)
     local b = Instance.new("TextButton", ArrowFrame); b.Text = txt; b.Size = UDim2.new(0, 50, 0, 50); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(0,0,0); b.BackgroundTransparency = 0.4; b.TextColor3 = Color3.new(1,1,1); b.ZIndex = 20; b.Font = "GothamBold"; b.TextSize = 25; Instance.new("UICorner", b); return b
@@ -210,4 +188,12 @@ AddToggle("Speed Hack", function(v) if LocalPlayer.Character then LocalPlayer.Ch
 AddToggle("Mega Jump", function(v) if LocalPlayer.Character then LocalPlayer.Character.Humanoid.UseJumpPower = true; LocalPlayer.Character.Humanoid.JumpPower = v and 150 or 50 end end)
 AddToggle("Ultimate Fling GUI", function(v) if v then loadstring(game:HttpGet("https://raw.githubusercontent.com/K1LAS1K/Ultimate-Fling-GUI/main/flingscript.lua"))() end end)
 AddToggle("Wallhack ESP", function(v) if v then for _,p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then local hl = Instance.new("Highlight", p.Character); hl.Name = "AndezESP"; hl.FillColor = Color3.fromRGB(255,0,0) end end else for _,p in pairs(game.Players:GetPlayers()) do if p.Character and p.Character:FindFirstChild("AndezESP") then p.Character.AndezESP:Destroy() end end end end)
-AddToggle("Noclip (Tembus)", function(v) _G.nc = v; if v then _G.NoclipConn = RunService.Stepped:Connect(function() if _G.nc and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end) else if _G.NoclipConn then _G.NoclipConn:Disconnect() _G.NoclipConn = nil e
+AddToggle("Noclip (Tembus)", function(v) _G.nc = v; if v then _G.NoclipConn = RunService.Stepped:Connect(function() if _G.nc and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end) else if _G.NoclipConn then _G.NoclipConn:Disconnect() _G.NoclipConn = nil end; if LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = true end end end end end)
+
+-- Mapping Movement
+Up.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, -1) end); Up.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+Down.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, 1) end); Down.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+Left.MouseButton1Down:Connect(function() moveDir = Vector3.new(-1, 0, 0) end); Left.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+Right.MouseButton1Down:Connect(function() moveDir = Vector3.new(1, 0, 0) end); Right.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+
+print("ANDEZ VIP V7.9: REPAIRED & GAHAR!")
