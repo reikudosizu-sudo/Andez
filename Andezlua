@@ -1,4 +1,4 @@
-    LoadingFrame.Size = UDim2.new(0, 450, 0, 200)
+Size = UDim2.new(0, 450, 0, 200)
     LoadingFrame.Position = UDim2.new(0.5, -225, 0.5, -100)
     LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
     LoadingFrame.ClipsDescendants = true
