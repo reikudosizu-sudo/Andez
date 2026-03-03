@@ -112,31 +112,40 @@ local MainMin = Instance.new("TextButton", TitleBar)
 MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin)
 
 MainMin.MouseButton1Click:Connect(function()
-    -- Animasi mengecil sebelum hilang
+    -- Animasi mengecil (Shrink)
     local info = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-    local shrink = TweenService:Create(MainFrame, info, {
+    local shrink = game:GetService("TweenService"):Create(MainFrame, info, {
         Size = UDim2.new(0, 0, 0, 0),
         BackgroundTransparency = 1
     })
     
     shrink:Play()
     
-    -- Tunggu animasi selesai baru sembunyikan total
+    -- Tunggu sampai mengecil sempurna baru di-hidden
     shrink.Completed:Connect(function()
         MainFrame.Visible = false
         LogoBtn.Visible = true
-        -- Kembalikan ukuran asli agar saat dibuka lagi tidak error
-        MainFrame.Size = UDim2.new(0, 190, 0, 320) 
+        -- Kembalikan sizenya di background agar tidak error saat dibuka lagi
+        MainFrame.Size = UDim2.new(0, 190, 0, 320)
     end)
 end)
 
 -- [[ EFEK SMOOTH OPENING NOMOR 3 ]]
 LogoBtn.MouseButton1Click:Connect(function()
-    -- 1. Persiapan Awal: Set ukuran jadi nol dan transparansi penuh
+    -- Reset ukuran ke nol agar animasi bisa mulai dari kecil
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.BackgroundTransparency = 1
     MainFrame.Visible = true
     LogoBtn.Visible = false
+
+    -- Jalankan Animasi Membesar (Pop-up)
+    local info = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+    local popUp = game:GetService("TweenService"):Create(MainFrame, info, {
+        Size = UDim2.new(0, 190, 0, 320), -- Ukuran asli menu kamu
+        BackgroundTransparency = 0
+    })
+    popUp:Play()
+end)
 
     -- 2. Jalankan Animasi Pop-up & Fade-in Berbarengan
     local info = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
