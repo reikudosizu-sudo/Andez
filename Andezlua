@@ -1,92 +1,8 @@
--- [[ ANDEZ VIP ⚡ V7.9 FINAL HYBRID - PERCENTAGE EDITION ]]
--- Gabungan Animasi Persentase + Fitur Lengkap (Fly, SASA, Hack)
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local FlingActive = false
-local SelectedTargets = {}
-local SearchBox = Instance.new("TextBox", MainFrame)
-Players.PlayerAdded:Connect(UpdateList)
-Players.PlayerRemoving:Connect(UpdateList)
-UpdateList()
-
--- Tombol Eksekusi (Start & Stop)
-local StartFling = Instance.new("TextButton", MainFrame)
-StartFling.Size = UDim2.new(0.42, 0, 0, 35)
-StartFling.Position = UDim2.new(0.05, 0, 0, 250)
-StartFling.Text = "START"
-StartFling.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-StartFling.TextColor3 = Color3.new(1,1,1)
-StartFling.Font = Enum.Font.GothamBold
-Instance.new("UICorner", StartFling)
-
-local StopFling = Instance.new("TextButton", MainFrame)
-StopFling.Size = UDim2.new(0.42, 0, 0, 35)
-StopFling.Position = UDim2.new(0.53, 0, 0, 250)
-StopFling.Text = "STOP"
-StopFling.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-StopFling.TextColor3 = Color3.new(1,1,1)
-StopFling.Font = Enum.Font.GothamBold
-Instance.new("UICorner", StopFling)
-
-StartFling.MouseButton1Click:Connect(function()
-    FlingActive = true
-    for name, _ in pairs(SelectedTargets) do
-        local target = Players:FindFirstChild(name)
-        if target and FlingActive then SkidFling(target) end
-    end
-    FlingActive = false
-end)
-StopFling.MouseButton1Click:Connect(function() FlingActive = false end)
-
-local MainClose = Instance.new("TextButton", TitleBar); MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
-local MainMin = Instance.new("TextButton", TitleBar); MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin)
--- [[ STEP 3: LOGIKA REAL-TIME PLAYER LIST ]]
-local function UpdateList()
-    for _, v in pairs(ScrollingFrame:GetChildren()) do 
-        if v:IsA("TextButton") then v:Destroy() end 
-    end
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and (SearchBox.Text == "" or p.Name:lower():find(SearchBox.Text:lower())) then
-            local btn = Instance.new("TextButton", ScrollingFrame)
-            btn.Size = UDim2.new(1, -10, 0, 30)
-            btn.Text = "  " .. p.DisplayName
-            btn.BackgroundColor3 = SelectedTargets[p.Name] and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(40, 40, 40)
-            btn.TextColor3 = Color3.new(1,1,1)
-            btn.TextXAlignment = Enum.TextXAlignment.Left
-            Instance.new("UICorner", btn)
-            btn.MouseButton1Click:Connect(function()
-                if SelectedTargets[p.Name] then SelectedTargets[p.Name] = nil else SelectedTargets[p.Name] = true end
-                UpdateList() 
-            end)
-        end
-    end
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y)
-
-local function SkidFling(TargetPlayer)
-    local Character = LocalPlayer.Character
-    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-    local TCharacter = TargetPlayer.Character
-    local TRootPart = TCharacter and TCharacter:FindFirstChild("HumanoidRootPart")
-    if Character and RootPart and TCharacter and TRootPart then
-        local OldPos = RootPart.CFrame
-        local BV = Instance.new("BodyVelocity", RootPart)
-        BV.Velocity = Vector3.new(9e7, 9e7, 9e7)
-        BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        local StartTime = tick()
-        repeat
-            RootPart.CFrame = TRootPart.CFrame * CFrame.Angles(math.rad(math.random(0,360)), 0, 0)
-            RootPart.Velocity = Vector3.new(9e8, 9e8, 9e8)
-            task.wait()
-        until not FlingActive or TargetPlayer.Parent ~= Players or (tick() - StartTime > 3)
-        BV:Destroy()
-        RootPart.Velocity = Vector3.new(0,0,0)
-        RootPart.CFrame = OldPos
-    end
-end
 
 -- [[ 1. FUNGSI UTAMA ]]
 local function MakeNeon(obj)
@@ -102,13 +18,26 @@ local function MakeNeon(obj)
     end)
 end
 
+local function ClearAllESP()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p.Character then
+            for _, child in pairs(p.Character:GetChildren()) do
+                if child.Name == "AndezESP" or child:IsA("Highlight") then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+end
+
 local function TotalKill()
-    _G.nc = false; _G.SpecLoop = false
+    _G.nc = false; _G.SpecLoop = false; _G.ESPActive = false; _G.JumpEnabled = false
+    ClearAllESP()
     if _G.NoclipConn then _G.NoclipConn:Disconnect() _G.NoclipConn = nil end
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         Camera.CameraSubject = LocalPlayer.Character.Humanoid
     end
-    for _, ui in pairs(game.CoreGui:GetChildren()) do if ui.Name:find("AndezVip") then ui:Destroy() end end
+    for _, ui in pairs(game.CoreGui:GetChildren()) do if ui.Name:find("AndezVip") or ui.Name:find("AndezFling") then ui:Destroy() end end
 end
 
 -- [[ 2. SETUP SCREEN GUI ]]
@@ -116,7 +45,7 @@ local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "AndezVip_Hybrid"; ScreenGui.ResetOnSpawn = false
 
 local LogoBtn = Instance.new("TextButton", ScreenGui)
-LogoBtn.Size = UDim2.new(0, 45, 0, 45); LogoBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+LogoBtn.Size = UDim2.new(0, 45, 0, 45); LogoBtn.Position = UDim2.new(0, 20, 0.45, 0)
 LogoBtn.BackgroundColor3 = Color3.fromRGB(20, 0, 0); LogoBtn.Text = "A"; LogoBtn.Font = "GothamBold"; LogoBtn.TextSize = 25
 LogoBtn.Visible = false; LogoBtn.Active = true; LogoBtn.Draggable = true; Instance.new("UICorner", LogoBtn)
 MakeNeon(LogoBtn)
@@ -125,7 +54,7 @@ local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
 
--- [[ 3. ANIMASI LOADING PERSENTASE (BARU) ]]
+-- [[ 3. ANIMASI LOADING PERSENTASE (100% RESTORED) ]]
 task.spawn(function()
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 420, 0, 200); LoadingFrame.Position = UDim2.new(0.5, -210, 0.5, -100)
@@ -142,6 +71,7 @@ task.spawn(function()
     local Grad = Instance.new("UIGradient", BigA)
     Grad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(0.51, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))}); Grad.Rotation = 90
 
+    -- TEXT ANDEZ VIP ACCESS (KEMBALI DI SINI)
     local AccessTitle = Instance.new("TextLabel", LoadingFrame)
     AccessTitle.Size = UDim2.new(0.65, 0, 0, 40); AccessTitle.Position = UDim2.new(0.3, 0, 0.1, 0); AccessTitle.Text = "ANDEZ VIP ACCESS"; AccessTitle.TextColor3 = Color3.fromRGB(255, 0, 0); AccessTitle.Font = "GothamBlack"; AccessTitle.TextSize = 22; AccessTitle.BackgroundTransparency = 1; MakeNeon(AccessTitle)
 
@@ -173,67 +103,17 @@ task.spawn(function()
         PercentText.Text = "100%"; StatusText.Text = "READY TO USE!"; StatusText.TextColor3 = Color3.fromRGB(0, 255, 0)
     end)
 
-    tw.Completed:Connect(function()
-        task.wait(0.5); LoadingFrame:Destroy(); LogoBtn.Visible = true
-    end)
+    tw.Completed:Connect(function() task.wait(0.5); LoadingFrame:Destroy(); LogoBtn.Visible = true end)
 end)
 
--- [[ 4. NAVIGASI & TITLE BAR ]]
+-- [[ 4. NAVIGASI UTAMA ]]
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1, 0, 0, 35); TitleBar.BackgroundColor3 = Color3.fromRGB(120, 0, 0); Instance.new("UICorner", TitleBar)
 local TitleText = Instance.new("TextLabel", TitleBar)
-TitleText.Text = "ANDEZ VIP"
-TitleText.Size = UDim2.new(0.6, 0, 0.7, 0) 
-TitleText.Position = UDim2.new(0.05, 0, 0.15, 0) 
-TitleText.Font = Enum.Font.GothamBlack
-TitleText.TextScaled = true -- Teks otomatis besar sesuai kotak tanpa terpotong
-TitleText.BackgroundTransparency = 1
-TitleText.TextColor3 = Color3.new(1,1,1)
-TitleText.TextXAlignment = Enum.TextXAlignment.Left
-MakeNeon(TitleText)
--- [[ TOMBOL DI MENU UTAMA ]]
-local FlingMenuBtn = Instance.new("TextButton", MainFrame)
-FlingMenuBtn.Size = UDim2.new(0.9, 0, 0, 35)
-FlingMenuBtn.Position = UDim2.new(0.05, 0, 0, 220) -- Sesuaikan posisi Y agar tidak tumpuk
-FlingMenuBtn.Text = "Fling Player"
-FlingMenuBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-FlingMenuBtn.TextColor3 = Color3.new(1, 1, 1)
-FlingMenuBtn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", FlingMenuBtn)
+TitleText.Text = "ANDEZ VIP"; TitleText.Size = UDim2.new(1, -70, 1, 0); TitleText.Position = UDim2.new(0, 8, 0, 0); TitleText.Font = "GothamBold"; TitleText.BackgroundTransparency = 1; TitleText.TextColor3 = Color3.new(1,1,1); TitleText.TextSize = 16; MakeNeon(TitleText)
 
-FlingMenuBtn.MouseButton1Click:Connect(function()
-    FlingPanel.Visible = not FlingPanel.Visible -- Klik untuk buka/tutup panel target
-end)
-
--- Fungsi Update List Otomatis
-local function UpdateList()
-    for _, v in pairs(ScrollingFrame:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and (SearchBox.Text == "" or p.Name:lower():find(SearchBox.Text:lower()) or p.DisplayName:lower():find(SearchBox.Text:lower())) then
-            local btn = Instance.new("TextButton", ScrollingFrame)
-            btn.Size = UDim2.new(1, -10, 0, 30)
-            btn.Text = "  " .. p.DisplayName
-            btn.BackgroundColor3 = SelectedTargets[p.Name] and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(45, 45, 45)
-            btn.TextColor3 = Color3.new(1,1,1)
-            btn.TextXAlignment = Enum.TextXAlignment.Left
-            btn.Font = Enum.Font.Gotham
-            Instance.new("UICorner", btn)
-            
-            btn.MouseButton1Click:Connect(function()
-                if SelectedTargets[p.Name] then SelectedTargets[p.Name] = nil else SelectedTargets[p.Name] = true end
-                UpdateList() 
-            end)
-        end
-    end
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y)
-end
-
-end
-
-SearchBox:GetPropertyChangedSignal("Text"):Connect(UpdateList)
-Players.PlayerAdded:Connect(UpdateList)
-Players.PlayerRemoving:Connect(UpdateList)
-UpdateList()
+local MainClose = Instance.new("TextButton", TitleBar); MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
+local MainMin = Instance.new("TextButton", TitleBar); MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin)
 
 MainMin.MouseButton1Click:Connect(function()
     local tw = TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0,0,0,0)})
@@ -247,84 +127,101 @@ end)
 
 local Scroll = Instance.new("ScrollingFrame", MainFrame); Scroll.Size = UDim2.new(1, -10, 1, -45); Scroll.Position = UDim2.new(0, 5, 0, 40); Scroll.BackgroundTransparency = 1; Scroll.ScrollBarThickness = 2; Instance.new("UIListLayout", Scroll).Padding = UDim.new(0, 6)
 
--- [[ 5. FITUR SASA TP & SPECTATOR ]]
+-- [[ 5. PANEL SASA & FLING RESTORE BUTTONS ]]
 local function CreateRestoreBtn(txt, pos, color)
     local b = Instance.new("TextButton", ScreenGui); b.Size = UDim2.new(0, 45, 0, 45); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(10,10,10); b.Text = txt; b.TextColor3 = color; b.Font = "GothamBold"; b.TextSize = 10; b.Visible = false; b.Draggable = true; Instance.new("UICorner", b); return b
 end
 local SasaTPRestore = CreateRestoreBtn("SASA TP", UDim2.new(0.92, 0, 0.4, 0), Color3.fromRGB(0, 255, 150))
 local SasaSpecRestore = CreateRestoreBtn("SASA 👀", UDim2.new(0.92, 0, 0.55, 0), Color3.fromRGB(255, 105, 180))
+local FlingRestore = CreateRestoreBtn("AF", UDim2.new(0.92, 0, 0.7, 0), Color3.fromRGB(150, 0, 0))
 
-local function CreateSasaPanel(name, color, restore)
-    local f = Instance.new("Frame", ScreenGui); f.Size = UDim2.new(0, 195, 0, 260); f.Position = UDim2.new(0.4, 0, 0.3, 0); f.BackgroundColor3 = Color3.fromRGB(10, 10, 10); f.Visible = false; f.Active = true; f.Draggable = true; Instance.new("UICorner", f)
+-- [[ 6. PANEL LOGIC (SASA & FLING) ]]
+local FlingActive = false
+local SelectedTargets = {}
+
+local function SkidFling(TargetPlayer)
+    local Character = LocalPlayer.Character
+    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local TCharacter = TargetPlayer.Character
+    local TRootPart = TCharacter and TCharacter:FindFirstChild("HumanoidRootPart")
+    if Character and RootPart and TCharacter and TRootPart then
+        local OldPos = RootPart.CFrame
+        workspace.FallenPartsDestroyHeight = 0/0
+        local BV = Instance.new("BodyVelocity", RootPart); BV.Velocity = Vector3.new(9e7, 9e7, 9e7); BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        local StartTime = tick()
+        repeat
+            if not TRootPart or not RootPart then break end
+            RootPart.CFrame = TRootPart.CFrame * CFrame.Angles(math.rad(math.random(0,360)), 0, 0)
+            RootPart.Velocity = Vector3.new(9e8, 9e8, 9e8); task.wait()
+        until not FlingActive or TargetPlayer.Parent ~= Players or (tick() - StartTime > 3)
+        BV:Destroy(); RootPart.Velocity = Vector3.new(0,0,0); RootPart.CFrame = OldPos
+    end
+end
+
+local function CreatePanel(name, color, restore, hasSearch)
+    local f = Instance.new("Frame", ScreenGui); f.Size = UDim2.new(0, 210, 0, 280); f.Position = UDim2.new(0.4, 0, 0.3, 0); f.BackgroundColor3 = Color3.fromRGB(10, 10, 10); f.Visible = false; f.Active = true; f.Draggable = true; Instance.new("UICorner", f)
     local h = Instance.new("Frame", f); h.Size = UDim2.new(1, 0, 0, 35); h.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Instance.new("UICorner", h)
     local t = Instance.new("TextLabel", h); t.Text = name; t.TextColor3 = color; t.Size = UDim2.new(0.6, 0, 1, 0); t.Position = UDim2.new(0.05, 0, 0, 0); t.BackgroundTransparency = 1; t.Font = "GothamBold"; t.TextSize = 11; t.TextXAlignment = "Left"
     local c = Instance.new("TextButton", h); c.Text = "X"; c.Size = UDim2.new(0, 22, 0, 22); c.Position = UDim2.new(0.85, 0, 0.15, 0); c.BackgroundColor3 = Color3.fromRGB(150, 0, 0); c.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", c); c.MouseButton1Click:Connect(function() f.Visible = false; restore.Visible = false end)
     local m = Instance.new("TextButton", h); m.Text = "-"; m.Size = UDim2.new(0, 22, 0, 22); m.Position = UDim2.new(0.7, 0, 0.15, 0); m.BackgroundColor3 = Color3.fromRGB(50, 50, 50); m.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", m); m.MouseButton1Click:Connect(function() f.Visible = false; restore.Visible = true end)
+    local searchBox = Instance.new("TextBox", f); searchBox.Size = UDim2.new(0.9, 0, 0, 25); searchBox.Position = UDim2.new(0.05, 0, 0.15, 0); searchBox.PlaceholderText = "Search Player..."; searchBox.BackgroundColor3 = Color3.fromRGB(30,30,30); searchBox.TextColor3 = Color3.new(1,1,1); searchBox.Font = "Gotham"; searchBox.TextSize = 10; Instance.new("UICorner", searchBox)
     restore.MouseButton1Click:Connect(function() f.Visible = true; restore.Visible = false end)
-    local s = Instance.new("ScrollingFrame", f); s.BackgroundTransparency = 1; s.ScrollBarThickness = 2; Instance.new("UIListLayout", s).Padding = UDim.new(0, 5); s.Position = UDim2.new(0.05, 0, 0.18, 0); s.Size = UDim2.new(0.9, 0, 0.77, 0)
-    return f, s
+    local s = Instance.new("ScrollingFrame", f); s.BackgroundTransparency = 1; s.ScrollBarThickness = 2; Instance.new("UIListLayout", s).Padding = UDim.new(0, 5); s.Position = UDim2.new(0.05, 0, 0.26, 0); s.Size = UDim2.new(0.9, 0, 0.58, 0)
+    return f, s, searchBox
 end
-local SasaTPFrame, SasaTPScroll = CreateSasaPanel("SASA TP VIP", Color3.fromRGB(0, 255, 150), SasaTPRestore)
-local SasaSpectFrame, SasaSpectScroll = CreateSasaPanel("SASA SPECTATOR", Color3.fromRGB(255, 105, 180), SasaSpecRestore)
 
-local function updateLists()
-    for _, child in pairs(SasaTPScroll:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
-    for _, child in pairs(SasaSpectScroll:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
+local SasaTPFrame, SasaTPScroll, SasaTPSearch = CreatePanel("SASA TP VIP", Color3.fromRGB(0, 255, 150), SasaTPRestore, true)
+local SasaSpecFrame, SasaSpecScroll, SasaSpecSearch = CreatePanel("SASA SPECTATOR", Color3.fromRGB(255, 105, 180), SasaSpecRestore, true)
+local FlingFrame, FlingScroll, FlingSearch = CreatePanel("ANDEZ FLING", Color3.fromRGB(150, 0, 0), FlingRestore, true)
+
+local StartFBtn = Instance.new("TextButton", FlingFrame); StartFBtn.Size = UDim2.new(0.42, 0, 0, 30); StartFBtn.Position = UDim2.new(0.05, 0, 0.86, 0); StartFBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 0); StartFBtn.Text = "START"; StartFBtn.TextColor3 = Color3.new(1,1,1); StartFBtn.Font = "GothamBold"; Instance.new("UICorner", StartFBtn)
+local StopFBtn = Instance.new("TextButton", FlingFrame); StopFBtn.Size = UDim2.new(0.42, 0, 0, 30); StopFBtn.Position = UDim2.new(0.53, 0, 0.86, 0); StopFBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 0); StopFBtn.Text = "STOP"; StopFBtn.TextColor3 = Color3.new(1,1,1); StopFBtn.Font = "GothamBold"; Instance.new("UICorner", StopFBtn)
+
+StartFBtn.MouseButton1Click:Connect(function()
+    FlingActive = true; StartFBtn.Text = "RUNNING..."
+    for name, _ in pairs(SelectedTargets) do local target = Players:FindFirstChild(name) if target and FlingActive then SkidFling(target) end end
+    FlingActive = false; StartFBtn.Text = "START"
+end)
+StopFBtn.MouseButton1Click:Connect(function() FlingActive = false end)
+
+local function updateLists(fTP, fSP, fFL)
+    for _, scroll in pairs({SasaTPScroll, SasaSpecScroll, FlingScroll}) do for _, child in pairs(scroll:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer then
-            local fTP = Instance.new("Frame", SasaTPScroll); fTP.Size = UDim2.new(1, 0, 0, 35); fTP.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Instance.new("UICorner", fTP)
-            local bTP = Instance.new("TextButton", fTP); bTP.Size = UDim2.new(0, 40, 0.7, 0); bTP.Position = UDim2.new(1, -45, 0.15, 0); bTP.Text = "TP"; bTP.BackgroundColor3 = Color3.fromRGB(0, 200, 100); Instance.new("UICorner", bTP); bTP.MouseButton1Click:Connect(function() if p.Character then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame end end)
-            local nTP = Instance.new("TextLabel", fTP); nTP.Text = p.Name; nTP.Size = UDim2.new(1, -55, 1, 0); nTP.TextColor3 = Color3.new(1,1,1); nTP.BackgroundTransparency = 1; nTP.TextXAlignment = "Left"
-
-            local fSP = Instance.new("Frame", SasaSpectScroll); fSP.Size = UDim2.new(1, 0, 0, 45); fSP.BackgroundColor3 = Color3.fromRGB(45, 25, 35); Instance.new("UICorner", fSP)
-            local bSP_EYE = Instance.new("TextButton", fSP); bSP_EYE.Size = UDim2.new(0, 45, 0.7, 0); bSP_EYE.Position = UDim2.new(0.7, 0, 0.15, 0); bSP_EYE.Text = "EYE"; bSP_EYE.BackgroundColor3 = Color3.fromRGB(255, 182, 193); Instance.new("UICorner", bSP_EYE)
-            bSP_EYE.MouseButton1Click:Connect(function() if _G.SpecLoop then _G.SpecLoop = false; Camera.CameraSubject = LocalPlayer.Character.Humanoid else _G.SpecLoop = true; task.spawn(function() while _G.SpecLoop do if p.Character then Camera.CameraSubject = p.Character.Humanoid end task.wait(0.1) end end) end end)
+            if not fTP or p.Name:lower():find(fTP:lower()) then
+                local f = Instance.new("Frame", SasaTPScroll); f.Size = UDim2.new(1, 0, 0, 35); f.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Instance.new("UICorner", f)
+                local b = Instance.new("TextButton", f); b.Size = UDim2.new(0, 40, 0.7, 0); b.Position = UDim2.new(1, -45, 0.15, 0); b.Text = "TP"; b.BackgroundColor3 = Color3.fromRGB(0, 200, 100); Instance.new("UICorner", b); b.MouseButton1Click:Connect(function() if p.Character then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame end end)
+                local n = Instance.new("TextLabel", f); n.Text = p.Name; n.Size = UDim2.new(1, -55, 1, 0); n.Position = UDim2.new(0, 5, 0, 0); n.TextColor3 = Color3.new(1,1,1); n.BackgroundTransparency = 1; n.TextXAlignment = "Left"; n.Font = "Gotham"; n.TextSize = 10
+            end
+            if not fSP or p.Name:lower():find(fSP:lower()) then
+                local f = Instance.new("Frame", SasaSpecScroll); f.Size = UDim2.new(1, 0, 0, 35); f.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Instance.new("UICorner", f)
+                local bE = Instance.new("TextButton", f); bE.Size = UDim2.new(0, 40, 0.7, 0); bE.Position = UDim2.new(1, -45, 0.15, 0); bE.Text = "EYE"; bE.BackgroundColor3 = Color3.fromRGB(255, 105, 180); Instance.new("UICorner", bE)
+                bE.MouseButton1Click:Connect(function() if _G.SpecLoop then _G.SpecLoop = false; Camera.CameraSubject = LocalPlayer.Character.Humanoid; bE.Text = "EYE" else _G.SpecLoop = true; bE.Text = "STOP"
+                    task.spawn(function() while _G.SpecLoop do if p.Character then Camera.CameraSubject = p.Character.Humanoid end task.wait(0.1) end bE.Text = "EYE" end) end end)
+                local bT = Instance.new("TextButton", f); bT.Size = UDim2.new(0, 35, 0.7, 0); bT.Position = UDim2.new(1, -85, 0.15, 0); bT.Text = "TP"; bT.BackgroundColor3 = Color3.fromRGB(0, 150, 200); Instance.new("UICorner", bT); bT.MouseButton1Click:Connect(function() if p.Character then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame end end)
+                local n = Instance.new("TextLabel", f); n.Text = p.Name; n.Size = UDim2.new(1, -95, 1, 0); n.Position = UDim2.new(0, 5, 0, 0); n.TextColor3 = Color3.new(1,1,1); n.BackgroundTransparency = 1; n.TextXAlignment = "Left"; n.Font = "Gotham"; n.TextSize = 10
+            end
+            if not fFL or p.Name:lower():find(fFL:lower()) then
+                local f = Instance.new("Frame", FlingScroll); f.Size = UDim2.new(1, 0, 0, 35); f.BackgroundColor3 = SelectedTargets[p.Name] and Color3.fromRGB(120, 0, 0) or Color3.fromRGB(25, 25, 25); Instance.new("UICorner", f)
+                local b = Instance.new("TextButton", f); b.Size = UDim2.new(1, 0, 1, 0); b.BackgroundTransparency = 1; b.Text = "  " .. p.DisplayName; b.TextColor3 = Color3.new(1, 1, 1); b.TextXAlignment = "Left"; b.Font = "Gotham"; b.TextSize = 10
+                b.MouseButton1Click:Connect(function() if SelectedTargets[p.Name] then SelectedTargets[p.Name] = nil; f.BackgroundColor3 = Color3.fromRGB(25, 25, 25) else SelectedTargets[p.Name] = true; f.BackgroundColor3 = Color3.fromRGB(120, 0, 0) end end)
+            end
         end
     end
 end
-Players.PlayerAdded:Connect(updateLists); Players.PlayerRemoving:Connect(updateLists); updateLists()
+for _, search in pairs({SasaTPSearch, SasaSpecSearch, FlingSearch}) do search:GetPropertyChangedSignal("Text"):Connect(function() updateLists(SasaTPSearch.Text, SasaSpecSearch.Text, FlingSearch.Text) end) end
+Players.PlayerAdded:Connect(function() updateLists() end); updateLists()
 
--- [[ 6. FLY CONTROL ]]
-local FlyUI = Instance.new("Frame", ScreenGui); FlyUI.Size = UDim2.new(1, 0, 1, 0); FlyUI.BackgroundTransparency = 1; FlyUI.Visible = false 
-local FlyPanel = Instance.new("Frame", FlyUI); FlyPanel.Size = UDim2.new(0, 160, 0, 115); FlyPanel.Position = UDim2.new(0.4, 0, 0.2, 0); FlyPanel.BackgroundColor3 = Color3.fromRGB(15, 15, 15); FlyPanel.Active = true; FlyPanel.Draggable = true; Instance.new("UICorner", FlyPanel)
-local FlyClose = Instance.new("TextButton", FlyPanel); FlyClose.Text = "X"; FlyClose.Size = UDim2.new(0, 22, 0, 22); FlyClose.Position = UDim2.new(1, -25, 0, 2); FlyClose.BackgroundColor3 = Color3.fromRGB(180, 0, 0); FlyClose.MouseButton1Click:Connect(function() FlyUI.Visible = false end)
-local FlyToggle = Instance.new("TextButton", FlyPanel); FlyToggle.Size = UDim2.new(0.9, 0, 0, 30); FlyToggle.Position = UDim2.new(0.05, 0, 0.3, 0); FlyToggle.Text = "FLY: OFF"; FlyToggle.BackgroundColor3 = Color3.fromRGB(130,0,0); FlyToggle.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyToggle)
-
-local ArrowFrame = Instance.new("Frame", FlyUI); ArrowFrame.Size = UDim2.new(0, 180, 0, 180); ArrowFrame.Position = UDim2.new(0.08, 0, 0.4, 0); ArrowFrame.BackgroundTransparency = 1; ArrowFrame.Visible = false 
-local function MakeArrow(txt, pos)
-    local b = Instance.new("TextButton", ArrowFrame); b.Text = txt; b.Size = UDim2.new(0, 50, 0, 50); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(0,0,0); b.BackgroundTransparency = 0.4; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 25; Instance.new("UICorner", b); return b
-end
-local Up = MakeArrow("▲", UDim2.new(0.35, 0, 0, 0)); local Down = MakeArrow("▼", UDim2.new(0.35, 0, 0.7, 0)); local Left = MakeArrow("◀", UDim2.new(0, 0, 0.35, 0)); local Right = MakeArrow("▶", UDim2.new(0.7, 0, 0.35, 0))
-
+-- [[ 7. FLY CONTROL ]]
+local flySpeed = 110
 local flying, moveDir, bv, bg = false, Vector3.new(0,0,0), nil, nil
-FlyToggle.MouseButton1Click:Connect(function()
-    flying = not flying; FlyToggle.Text = flying and "FLY: ON" or "FLY: OFF"; FlyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 130, 0) or Color3.fromRGB(130, 0, 0); ArrowFrame.Visible = flying 
-    local hrp = LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-    if flying then 
-        LocalPlayer.Character.Humanoid.PlatformStand = true; bv = Instance.new("BodyVelocity", hrp); bv.MaxForce = Vector3.new(9e9,9e9,9e9); bg = Instance.new("BodyGyro", hrp); bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
-        task.spawn(function() while flying do bv.Velocity = (moveDir.Magnitude > 0) and (Camera.CFrame:VectorToWorldSpace(moveDir) * 150) or Vector3.new(0,0.1,0); bg.CFrame = Camera.CFrame; task.wait() end end)
-    else if bv then bv:Destroy() end; if bg then bg:Destroy() end; LocalPlayer.Character.Humanoid.PlatformStand = false end
-end)
-Up.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, -1) end); Up.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
-Down.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, 1) end); Down.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
-Left.MouseButton1Down:Connect(function() moveDir = Vector3.new(-1, 0, 0) end); Left.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
-Right.MouseButton1Down:Connect(function() moveDir = Vector3.new(1, 0, 0) end); Right.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
-
--- [[ 7. LIST FITUR ]]
-local function AddButton(name, callback)
-    local b = Instance.new("TextButton", Scroll); b.Size = UDim2.new(0.95, 0, 0, 32); b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.Text = name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 10; Instance.new("UICorner", b); b.MouseButton1Click:Connect(callback)
-end
-local function AddToggle(name, callback)
-    local active = false; local b = Instance.new("TextButton", Scroll); b.Size = UDim2.new(0.95, 0, 0, 32); b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.Text = "[ OFF ] " .. name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 10; Instance.new("UICorner", b)
-    b.MouseButton1Click:Connect(function() active = not active; b.Text = (active and "[ ON ] " or "[ OFF ] ") .. name; b.BackgroundColor3 = active and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(40,40,40); callback(active) end)
-end
-
-AddButton("FLY CONTROL", function() FlyUI.Visible = true end)
-AddButton("SASA TP", function() SasaTPFrame.Visible = true end)
-AddButton("SASA SPECT", function() SasaSpectFrame.Visible = true end)
-AddToggle("Speed Hack", function(v) LocalPlayer.Character.Humanoid.WalkSpeed = v and 100 or 16 end)
-AddToggle("Jump Hack", function(v) LocalPlayer.Character.Humanoid.JumpPower = v and 150 or 50 end)
-AddToggle("ESP Wallhack", function(v) if v then for _,p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then local hl = Instance.new("Highlight", p.Character); hl.FillColor = Color3.new(1,0,0) end end end end)
-AddToggle("Noclip (Tembus)", function(v) _G.nc = v; if v then _G.NoclipConn = RunService.Stepped:Connect(function() if _G.nc and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end) end end)
-
-print("ANDEZ VIP V7.9 PERCENTAGE HYBRID LOADED!")
+local FlyUI = Instance.new("Frame", ScreenGui); FlyUI.Size = UDim2.new(0, 160, 0, 150); FlyUI.Position = UDim2.new(0.4, 0, 0.2, 0); FlyUI.BackgroundColor3 = Color3.fromRGB(15, 15, 15); FlyUI.Visible = false; FlyUI.Active = true; FlyUI.Draggable = true; Instance.new("UICorner", FlyUI)
+local FlyHeader = Instance.new("Frame", FlyUI); FlyHeader.Size = UDim2.new(1, 0, 0, 30); FlyHeader.BackgroundColor3 = Color3.fromRGB(80, 0, 0); Instance.new("UICorner", FlyHeader)
+local FlyTitle = Instance.new("TextLabel", FlyHeader); FlyTitle.Text = "FLY CONTROL"; FlyTitle.Size = UDim2.new(0.6, 0, 1, 0); FlyTitle.Position = UDim2.new(0, 8, 0, 0); FlyTitle.BackgroundTransparency = 1; FlyTitle.TextColor3 = Color3.new(1,1,1); FlyTitle.Font = "GothamBold"; FlyTitle.TextSize = 10; FlyTitle.TextXAlignment = "Left"
+local FlyMin = Instance.new("TextButton", FlyHeader); FlyMin.Text = "-"; FlyMin.Size = UDim2.new(0, 22, 0, 22); FlyMin.Position = UDim2.new(1, -50, 0.1, 0); FlyMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); FlyMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyMin)
+local FlyRestore = CreateRestoreBtn("FLY", UDim2.new(0.05, 0, 0.55, 0), Color3.new(1,1,1))
+FlyMin.MouseButton1Click:Connect(function() FlyUI.Visible = false; FlyRestore.Visible = true end); FlyRestore.MouseButton1Click:Connect(function() FlyUI.Visible = true; FlyRestore.Visible = false end)
+local FlyToggle = Instance.new("TextButton", FlyUI); FlyToggle.Size = UDim2.new(0.9, 0, 0, 30); FlyToggle.Position = UDim2.new(0.05, 0, 0.25, 0); FlyToggle.Text = "FLY: OFF"; FlyToggle.BackgroundColor3 = Color3.fromRGB(130,0,0); FlyToggle.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyToggle)
+local SpeedText = Instance.new("TextLabel", FlyUI); SpeedText.Size = UDim2.new(1, 0, 0, 20); SpeedText.Position = UDim2.new(0, 0, 0.5, 0); SpeedText.Text = "SPEED: " .. flySpeed; SpeedText.BackgroundTransparency = 1; SpeedText.TextColor3 = Color3.new(1,1,1); SpeedText.Font = "GothamBold"; SpeedText.TextSize = 10
+local SUp = Instance.new("TextButton", FlyUI); SUp.Text = "+"; SUp.Size = UDim2.new(0, 40, 0, 30); SUp.Position = UDim2.new(0.6, 0, 0.65, 0); SUp.BackgroundColor3 = Color3.fromRGB(40,40,40); SUp.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", SUp)
+local SDown = Instance.new("TextButton", FlyUI); SDown.Text = "-"; SDown.Size = UDim2.new(0, 40, 0, 30); SDown.Position = UDim2.
