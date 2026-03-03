@@ -1,5 +1,5 @@
--- [[ ANDEZ VIP ⚡ V7.9 FINAL HYBRID EDITION ]]
--- Gabungan Animasi Cyberpunk + Semua Fitur Lama (Fly, SASA, Hack)
+-- [[ ANDEZ VIP ⚡ V7.9 FINAL HYBRID - PERCENTAGE EDITION ]]
+-- Gabungan Animasi Persentase + Fitur Lengkap (Fly, SASA, Hack)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,7 +7,7 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- [[ 1. FUNGSI UTAMA (ANTI-ERROR NIL) ]]
+-- [[ 1. FUNGSI UTAMA ]]
 local function MakeNeon(obj)
     task.spawn(function()
         local h = 0
@@ -32,43 +32,64 @@ end
 
 -- [[ 2. SETUP SCREEN GUI ]]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "AndezVip_Final"; ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "AndezVip_Hybrid"; ScreenGui.ResetOnSpawn = false
 
--- Tombol Logo A (Sembunyi dulu)
 local LogoBtn = Instance.new("TextButton", ScreenGui)
 LogoBtn.Size = UDim2.new(0, 45, 0, 45); LogoBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
 LogoBtn.BackgroundColor3 = Color3.fromRGB(20, 0, 0); LogoBtn.Text = "A"; LogoBtn.Font = "GothamBold"; LogoBtn.TextSize = 25
 LogoBtn.Visible = false; LogoBtn.Active = true; LogoBtn.Draggable = true; Instance.new("UICorner", LogoBtn)
 MakeNeon(LogoBtn)
 
--- Main Frame (Sembunyi dulu)
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
 
--- [[ 3. ANIMASI LOADING CYBERPUNK (DARI GAMBAR) ]]
+-- [[ 3. ANIMASI LOADING PERSENTASE (BARU) ]]
 task.spawn(function()
     local LoadingFrame = Instance.new("Frame", ScreenGui)
-    LoadingFrame.Size = UDim2.new(0, 380, 0, 150); LoadingFrame.Position = UDim2.new(0.5, -190, 0.5, -75)
+    LoadingFrame.Size = UDim2.new(0, 420, 0, 200); LoadingFrame.Position = UDim2.new(0.5, -210, 0.5, -100)
     LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10); LoadingFrame.ClipsDescendants = true
-    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 10)
+    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 15)
     local Stroke = Instance.new("UIStroke", LoadingFrame); Stroke.Color = Color3.fromRGB(255, 0, 0); Stroke.Thickness = 2
 
+    local LogoBox = Instance.new("Frame", LoadingFrame)
+    LogoBox.Size = UDim2.new(0, 110, 1, -20); LogoBox.Position = UDim2.new(0, 10, 0, 10)
+    LogoBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Instance.new("UICorner", LogoBox)
+
+    local BigA = Instance.new("TextLabel", LogoBox)
+    BigA.Size = UDim2.new(1, 0, 1, 0); BigA.BackgroundTransparency = 1; BigA.Text = "A"; BigA.TextColor3 = Color3.new(1, 1, 1); BigA.Font = "GothamBlack"; BigA.TextSize = 100
+    local Grad = Instance.new("UIGradient", BigA)
+    Grad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(0.51, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))}); Grad.Rotation = 90
+
+    local AccessTitle = Instance.new("TextLabel", LoadingFrame)
+    AccessTitle.Size = UDim2.new(0.65, 0, 0, 40); AccessTitle.Position = UDim2.new(0.3, 0, 0.1, 0); AccessTitle.Text = "ANDEZ VIP ACCESS"; AccessTitle.TextColor3 = Color3.fromRGB(255, 0, 0); AccessTitle.Font = "GothamBlack"; AccessTitle.TextSize = 22; AccessTitle.BackgroundTransparency = 1; MakeNeon(AccessTitle)
+
     local StatusText = Instance.new("TextLabel", LoadingFrame)
-    StatusText.Size = UDim2.new(0, 250, 0, 20); StatusText.Position = UDim2.new(0.3, 0, 0.3, 0)
-    StatusText.Text = "INITIALIZING..."; StatusText.TextColor3 = Color3.new(1, 1, 1); StatusText.BackgroundTransparency = 1; StatusText.Font = "GothamBold"
+    StatusText.Size = UDim2.new(0.65, 0, 0, 30); StatusText.Position = UDim2.new(0.3, 0, 0.4, 0); StatusText.Text = "INITIALIZING..."; StatusText.TextColor3 = Color3.new(1, 1, 1); StatusText.BackgroundTransparency = 1; StatusText.Font = "GothamBlack"; StatusText.TextSize = 16
+
+    local PercentText = Instance.new("TextLabel", LoadingFrame)
+    PercentText.Size = UDim2.new(0.65, 0, 0, 30); PercentText.Position = UDim2.new(0.3, 0, 0.55, 0); PercentText.Text = "0%"; PercentText.TextColor3 = Color3.fromRGB(255, 0, 0); PercentText.BackgroundTransparency = 1; PercentText.Font = "GothamBlack"; PercentText.TextSize = 24
 
     local BarBg = Instance.new("Frame", LoadingFrame)
-    BarBg.Size = UDim2.new(0.9, 0, 0, 5); BarBg.Position = UDim2.new(0.05, 0, 0.8, 0); BarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    BarBg.Size = UDim2.new(0.6, 0, 0, 8); BarBg.Position = UDim2.new(0.32, 0, 0.8, 0); BarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Instance.new("UICorner", BarBg)
     local BarFill = Instance.new("Frame", BarBg)
-    BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Instance.new("UICorner", BarFill)
 
-    local tw = TweenService:Create(BarFill, TweenInfo.new(3.5, Enum.EasingStyle.Quart), {Size = UDim2.new(1, 0, 1, 0)})
+    local duration = 4
+    local tw = TweenService:Create(BarFill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
     tw:Play()
 
     task.spawn(function()
-        local m = {"SCANNING DATA...", "BYPASSING SECURITY...", "LOADING FEATURES...", "READY TO USE!"}
-        for _, txt in pairs(m) do StatusText.Text = txt; task.wait(0.8) end
+        local startTick = tick()
+        while tick() - startTick < duration do
+            local progress = math.floor(((tick() - startTick) / duration) * 100)
+            PercentText.Text = progress .. "%"
+            if progress < 30 then StatusText.Text = "SCANNING DATA..."
+            elseif progress < 70 then StatusText.Text = "BYPASSING SECURITY..."
+            else StatusText.Text = "SUCCESS!" end
+            task.wait()
+        end
+        PercentText.Text = "100%"; StatusText.Text = "READY TO USE!"; StatusText.TextColor3 = Color3.fromRGB(0, 255, 0)
     end)
 
     tw.Completed:Connect(function()
@@ -97,14 +118,14 @@ end)
 
 local Scroll = Instance.new("ScrollingFrame", MainFrame); Scroll.Size = UDim2.new(1, -10, 1, -45); Scroll.Position = UDim2.new(0, 5, 0, 40); Scroll.BackgroundTransparency = 1; Scroll.ScrollBarThickness = 2; Instance.new("UIListLayout", Scroll).Padding = UDim.new(0, 6)
 
--- [[ 5. SISTEM SASA TP & SPECTATOR (FITUR LAMA) ]]
+-- [[ 5. FITUR SASA TP & SPECTATOR ]]
 local function CreateRestoreBtn(txt, pos, color)
     local b = Instance.new("TextButton", ScreenGui); b.Size = UDim2.new(0, 45, 0, 45); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(10,10,10); b.Text = txt; b.TextColor3 = color; b.Font = "GothamBold"; b.TextSize = 10; b.Visible = false; b.Draggable = true; Instance.new("UICorner", b); return b
 end
 local SasaTPRestore = CreateRestoreBtn("SASA TP", UDim2.new(0.92, 0, 0.4, 0), Color3.fromRGB(0, 255, 150))
 local SasaSpecRestore = CreateRestoreBtn("SASA 👀", UDim2.new(0.92, 0, 0.55, 0), Color3.fromRGB(255, 105, 180))
 
-local function CreateSasaPanel(name, color, restore, useSearch)
+local function CreateSasaPanel(name, color, restore)
     local f = Instance.new("Frame", ScreenGui); f.Size = UDim2.new(0, 195, 0, 260); f.Position = UDim2.new(0.4, 0, 0.3, 0); f.BackgroundColor3 = Color3.fromRGB(10, 10, 10); f.Visible = false; f.Active = true; f.Draggable = true; Instance.new("UICorner", f)
     local h = Instance.new("Frame", f); h.Size = UDim2.new(1, 0, 0, 35); h.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Instance.new("UICorner", h)
     local t = Instance.new("TextLabel", h); t.Text = name; t.TextColor3 = color; t.Size = UDim2.new(0.6, 0, 1, 0); t.Position = UDim2.new(0.05, 0, 0, 0); t.BackgroundTransparency = 1; t.Font = "GothamBold"; t.TextSize = 11; t.TextXAlignment = "Left"
@@ -134,7 +155,7 @@ local function updateLists()
 end
 Players.PlayerAdded:Connect(updateLists); Players.PlayerRemoving:Connect(updateLists); updateLists()
 
--- [[ 6. SISTEM FLY CONTROL (FITUR LAMA) ]]
+-- [[ 6. FLY CONTROL ]]
 local FlyUI = Instance.new("Frame", ScreenGui); FlyUI.Size = UDim2.new(1, 0, 1, 0); FlyUI.BackgroundTransparency = 1; FlyUI.Visible = false 
 local FlyPanel = Instance.new("Frame", FlyUI); FlyPanel.Size = UDim2.new(0, 160, 0, 115); FlyPanel.Position = UDim2.new(0.4, 0, 0.2, 0); FlyPanel.BackgroundColor3 = Color3.fromRGB(15, 15, 15); FlyPanel.Active = true; FlyPanel.Draggable = true; Instance.new("UICorner", FlyPanel)
 local FlyClose = Instance.new("TextButton", FlyPanel); FlyClose.Text = "X"; FlyClose.Size = UDim2.new(0, 22, 0, 22); FlyClose.Position = UDim2.new(1, -25, 0, 2); FlyClose.BackgroundColor3 = Color3.fromRGB(180, 0, 0); FlyClose.MouseButton1Click:Connect(function() FlyUI.Visible = false end)
@@ -160,7 +181,7 @@ Down.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, 1) end); Do
 Left.MouseButton1Down:Connect(function() moveDir = Vector3.new(-1, 0, 0) end); Left.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
 Right.MouseButton1Down:Connect(function() moveDir = Vector3.new(1, 0, 0) end); Right.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
 
--- [[ 7. LIST FITUR UTAMA ]]
+-- [[ 7. LIST FITUR ]]
 local function AddButton(name, callback)
     local b = Instance.new("TextButton", Scroll); b.Size = UDim2.new(0.95, 0, 0, 32); b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.Text = name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 10; Instance.new("UICorner", b); b.MouseButton1Click:Connect(callback)
 end
@@ -177,4 +198,4 @@ AddToggle("Jump Hack", function(v) LocalPlayer.Character.Humanoid.JumpPower = v 
 AddToggle("ESP Wallhack", function(v) if v then for _,p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then local hl = Instance.new("Highlight", p.Character); hl.FillColor = Color3.new(1,0,0) end end end end)
 AddToggle("Noclip (Tembus)", function(v) _G.nc = v; if v then _G.NoclipConn = RunService.Stepped:Connect(function() if _G.nc and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end) end end)
 
-print("ANDEZ VIP V7.9: ALL FEATURES MERGED!")
+print("ANDEZ VIP V7.9 PERCENTAGE HYBRID LOADED!")
