@@ -98,9 +98,16 @@ local MainClose = Instance.new("TextButton", TitleBar)
 MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
 
 local MainMin = Instance.new("TextButton", TitleBar)
-MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin); MainMin.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin); MainMin.MouseButton1Click:Connect(function() 
+    MainFrame.Visible = false 
+    LogoBtn.Visible = true  -- Menampilkan kembali Ikon A agar bisa dibuka lagi
+end)
 
 LogoBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true end)
+LogoBtn.MouseButton1Click:Connect(function() 
+    MainFrame.Visible = true 
+    LogoBtn.Visible = false -- Sembunyikan Ikon A saat menu sedang terbuka
+end)
 
 local function CreateRestoreBtn(txt, pos, color)
     local b = Instance.new("TextButton", ScreenGui); b.Size = UDim2.new(0, 45, 0, 45); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(10,10,10); b.Text = txt; b.TextColor3 = color; b.Font = "GothamBold"; b.TextSize = 10; b.Visible = false; b.Draggable = true; Instance.new("UICorner", b, {CornerRadius = UDim.new(1,0)}); local s = Instance.new("UIStroke", b); s.Color = color; s.Thickness = 2; s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; return b
