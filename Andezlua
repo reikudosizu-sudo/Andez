@@ -1,4 +1,4 @@
--- [[ ANDEZ VIP ⚡ V1.1 - FULL OPTIMIZED ]]
+-- [[ ANDEZ VIP ⚡ V1.1 - FULL REPAIRED ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -19,7 +19,6 @@ end)
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "AndezVip_V1"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 999
 
--- Fungsi Neon & Kill
 local function TotalKill()
     _G.nc = false; _G.SpecLoop = false
     if _G.NoclipConn then _G.NoclipConn:Disconnect() _G.NoclipConn = nil end
@@ -34,6 +33,101 @@ local function MakeNeon(obj)
             obj.TextColor3 = Color3.fromHSV(h, 1, 1); task.wait(0.05)
         end
     end)
+end
+
+-- 3. ANIMASI SCANNER MERAH XL
+task.spawn(function()
+    local LoadingFrame = Instance.new("Frame", ScreenGui)
+    LoadingFrame.Size = UDim2.new(0, 450, 0, 200)
+    LoadingFrame.Position = UDim2.new(0.5, -225, 0.5, -100)
+    LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
+    LoadingFrame.ClipsDescendants = true
+    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 20)
+
+    local Stroke = Instance.new("UIStroke", LoadingFrame)
+    Stroke.Color = Color3.fromRGB(255, 0, 0); Stroke.Thickness = 3
+
+    local ScanLine = Instance.new("Frame", LoadingFrame)
+    ScanLine.Size = UDim2.new(1, 0, 0, 2); ScanLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0); ScanLine.BorderSizePixel = 0
+
+    local LoadText = Instance.new("TextLabel", LoadingFrame)
+    LoadText.Size = UDim2.new(1, 0, 0.5, 0); LoadText.Text = "ANDEZ VIP"; LoadText.TextColor3 = Color3.fromRGB(255, 0, 0)
+    LoadText.Font = Enum.Font.GothamBold; LoadText.TextSize = 35; LoadText.BackgroundTransparency = 1
+
+    local VersionText = Instance.new("TextLabel", LoadingFrame)
+    VersionText.Size = UDim2.new(1, 0, 0.2, 0); VersionText.Position = UDim2.new(0, 0, 0.55, 0)
+    VersionText.Text = "INITIALIZING SCAN..."; VersionText.TextColor3 = Color3.new(1, 1, 1)
+    VersionText.Font = Enum.Font.GothamMedium; VersionText.TextSize = 14; VersionText.BackgroundTransparency = 1
+
+    local BarBg = Instance.new("Frame", LoadingFrame)
+    BarBg.Size = UDim2.new(0.85, 0, 0, 12); BarBg.Position = UDim2.new(0.075, 0, 0.8, 0); BarBg.BackgroundColor3 = Color3.fromRGB(40, 0, 0); Instance.new("UICorner", BarBg)
+
+    local BarFill = Instance.new("Frame", BarBg)
+    BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Instance.new("UICorner", BarFill)
+
+    task.spawn(function()
+        while LoadingFrame and LoadingFrame.Parent do
+            ScanLine.Position = UDim2.new(0, 0, 0, 0)
+            TweenService:Create(ScanLine, TweenInfo.new(1.5), {Position = UDim2.new(0, 0, 1, 0)}):Play()
+            task.wait(1.5)
+        end
+    end)
+
+    repeat task.wait() until GitHubVersion ~= "Checking..."
+    if GitHubVersion == LocalVersion then
+        VersionText.Text = "STATUS: UP TO DATE [V" .. GitHubVersion .. "]"
+        VersionText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        VersionText.Text = "NEW UPDATE FOUND: V" .. GitHubVersion
+        VersionText.TextColor3 = Color3.fromRGB(255, 255, 0)
+    end
+    
+    TweenService:Create(BarFill, TweenInfo.new(3), {Size = UDim2.new(1,0,1,0)}):Play()
+    task.wait(3.5)
+
+    local Out = TweenService:Create(LoadingFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back), {BackgroundTransparency = 1, Size = UDim2.new(0,0,0,0)})
+    Out:Play()
+    Out.Completed:Connect(function()
+        LoadingFrame:Destroy()
+        -- MUNCULKAN MENU
+        _G.AndezLogoBtn.Visible = true
+    end)
+end)
+
+-- 4. SETUP MENU UTAMA
+_G.AndezLogoBtn = Instance.new("TextButton", ScreenGui)
+_G.AndezLogoBtn.Size = UDim2.new(0, 45, 0, 45); _G.AndezLogoBtn.Position = UDim2.new(0.05, 0, 0.45, 0); _G.AndezLogoBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); _G.AndezLogoBtn.Text = "A"; _G.AndezLogoBtn.Font = "GothamBold"; _G.AndezLogoBtn.TextSize = 25; _G.AndezLogoBtn.Visible = false; _G.AndezLogoBtn.Active = true; _G.AndezLogoBtn.Draggable = true; Instance.new("UICorner", _G.AndezLogoBtn); MakeNeon(_G.AndezLogoBtn)
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0); MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
+
+local TitleBar = Instance.new("Frame", MainFrame)
+TitleBar.Size = UDim2.new(1, 0, 0, 35); TitleBar.BackgroundColor3 = Color3.fromRGB(120, 0, 0); Instance.new("UICorner", TitleBar)
+
+local TitleText = Instance.new("TextLabel", TitleBar)
+TitleText.Text = "ANDEZ VIP"; TitleText.Size = UDim2.new(1, -70, 1, 0); TitleText.Position = UDim2.new(0, 8, 0, 0); TitleText.Font = "GothamBold"; TitleText.TextSize = 14; TitleText.BackgroundTransparency = 1; TitleText.TextXAlignment = "Left"; MakeNeon(TitleText)
+
+local MainClose = Instance.new("TextButton", TitleBar)
+MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
+
+local MainMin = Instance.new("TextButton", TitleBar)
+MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin); MainMin.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+
+_G.AndezLogoBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+-- [ SISTEM TOGGLE & FITUR ]
+local Scroll = Instance.new("ScrollingFrame", MainFrame); Scroll.Size = UDim2.new(1, -10, 1, -45); Scroll.Position = UDim2.new(0, 5, 0, 40); Scroll.BackgroundTransparency = 1; Scroll.ScrollBarThickness = 2; Instance.new("UIListLayout", Scroll).Padding = UDim.new(0, 6)
+
+local function AddToggle(name, callback)
+    local active = false; local b = Instance.new("TextButton", Scroll); b.Size = UDim2.new(0.95, 0, 0, 32); b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.Text = "[ OFF ] " .. name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 10; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function() active = not active; b.Text = (active and "[ ON ] " or "[ OFF ] ") .. name; b.BackgroundColor3 = active and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(40,40,40); callback(active) end)
+end
+
+AddToggle("Speed Hack", function(v) if LocalPlayer.Character then LocalPlayer.Character.Humanoid.WalkSpeed = v and 100 or 16 end end)
+AddToggle("Mega Jump", function(v) if LocalPlayer.Character then LocalPlayer.Character.Humanoid.UseJumpPower = true; LocalPlayer.Character.Humanoid.JumpPower = v and 150 or 50 end end)
+AddToggle("Infinite Jump", function(v) _G.InfJump = v; if v then _G.InfJumpConn = game:GetService("UserInputService").JumpRequest:Connect(function() if _G.InfJump then local h = LocalPlayer.Character:FindFirstChildOfClass("Humanoid") if h then h:ChangeState("Jumping") end end end) end end)
+
+print("ANDEZ VIP V1.1: REPAIRED!")
 end
 
 -- 3. ANIMASI SCANNER MERAH XL
