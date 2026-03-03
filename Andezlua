@@ -111,8 +111,43 @@ MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Positi
 local MainMin = Instance.new("TextButton", TitleBar)
 MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin)
 
-MainMin.MouseButton1Click:Connect(function() MainFrame.Visible = false; LogoBtn.Visible = true end)
-LogoBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true; LogoBtn.Visible = false end)
+MainMin.MouseButton1Click:Connect(function()
+    -- Animasi mengecil sebelum hilang
+    local info = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+    local shrink = TweenService:Create(MainFrame, info, {
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundTransparency = 1
+    })
+    
+    shrink:Play()
+    
+    -- Tunggu animasi selesai baru sembunyikan total
+    shrink.Completed:Connect(function()
+        MainFrame.Visible = false
+        LogoBtn.Visible = true
+        -- Kembalikan ukuran asli agar saat dibuka lagi tidak error
+        MainFrame.Size = UDim2.new(0, 190, 0, 320) 
+    end)
+end)
+
+-- [[ EFEK SMOOTH OPENING NOMOR 3 ]]
+LogoBtn.MouseButton1Click:Connect(function()
+    -- 1. Persiapan Awal: Set ukuran jadi nol dan transparansi penuh
+    MainFrame.Size = UDim2.new(0, 0, 0, 0)
+    MainFrame.BackgroundTransparency = 1
+    MainFrame.Visible = true
+    LogoBtn.Visible = false
+
+    -- 2. Jalankan Animasi Pop-up & Fade-in Berbarengan
+    local info = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+    
+    local popUp = TweenService:Create(MainFrame, info, {
+        Size = UDim2.new(0, 190, 0, 320), -- Ukuran asli menu kamu
+        BackgroundTransparency = 0 -- Munculkan warna background
+    })
+    
+    popUp:Play()
+end)
 
 -- [[ 6. FITUR SASA TP & SPECTATOR ]]
 local function CreateRestoreBtn(txt, pos, color)
