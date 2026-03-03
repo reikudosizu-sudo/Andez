@@ -6,6 +6,30 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+local FlingActive = false
+local SelectedTargets = {}
+
+local function SkidFling(TargetPlayer)
+    local Character = LocalPlayer.Character
+    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local TCharacter = TargetPlayer.Character
+    local TRootPart = TCharacter and TCharacter:FindFirstChild("HumanoidRootPart")
+    if Character and RootPart and TCharacter and TRootPart then
+        local OldPos = RootPart.CFrame
+        local BV = Instance.new("BodyVelocity", RootPart)
+        BV.Velocity = Vector3.new(9e7, 9e7, 9e7)
+        BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        local StartTime = tick()
+        repeat
+            RootPart.CFrame = TRootPart.CFrame * CFrame.Angles(math.rad(math.random(0,360)), 0, 0)
+            RootPart.Velocity = Vector3.new(9e8, 9e8, 9e8)
+            task.wait()
+        until not FlingActive or TargetPlayer.Parent ~= Players or (tick() - StartTime > 3)
+        BV:Destroy()
+        RootPart.Velocity = Vector3.new(0,0,0)
+        RootPart.CFrame = OldPos
+    end
+end
 
 -- [[ 1. FUNGSI UTAMA ]]
 local function MakeNeon(obj)
@@ -110,6 +134,82 @@ TitleText.BackgroundTransparency = 1
 TitleText.TextColor3 = Color3.new(1,1,1)
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 MakeNeon(TitleText)
+-- [[ TAMBAHAN PANEL PLAYER LIST & SEARCH ]]
+local SearchBox = Instance.new("TextBox", MainFrame)
+SearchBox.Size = UDim2.new(0.9, 0, 0, 30)
+SearchBox.Position = UDim2.new(0.05, 0, 0, 50) -- Muncul di bawah TitleBar
+SearchBox.PlaceholderText = "Cari Player..."
+SearchBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SearchBox.TextColor3 = Color3.new(1, 1, 1)
+SearchBox.Font = Enum.Font.Gotham
+Instance.new("UICorner", SearchBox)
+
+local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
+ScrollingFrame.Size = UDim2.new(0.9, 0, 0, 150) 
+ScrollingFrame.Position = UDim2.new(0.05, 0, 0, 90)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollingFrame.ScrollBarThickness = 4
+local UIList = Instance.new("UIListLayout", ScrollingFrame)
+UIList.Padding = UDim.new(0, 5)
+
+-- Fungsi Update List Otomatis
+local function UpdateList()
+    for _, v in pairs(ScrollingFrame:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and (SearchBox.Text == "" or p.Name:lower():find(SearchBox.Text:lower()) or p.DisplayName:lower():find(SearchBox.Text:lower())) then
+            local btn = Instance.new("TextButton", ScrollingFrame)
+            btn.Size = UDim2.new(1, -10, 0, 30)
+            btn.Text = "  " .. p.DisplayName
+            btn.BackgroundColor3 = SelectedTargets[p.Name] and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(45, 45, 45)
+            btn.TextColor3 = Color3.new(1,1,1)
+            btn.TextXAlignment = Enum.TextXAlignment.Left
+            btn.Font = Enum.Font.Gotham
+            Instance.new("UICorner", btn)
+            
+            btn.MouseButton1Click:Connect(function()
+                if SelectedTargets[p.Name] then SelectedTargets[p.Name] = nil else SelectedTargets[p.Name] = true end
+                UpdateList() 
+            end)
+        end
+    end
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y)
+end
+
+SearchBox:GetPropertyChangedSignal("Text"):Connect(UpdateList)
+Players.PlayerAdded:Connect(UpdateList)
+Players.PlayerRemoving:Connect(UpdateList)
+UpdateList()
+
+-- Tombol Eksekusi (Start & Stop)
+local StartFling = Instance.new("TextButton", MainFrame)
+StartFling.Size = UDim2.new(0.42, 0, 0, 35)
+StartFling.Position = UDim2.new(0.05, 0, 0, 250)
+StartFling.Text = "START"
+StartFling.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+StartFling.TextColor3 = Color3.new(1,1,1)
+StartFling.Font = Enum.Font.GothamBold
+Instance.new("UICorner", StartFling)
+
+local StopFling = Instance.new("TextButton", MainFrame)
+StopFling.Size = UDim2.new(0.42, 0, 0, 35)
+StopFling.Position = UDim2.new(0.53, 0, 0, 250)
+StopFling.Text = "STOP"
+StopFling.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+StopFling.TextColor3 = Color3.new(1,1,1)
+StopFling.Font = Enum.Font.GothamBold
+Instance.new("UICorner", StopFling)
+
+StartFling.MouseButton1Click:Connect(function()
+    FlingActive = true
+    for name, _ in pairs(SelectedTargets) do
+        local target = Players:FindFirstChild(name)
+        if target and FlingActive then SkidFling(target) end
+    end
+    FlingActive = false
+end)
+StopFling.MouseButton1Click:Connect(function() FlingActive = false end)
+
 local MainClose = Instance.new("TextButton", TitleBar); MainClose.Text = "X"; MainClose.Size = UDim2.new(0, 25, 0, 25); MainClose.Position = UDim2.new(1, -30, 0, 5); MainClose.BackgroundColor3 = Color3.fromRGB(200, 0, 0); MainClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainClose); MainClose.MouseButton1Click:Connect(TotalKill)
 local MainMin = Instance.new("TextButton", TitleBar); MainMin.Text = "-"; MainMin.Size = UDim2.new(0, 25, 0, 25); MainMin.Position = UDim2.new(1, -60, 0, 5); MainMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); MainMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", MainMin)
 
