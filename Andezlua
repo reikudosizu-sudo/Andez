@@ -171,7 +171,7 @@ local function UpdateList()
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y)
 end
 
-SearchBox:GetPropertyChangedSignal("Text"):Connect(UpdateList)
+local SearchBox = Instance.new("TextBox", MainFrame)
 Players.PlayerAdded:Connect(UpdateList)
 Players.PlayerRemoving:Connect(UpdateList)
 UpdateList()
