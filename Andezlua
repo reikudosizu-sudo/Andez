@@ -1,3 +1,6 @@
+-- [[ ANDEZ VIP ⚡ V7.9 FINAL HYBRID - PERCENTAGE EDITION ]]
+-- SEMUA FITUR 100% UTUH + ANDEZ VIP ACCESS RESTORED + PERBAIKAN ESP & JUMP
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -224,4 +227,49 @@ FlyMin.MouseButton1Click:Connect(function() FlyUI.Visible = false; FlyRestore.Vi
 local FlyToggle = Instance.new("TextButton", FlyUI); FlyToggle.Size = UDim2.new(0.9, 0, 0, 30); FlyToggle.Position = UDim2.new(0.05, 0, 0.25, 0); FlyToggle.Text = "FLY: OFF"; FlyToggle.BackgroundColor3 = Color3.fromRGB(130,0,0); FlyToggle.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyToggle)
 local SpeedText = Instance.new("TextLabel", FlyUI); SpeedText.Size = UDim2.new(1, 0, 0, 20); SpeedText.Position = UDim2.new(0, 0, 0.5, 0); SpeedText.Text = "SPEED: " .. flySpeed; SpeedText.BackgroundTransparency = 1; SpeedText.TextColor3 = Color3.new(1,1,1); SpeedText.Font = "GothamBold"; SpeedText.TextSize = 10
 local SUp = Instance.new("TextButton", FlyUI); SUp.Text = "+"; SUp.Size = UDim2.new(0, 40, 0, 30); SUp.Position = UDim2.new(0.6, 0, 0.65, 0); SUp.BackgroundColor3 = Color3.fromRGB(40,40,40); SUp.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", SUp)
-local SDown = Instance.new("TextButton", FlyUI); SDown.Text = "-"; SDown.Size = UDim2.new(0, 40, 0, 30); SDown.Position = UDim2.
+local SDown = Instance.new("TextButton", FlyUI); SDown.Text = "-"; SDown.Size = UDim2.new(0, 40, 0, 30); SDown.Position = UDim2.new(0.15, 0, 0.65, 0); SDown.BackgroundColor3 = Color3.fromRGB(40,40,40); SDown.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", SDown)
+SUp.MouseButton1Click:Connect(function() flySpeed = flySpeed + 10; SpeedText.Text = "SPEED: " .. flySpeed end); SDown.MouseButton1Click:Connect(function() flySpeed = math.max(10, flySpeed - 10); SpeedText.Text = "SPEED: " .. flySpeed end)
+local ArrowFrame = Instance.new("Frame", ScreenGui); ArrowFrame.Size = UDim2.new(0, 180, 0, 180); ArrowFrame.Position = UDim2.new(0.08, 0, 0.4, 0); ArrowFrame.BackgroundTransparency = 1; ArrowFrame.Visible = false 
+local function MakeArrow(txt, pos) local b = Instance.new("TextButton", ArrowFrame); b.Text = txt; b.Size = UDim2.new(0, 50, 0, 50); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(0,0,0); b.BackgroundTransparency = 0.4; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 25; Instance.new("UICorner", b); return b end
+local Up = MakeArrow("▲", UDim2.new(0.35, 0, 0, 0)); local Down = MakeArrow("▼", UDim2.new(0.35, 0, 0.7, 0)); local Left = MakeArrow("◀", UDim2.new(0, 0, 0.35, 0)); local Right = MakeArrow("▶", UDim2.new(0.7, 0, 0.35, 0))
+FlyToggle.MouseButton1Click:Connect(function()
+    flying = not flying; FlyToggle.Text = flying and "FLY: ON" or "FLY: OFF"; FlyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 130, 0) or Color3.fromRGB(130, 0, 0); ArrowFrame.Visible = flying 
+    local hrp = LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+    if flying then LocalPlayer.Character.Humanoid.PlatformStand = true; bv = Instance.new("BodyVelocity", hrp); bv.MaxForce = Vector3.new(9e9,9e9,9e9); bg = Instance.new("BodyGyro", hrp); bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+        task.spawn(function() while flying do bv.Velocity = (moveDir.Magnitude > 0) and (Camera.CFrame:VectorToWorldSpace(moveDir) * flySpeed) or Vector3.new(0,0.1,0); bg.CFrame = Camera.CFrame; task.wait() end end)
+    else if bv then bv:Destroy() end; if bg then bg:Destroy() end; LocalPlayer.Character.Humanoid.PlatformStand = false end
+end)
+Up.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, -1) end); Up.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+Down.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, 1) end); Down.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+Left.MouseButton1Down:Connect(function() moveDir = Vector3.new(-1, 0, 0) end); Left.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+Right.MouseButton1Down:Connect(function() moveDir = Vector3.new(1, 0, 0) end); Right.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
+
+-- [[ 8. LIST FITUR ]]
+local function AddButton(name, callback) local b = Instance.new("TextButton", Scroll); b.Size = UDim2.new(0.95, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.Text = name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 13; Instance.new("UICorner", b); b.MouseButton1Click:Connect(callback) end
+local function AddToggle(name, callback)
+    local active = false; local b = Instance.new("TextButton", Scroll); b.Size = UDim2.new(0.95, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.Text = "[ OFF ] " .. name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 13; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function() active = not active; b.Text = (active and "[ ON ] " or "[ OFF ] ") .. name; b.BackgroundColor3 = active and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(40,40,40); callback(active) end)
+end
+
+AddButton("FLY CONTROL", function() FlyUI.Visible = true end)
+AddButton("SASA TP", function() SasaTPFrame.Visible = true end)
+AddButton("SASA SPECT", function() SasaSpecFrame.Visible = true end)
+AddButton("ANDEZ FLING", function() FlingFrame.Visible = true end)
+
+AddToggle("Speed Hack", function(v) LocalPlayer.Character.Humanoid.WalkSpeed = v and 100 or 16 end)
+AddToggle("Jump Hack", function(v) 
+    _G.JumpEnabled = v
+    if v then LocalPlayer.Character.Humanoid.UseJumpPower = true; task.spawn(function() while _G.JumpEnabled do if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.UseJumpPower = true; LocalPlayer.Character.Humanoid.JumpPower = 150 end; task.wait(0.5) end end)
+    else LocalPlayer.Character.Humanoid.JumpPower = 50 end
+end)
+AddToggle("ESP Wallhack", function(v) 
+    _G.ESPActive = v
+    if v then 
+        local function ApplyESP(p) if p ~= LocalPlayer and p.Character and not p.Character:FindFirstChild("AndezESP") then local hl = Instance.new("Highlight", p.Character); hl.Name = "AndezESP"; hl.FillColor = Color3.fromRGB(255, 0, 0) end end
+        for _,p in pairs(Players:GetPlayers()) do ApplyESP(p) end
+        _G.ESPConn = Players.PlayerAdded:Connect(function(newP) newP.CharacterAdded:Connect(function() task.wait(1) if _G.ESPActive then ApplyESP(newP) end end) end)
+    else if _G.ESPConn then _G.ESPConn:Disconnect() end; ClearAllESP() end 
+end)
+AddToggle("Noclip (Tembus)", function(v) _G.nc = v; if v then _G.NoclipConn = RunService.Stepped:Connect(function() if _G.nc and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end) end end)
+
+print("ANDEZ VIP V7.9 PERCENTAGE HYBRID LOADED!")
