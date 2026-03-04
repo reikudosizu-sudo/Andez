@@ -1,10 +1,11 @@
 -- [[ ANDEZ VIP ⚡ V7.9 FINAL HYBRID - PERCENTAGE EDITION ]]
--- SEMUA FITUR 100% UTUH + ANDEZ VIP ACCESS RESTORED + PERBAIKAN ESP & JUMP
--- FIX: ARROW VISIBILITY & FULL CLOSE FLY PANEL
+-- SEMUA FITUR 100% UTUH + ANDEZ VIP ACCESS RESTORED
+-- UPDATE: INTEGRASI TOGGLE ANTI-FLING KE DALAM LIST MENU
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
@@ -35,9 +36,10 @@ local function ClearAllESP()
 end
 
 local function TotalKill()
-    _G.nc = false; _G.SpecLoop = false; _G.ESPActive = false; _G.JumpEnabled = false
+    _G.nc = false; _G.SpecLoop = false; _G.ESPActive = false; _G.JumpEnabled = false; _G.AntiFling = false
     ClearAllESP()
     if _G.NoclipConn then _G.NoclipConn:Disconnect() _G.NoclipConn = nil end
+    if _G.AntiFlingConn then _G.AntiFlingConn:Disconnect() _G.AntiFlingConn = nil end
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         Camera.CameraSubject = LocalPlayer.Character.Humanoid
     end
@@ -58,7 +60,7 @@ local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 190, 0, 320); MainFrame.Position = UDim2.new(0.7, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5); MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame)
 
--- [[ 3. ANIMASI LOADING PERSENTASE (100% RESTORED) ]]
+-- [[ 3. ANIMASI LOADING PERSENTASE ]]
 task.spawn(function()
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 420, 0, 200); LoadingFrame.Position = UDim2.new(0.5, -210, 0.5, -100)
@@ -219,7 +221,6 @@ Players.PlayerAdded:Connect(function() updateLists() end); updateLists()
 local flySpeed = 110
 local flying, moveDir, bv, bg = false, Vector3.new(0,0,0), nil, nil
 
--- ARROW UI DEFINED FIRST
 local ArrowFrame = Instance.new("Frame", ScreenGui); ArrowFrame.Size = UDim2.new(0, 180, 0, 180); ArrowFrame.Position = UDim2.new(0.08, 0, 0.4, 0); ArrowFrame.BackgroundTransparency = 1; ArrowFrame.Visible = false 
 local function MakeArrow(txt, pos) local b = Instance.new("TextButton", ArrowFrame); b.Text = txt; b.Size = UDim2.new(0, 50, 0, 50); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(0,0,0); b.BackgroundTransparency = 0.4; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 25; Instance.new("UICorner", b); return b end
 local Up = MakeArrow("▲", UDim2.new(0.35, 0, 0, 0)); local Down = MakeArrow("▼", UDim2.new(0.35, 0, 0.7, 0)); local Left = MakeArrow("◀", UDim2.new(0, 0, 0.35, 0)); local Right = MakeArrow("▶", UDim2.new(0.7, 0, 0.35, 0))
@@ -303,4 +304,37 @@ AddToggle("ESP Wallhack", function(v)
 end)
 AddToggle("Noclip (Tembus)", function(v) _G.nc = v; if v then _G.NoclipConn = RunService.Stepped:Connect(function() if _G.nc and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end) end end)
 
-print("ANDEZ VIP V7.9 PERCENTAGE HYBRID LOADED!")
+-- [[ 9. FITUR ANTI-FLING DENGAN TOGGLE ]]
+AddToggle("Anti Fling", function(v)
+    _G.AntiFling = v
+    if v then
+        -- Munculkan Pop-up saat di-ON-kan
+        StarterGui:SetCore("SendNotification", {
+            Title = "Anti-Fling",
+            Text = "Anti Fling by Andez ON",
+            Duration = 5;
+        })
+        -- Jalankan Loop Anti-Fling
+        _G.AntiFlingConn = RunService.Stepped:Connect(function()
+            if _G.AntiFling then
+                for _, CoPlayer in pairs(Players:GetPlayers()) do
+                    if CoPlayer ~= LocalPlayer and CoPlayer.Character then
+                        for _, Part in pairs(CoPlayer.Character:GetChildren()) do
+                            if Part:IsA("BasePart") then Part.CanCollide = false end
+                        end
+                    end
+                end
+                for _, Accessory in pairs(workspace:GetChildren()) do
+                    if Accessory:IsA("Accessory") and Accessory:FindFirstChildWhichIsA("Part") then
+                        Accessory:FindFirstChildWhichIsA("Part"):Destroy()
+                    end
+                end
+            end
+        end)
+    else
+        -- Matikan Koneksi saat OFF
+        if _G.AntiFlingConn then _G.AntiFlingConn:Disconnect() _G.AntiFlingConn = nil end
+    end
+end)
+
+print("ANDEZ VIP V7.9 HYBRID LOADED!")
