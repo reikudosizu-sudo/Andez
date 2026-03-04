@@ -1,5 +1,6 @@
 -- [[ ANDEZ VIP ⚡ V7.9 FINAL HYBRID - PERCENTAGE EDITION ]]
 -- SEMUA FITUR 100% UTUH + ANDEZ VIP ACCESS RESTORED + PERBAIKAN ESP & JUMP
+-- FIX: ARROW VISIBILITY & FULL CLOSE FLY PANEL
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -74,7 +75,6 @@ task.spawn(function()
     local Grad = Instance.new("UIGradient", BigA)
     Grad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(0.51, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))}); Grad.Rotation = 90
 
-    -- TEXT ANDEZ VIP ACCESS (KEMBALI DI SINI)
     local AccessTitle = Instance.new("TextLabel", LoadingFrame)
     AccessTitle.Size = UDim2.new(0.65, 0, 0, 40); AccessTitle.Position = UDim2.new(0.3, 0, 0.1, 0); AccessTitle.Text = "ANDEZ VIP ACCESS"; AccessTitle.TextColor3 = Color3.fromRGB(255, 0, 0); AccessTitle.Font = "GothamBlack"; AccessTitle.TextSize = 22; AccessTitle.BackgroundTransparency = 1; MakeNeon(AccessTitle)
 
@@ -215,30 +215,61 @@ end
 for _, search in pairs({SasaTPSearch, SasaSpecSearch, FlingSearch}) do search:GetPropertyChangedSignal("Text"):Connect(function() updateLists(SasaTPSearch.Text, SasaSpecSearch.Text, FlingSearch.Text) end) end
 Players.PlayerAdded:Connect(function() updateLists() end); updateLists()
 
--- [[ 7. FLY CONTROL ]]
+-- [[ 7. FLY CONTROL SETUP ]]
 local flySpeed = 110
 local flying, moveDir, bv, bg = false, Vector3.new(0,0,0), nil, nil
+
+-- ARROW UI DEFINED FIRST
+local ArrowFrame = Instance.new("Frame", ScreenGui); ArrowFrame.Size = UDim2.new(0, 180, 0, 180); ArrowFrame.Position = UDim2.new(0.08, 0, 0.4, 0); ArrowFrame.BackgroundTransparency = 1; ArrowFrame.Visible = false 
+local function MakeArrow(txt, pos) local b = Instance.new("TextButton", ArrowFrame); b.Text = txt; b.Size = UDim2.new(0, 50, 0, 50); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(0,0,0); b.BackgroundTransparency = 0.4; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 25; Instance.new("UICorner", b); return b end
+local Up = MakeArrow("▲", UDim2.new(0.35, 0, 0, 0)); local Down = MakeArrow("▼", UDim2.new(0.35, 0, 0.7, 0)); local Left = MakeArrow("◀", UDim2.new(0, 0, 0.35, 0)); local Right = MakeArrow("▶", UDim2.new(0.7, 0, 0.35, 0))
+
 local FlyUI = Instance.new("Frame", ScreenGui); FlyUI.Size = UDim2.new(0, 160, 0, 150); FlyUI.Position = UDim2.new(0.4, 0, 0.2, 0); FlyUI.BackgroundColor3 = Color3.fromRGB(15, 15, 15); FlyUI.Visible = false; FlyUI.Active = true; FlyUI.Draggable = true; Instance.new("UICorner", FlyUI)
 local FlyHeader = Instance.new("Frame", FlyUI); FlyHeader.Size = UDim2.new(1, 0, 0, 30); FlyHeader.BackgroundColor3 = Color3.fromRGB(80, 0, 0); Instance.new("UICorner", FlyHeader)
 local FlyTitle = Instance.new("TextLabel", FlyHeader); FlyTitle.Text = "FLY CONTROL"; FlyTitle.Size = UDim2.new(0.6, 0, 1, 0); FlyTitle.Position = UDim2.new(0, 8, 0, 0); FlyTitle.BackgroundTransparency = 1; FlyTitle.TextColor3 = Color3.new(1,1,1); FlyTitle.Font = "GothamBold"; FlyTitle.TextSize = 10; FlyTitle.TextXAlignment = "Left"
+local FlyClose = Instance.new("TextButton", FlyHeader); FlyClose.Text = "X"; FlyClose.Size = UDim2.new(0, 22, 0, 22); FlyClose.Position = UDim2.new(1, -25, 0.1, 0); FlyClose.BackgroundColor3 = Color3.fromRGB(150, 0, 0); FlyClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyClose)
 local FlyMin = Instance.new("TextButton", FlyHeader); FlyMin.Text = "-"; FlyMin.Size = UDim2.new(0, 22, 0, 22); FlyMin.Position = UDim2.new(1, -50, 0.1, 0); FlyMin.BackgroundColor3 = Color3.fromRGB(40, 40, 40); FlyMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyMin)
 local FlyRestore = CreateRestoreBtn("FLY", UDim2.new(0.05, 0, 0.55, 0), Color3.new(1,1,1))
-FlyMin.MouseButton1Click:Connect(function() FlyUI.Visible = false; FlyRestore.Visible = true end); FlyRestore.MouseButton1Click:Connect(function() FlyUI.Visible = true; FlyRestore.Visible = false end)
+
 local FlyToggle = Instance.new("TextButton", FlyUI); FlyToggle.Size = UDim2.new(0.9, 0, 0, 30); FlyToggle.Position = UDim2.new(0.05, 0, 0.25, 0); FlyToggle.Text = "FLY: OFF"; FlyToggle.BackgroundColor3 = Color3.fromRGB(130,0,0); FlyToggle.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyToggle)
+
+local function SetFly(state)
+    flying = state
+    FlyToggle.Text = flying and "FLY: ON" or "FLY: OFF"
+    FlyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 130, 0) or Color3.fromRGB(130, 0, 0)
+    ArrowFrame.Visible = flying
+    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    if flying then
+        LocalPlayer.Character.Humanoid.PlatformStand = true
+        bv = Instance.new("BodyVelocity", hrp); bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+        bg = Instance.new("BodyGyro", hrp); bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+        task.spawn(function()
+            while flying do
+                bv.Velocity = (moveDir.Magnitude > 0) and (Camera.CFrame:VectorToWorldSpace(moveDir) * flySpeed) or Vector3.new(0,0.1,0)
+                bg.CFrame = Camera.CFrame
+                task.wait()
+            end
+        end)
+    else
+        if bv then bv:Destroy() end
+        if bg then bg:Destroy() end
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+        end
+    end
+end
+
+FlyToggle.MouseButton1Click:Connect(function() SetFly(not flying) end)
+FlyMin.MouseButton1Click:Connect(function() FlyUI.Visible = false; FlyRestore.Visible = true end)
+FlyRestore.MouseButton1Click:Connect(function() FlyUI.Visible = true; FlyRestore.Visible = false end)
+FlyClose.MouseButton1Click:Connect(function() SetFly(false); FlyUI.Visible = false; FlyRestore.Visible = false end)
+
 local SpeedText = Instance.new("TextLabel", FlyUI); SpeedText.Size = UDim2.new(1, 0, 0, 20); SpeedText.Position = UDim2.new(0, 0, 0.5, 0); SpeedText.Text = "SPEED: " .. flySpeed; SpeedText.BackgroundTransparency = 1; SpeedText.TextColor3 = Color3.new(1,1,1); SpeedText.Font = "GothamBold"; SpeedText.TextSize = 10
 local SUp = Instance.new("TextButton", FlyUI); SUp.Text = "+"; SUp.Size = UDim2.new(0, 40, 0, 30); SUp.Position = UDim2.new(0.6, 0, 0.65, 0); SUp.BackgroundColor3 = Color3.fromRGB(40,40,40); SUp.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", SUp)
 local SDown = Instance.new("TextButton", FlyUI); SDown.Text = "-"; SDown.Size = UDim2.new(0, 40, 0, 30); SDown.Position = UDim2.new(0.15, 0, 0.65, 0); SDown.BackgroundColor3 = Color3.fromRGB(40,40,40); SDown.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", SDown)
 SUp.MouseButton1Click:Connect(function() flySpeed = flySpeed + 10; SpeedText.Text = "SPEED: " .. flySpeed end); SDown.MouseButton1Click:Connect(function() flySpeed = math.max(10, flySpeed - 10); SpeedText.Text = "SPEED: " .. flySpeed end)
-local ArrowFrame = Instance.new("Frame", ScreenGui); ArrowFrame.Size = UDim2.new(0, 180, 0, 180); ArrowFrame.Position = UDim2.new(0.08, 0, 0.4, 0); ArrowFrame.BackgroundTransparency = 1; ArrowFrame.Visible = false 
-local function MakeArrow(txt, pos) local b = Instance.new("TextButton", ArrowFrame); b.Text = txt; b.Size = UDim2.new(0, 50, 0, 50); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(0,0,0); b.BackgroundTransparency = 0.4; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 25; Instance.new("UICorner", b); return b end
-local Up = MakeArrow("▲", UDim2.new(0.35, 0, 0, 0)); local Down = MakeArrow("▼", UDim2.new(0.35, 0, 0.7, 0)); local Left = MakeArrow("◀", UDim2.new(0, 0, 0.35, 0)); local Right = MakeArrow("▶", UDim2.new(0.7, 0, 0.35, 0))
-FlyToggle.MouseButton1Click:Connect(function()
-    flying = not flying; FlyToggle.Text = flying and "FLY: ON" or "FLY: OFF"; FlyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 130, 0) or Color3.fromRGB(130, 0, 0); ArrowFrame.Visible = flying 
-    local hrp = LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-    if flying then LocalPlayer.Character.Humanoid.PlatformStand = true; bv = Instance.new("BodyVelocity", hrp); bv.MaxForce = Vector3.new(9e9,9e9,9e9); bg = Instance.new("BodyGyro", hrp); bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
-        task.spawn(function() while flying do bv.Velocity = (moveDir.Magnitude > 0) and (Camera.CFrame:VectorToWorldSpace(moveDir) * flySpeed) or Vector3.new(0,0.1,0); bg.CFrame = Camera.CFrame; task.wait() end end)
-    else if bv then bv:Destroy() end; if bg then bg:Destroy() end; LocalPlayer.Character.Humanoid.PlatformStand = false end
-end)
+
 Up.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, -1) end); Up.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
 Down.MouseButton1Down:Connect(function() moveDir = Vector3.new(0, 0, 1) end); Down.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
 Left.MouseButton1Down:Connect(function() moveDir = Vector3.new(-1, 0, 0) end); Left.MouseButton1Up:Connect(function() moveDir = Vector3.new(0, 0, 0) end)
