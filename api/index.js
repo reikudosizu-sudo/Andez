@@ -2,10 +2,10 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 
-// LINK GIST ASLI ANDEZLUA
+// LINK GIST ASLI ANDEZLUA (PASTIKAN LINK INI TETAP BENAR)
 const GIST_URL = "https://gist.githubusercontent.com/reikudosizu-sudo/e20fc56dc5da58a3d70ce562732be963/raw/45657973d6d4e8f255d633122f8a1269034164ea/main.%20lua";
 
-// Rute utama yang akan dipanggil oleh vercel.json
+// Rute utama yang dipanggil oleh vercel.json
 app.get('/', async (req, res) => {
     const userAgent = req.headers['user-agent'] || "";
 
