@@ -1,0 +1,169 @@
+-- Status: Button Size Increased | Title Large | List Clean
+
+local player = game.Players.LocalPlayer
+local runService = game:GetService("RunService")
+
+-- Konfigurasi
+local PUNCH_DISTANCE = 6 
+
+-- UI Setup
+local screenGui = Instance.new("ScreenGui", player.PlayerGui)
+screenGui.Name = "AndezXXV_Clean"
+screenGui.ResetOnSpawn = false
+
+local currentTarget = nil
+local isMinimized = false
+
+-- Frame Utama (210x300)
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 210, 0, 310) 
+mainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
+
+-- Header
+local header = Instance.new("Frame", mainFrame)
+header.Size = UDim2.new(1, 0, 0, 60) -- Tinggi ditambah sedikit untuk tombol besar
+header.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+header.BorderSizePixel = 0
+header.ClipsDescendants = true
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel", header)
+title.Size = UDim2.new(1, -80, 0.5, 0)
+title.Position = UDim2.new(0, 10, 0.15, 0)
+title.Text = "ANDEZ XXV"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 22 
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local statusLabel = Instance.new("TextLabel", header)
+statusLabel.Size = UDim2.new(1, -20, 0.3, 0)
+statusLabel.Position = UDim2.new(0, 10, 0.65, 0)
+statusLabel.Text = "Target: None | Dist: 0"
+statusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+statusLabel.TextSize = 10 
+statusLabel.Font = Enum.Font.SourceSans
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Search Bar
+local searchBox = Instance.new("TextBox", mainFrame)
+searchBox.Size = UDim2.new(1, -20, 0, 22)
+searchBox.Position = UDim2.new(0, 10, 0, 70)
+searchBox.PlaceholderText = "Cari Pemain..."
+searchBox.Text = ""
+searchBox.TextSize = 11
+searchBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+searchBox.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 4)
+
+-- Scroll List
+local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
+scrollFrame.Size = UDim2.new(1, -10, 0, 200)
+scrollFrame.Position = UDim2.new(0, 5, 0, 100)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scrollFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.ScrollBarThickness = 2
+
+local uiList = Instance.new("UIListLayout", scrollFrame)
+uiList.SortOrder = Enum.SortOrder.LayoutOrder
+uiList.Padding = UDim.new(0, 4)
+
+-- Visual Target
+local sBox = Instance.new("SelectionBox")
+sBox.Color3 = Color3.fromRGB(0, 255, 0)
+sBox.LineThickness = 0.05
+sBox.Parent = workspace
+
+-- Update List (Klik untuk ON/OFF)
+local function updateList()
+    for _, child in pairs(scrollFrame:GetChildren()) do
+        if child:IsA("TextButton") then child:Destroy() end
+    end
+    local searchText = searchBox.Text:lower()
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= player then
+            if searchText == "" or p.DisplayName:lower():find(searchText) or p.Name:lower():find(searchText) then
+                local pBtn = Instance.new("TextButton", scrollFrame)
+                pBtn.Size = UDim2.new(1, -10, 0, 28)
+                pBtn.Text = p.DisplayName
+                pBtn.TextSize = 11 
+                pBtn.BackgroundColor3 = (currentTarget == p.Name) and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(40, 40, 40)
+                pBtn.TextColor3 = Color3.new(1, 1, 1)
+                pBtn.Font = Enum.Font.SourceSans
+                Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
+                
+                pBtn.MouseButton1Click:Connect(function()
+                    currentTarget = (currentTarget == p.Name) and nil or p.Name
+                    updateList()
+                end)
+            end
+        end
+    end
+end
+
+searchBox:GetPropertyChangedSignal("Text"):Connect(updateList)
+
+-- Main Loop
+runService.RenderStepped:Connect(function()
+    if currentTarget and player.Character then
+        local targetP = game.Players:FindFirstChild(currentTarget)
+        if targetP and targetP.Character and targetP.Character:FindFirstChild("HumanoidRootPart") then
+            local tHrp = targetP.Character.HumanoidRootPart
+            local myHrp = player.Character:FindFirstChild("HumanoidRootPart")
+            tHrp.Size = Vector3.new(4, 4, 4)
+            tHrp.Transparency = 1
+            if myHrp then
+                local distance = (myHrp.Position - tHrp.Position).Magnitude
+                statusLabel.Text = "Tgt: " .. targetP.DisplayName:sub(1,10) .. " | Dist: " .. math.floor(distance)
+                sBox.Color3 = (distance <= PUNCH_DISTANCE) and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
+            end
+            sBox.Adornee = targetP.Character
+        else sBox.Adornee = nil end
+    else
+        sBox.Adornee = nil
+        statusLabel.Text = "Target: None | Dist: 0"
+    end
+end)
+
+-- Tombol Control (DIPERBESAR UNTUK HP)
+local minBtn = Instance.new("TextButton", header)
+minBtn.Size = UDim2.new(0, 24, 0, 24) -- Ukuran lebih besar
+minBtn.Position = UDim2.new(1, -60, 0, 12)
+minBtn.Text = "-"
+minBtn.TextSize = 18
+minBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+minBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 5)
+
+local closeBtn = Instance.new("TextButton", header)
+closeBtn.Size = UDim2.new(0, 24, 0, 24) -- Ukuran lebih besar
+closeBtn.Position = UDim2.new(1, -32, 0, 12)
+closeBtn.Text = "X"
+closeBtn.TextSize = 14
+closeBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
+
+minBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    scrollFrame.Visible = not isMinimized
+    searchBox.Visible = not isMinimized
+    mainFrame:TweenSize(isMinimized and UDim2.new(0, 210, 0, 60) or UDim2.new(0, 210, 0, 310), "Out", "Quart", 0.3, true)
+    minBtn.Text = isMinimized and "+" or "-"
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    sBox:Destroy()
+    screenGui:Destroy()
+end)
+
+updateList()
