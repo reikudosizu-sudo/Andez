@@ -7,6 +7,7 @@
     - [FIXED] Notification Collision (Smart vertical queue)
     - [REBRAND] Welcome Notif: "MIYAKO IS READY"
     - [STATUS] 100% Full Script - No Simplification
+    - [LIB-FIX] Added External Tab Support for Loadstring
 ]]
 
 local MIYAKO = {}
@@ -327,7 +328,7 @@ function MIYAKO.CreateLib()
     ConfirmOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     ConfirmOverlay.BackgroundTransparency = 1
     ConfirmOverlay.Visible = false
-    ConfirmOverlay.ZIndex = 9999
+    ConfirmOverlay.ZIndex = 9999 
 
     local ConfirmPanel = Instance.new("Frame", ConfirmOverlay)
     ConfirmPanel.Size = UDim2.new(0, 310, 0, 150)
@@ -819,13 +820,14 @@ function MIYAKO.CreateLib()
         for _, p in pairs(Elements_To_Update.Particles) do p.BackgroundColor3 = newColor end
     end
 
+    --// INITIAL NOTIFY (Welcome)
     SendNotification("MIYAKO IS READY", "Hello, " .. lp.DisplayName .. "! HUB is Loaded.", 6)
 
     return Tabs
 end
 
---// RUNNING ORIGINAL FEATURES
-local Tabs = MIYAKO.CreateLib()
+--// [EKSEKUSI FITUR BAWAAN]
+local MyTabs = MIYAKO.CreateLib()
 
 local function UpdatePlaylistHighlight()
     for i, btn in pairs(SongButtons) do
@@ -835,8 +837,8 @@ local function UpdatePlaylistHighlight()
     end
 end
 
--- Tab Main & Fitur Jump
-local MainTab = Tabs:NewTab("Main")
+-- Tab Main
+local MainTab = MyTabs:NewTab("Main")
 local Mov = MainTab:NewSection("Player Movement")
 Mov:NewToggle("Infinite Jump", function(s) _G.IJ = s end)
 game:GetService("UserInputService").JumpRequest:Connect(function()
@@ -846,8 +848,8 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
--- Tab Settings & Performance
-local SetTab = Tabs:NewTab("Settings")
+-- Tab Settings
+local SetTab = MyTabs:NewTab("Settings")
 local PerfSec = SetTab:NewSection("Performance")
 PerfSec:NewToggle("FPS Booster Extreme ⚡", function(state)
     if state then
@@ -866,7 +868,6 @@ PerfSec:NewToggle("FPS Booster Extreme ⚡", function(state)
     end
 end)
 
--- Music System
 local MusicSec = SetTab:NewSection("Music Player")
 local playLabel = nil
 local function UpdateMusicUI()
@@ -885,7 +886,6 @@ MusicSec:NewButton("Prev Track ⏪", function() curTrack = (curTrack - 2) % #Pla
 playLabel = MusicSec:NewButton("Now: " .. Playlist[curTrack].Name, function() end)
 MusicSec:NewMusicPanel(Playlist, function(index) curTrack = index UpdateMusicUI() end)
 
--- Theme System
 local ThemeSec = SetTab:NewSection("Theme Custom")
 local rainbowColors = {
     {Color3.fromRGB(255, 0, 0), "Red 🔴"},
@@ -905,5 +905,9 @@ ThemeSec:NewButton("Theme: Blue 🔵", function(self)
     SendNotification("Theme", "UI Color: " .. rainbowColors[curCol][2], 3)
 end)
 
---// RETURN LIBRARY (Agar bisa loadstring tapi tetap jalan)
-return Tabs
+--// [JEMBATAN FUNGSI UNTUK LOADSTRING]
+function MIYAKO:NewTab(name)
+    return MyTabs:NewTab(name)
+end
+
+return MIYAKO
