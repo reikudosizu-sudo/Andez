@@ -7,7 +7,6 @@
     - [FIXED] Notification Collision (Smart vertical queue)
     - [REBRAND] Welcome Notif: "MIYAKO IS READY"
     - [STATUS] 100% Full Script - No Simplification
-    - [LIB] Exported as Library for External Features
 ]]
 
 local MIYAKO = {}
@@ -328,7 +327,7 @@ function MIYAKO.CreateLib()
     ConfirmOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     ConfirmOverlay.BackgroundTransparency = 1
     ConfirmOverlay.Visible = false
-    ConfirmOverlay.ZIndex = 9999 
+    ConfirmOverlay.ZIndex = 9999
 
     local ConfirmPanel = Instance.new("Frame", ConfirmOverlay)
     ConfirmPanel.Size = UDim2.new(0, 310, 0, 150)
@@ -820,63 +819,91 @@ function MIYAKO.CreateLib()
         for _, p in pairs(Elements_To_Update.Particles) do p.BackgroundColor3 = newColor end
     end
 
-    --// INITIAL NOTIFY (Welcome)
     SendNotification("MIYAKO IS READY", "Hello, " .. lp.DisplayName .. "! HUB is Loaded.", 6)
 
-    --// INITIAL FEATURES (Main & Settings)
-    local MainTab = Tabs:NewTab("Main")
-    local Mov = MainTab:NewSection("Player Movement")
-    Mov:NewToggle("Infinite Jump", function(s) _G.IJ = s end)
-    game:GetService("UserInputService").JumpRequest:Connect(function()
-        if _G.IJ and lp.Character then 
-            local h = lp.Character:FindFirstChildOfClass("Humanoid")
-            if h then h:ChangeState("Jumping") end
-        end
-    end)
-
-    local SetTab = Tabs:NewTab("Settings")
-    local PerfSec = SetTab:NewSection("Performance")
-    PerfSec:NewToggle("FPS Booster Extreme ⚡", function(state)
-        if state then
-            for _, v in pairs(game:GetDescendants()) do
-                if v:IsA("BasePart") and not v:IsA("MeshPart") then
-                    originalMaterials[v] = v.Material
-                    v.Material = Enum.Material.SmoothPlastic
-                end
-                if v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1 end
-            end
-            lighting.GlobalShadows = false
-        else
-            for part, material in pairs(originalMaterials) do if part and part.Parent then part.Material = material end end
-            for _, v in pairs(game:GetDescendants()) do if v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 0 end end
-            lighting.GlobalShadows = true
-        end
-    end)
-
-    local MusicSec = SetTab:NewSection("Music Player")
-    local playLabel = nil
-    local function UpdateMusicUI()
-        if isPlaying then BGM:Stop() BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID BGM:Play() end
-        if playLabel then playLabel.Text = "Now: " .. Playlist[curTrack].Name end
-    end
-
-    MusicSec:NewToggle("Miyako Music 😜", function(state)
-        isPlaying = state
-        if state then BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID BGM:Play() else BGM:Stop() end
-    end)
-    MusicSec:NewVolumeSlider()
-    MusicSec:NewButton("Next Track ⏭️", function() curTrack = (curTrack % #Playlist) + 1 UpdateMusicUI() end)
-    playLabel = MusicSec:NewButton("Now: " .. Playlist[curTrack].Name, function() end)
-    MusicSec:NewMusicPanel(Playlist, function(index) curTrack = index UpdateMusicUI() end)
-
-    local ThemeSec = SetTab:NewSection("Theme Custom")
-    ThemeSec:NewButton("Theme: Randomize 🔵", function(self)
-        local rc = Color3.fromHSV(math.random(), 0.8, 1)
-        MIYAKO:ChangeTheme(rc)
-        SendNotification("Theme", "UI Color Randomly Updated!", 3)
-    end)
-
-    return Tabs -- <--- WAJIB: Agar Tab bisa ditambah dari luar
+    return Tabs
 end
 
-return MIYAKO
+--// RUNNING ORIGINAL FEATURES
+local Tabs = MIYAKO.CreateLib()
+
+local function UpdatePlaylistHighlight()
+    for i, btn in pairs(SongButtons) do
+        if btn and btn.Parent then
+            tween:Create(btn, TweenInfo.new(0.3), {BackgroundColor3 = (i == curTrack) and Miyako_Theme.SchemeColor or Miyako_Theme.ElementColor}):Play()
+        end
+    end
+end
+
+-- Tab Main & Fitur Jump
+local MainTab = Tabs:NewTab("Main")
+local Mov = MainTab:NewSection("Player Movement")
+Mov:NewToggle("Infinite Jump", function(s) _G.IJ = s end)
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.IJ and lp.Character then 
+        local h = lp.Character:FindFirstChildOfClass("Humanoid")
+        if h then h:ChangeState("Jumping") end
+    end
+end)
+
+-- Tab Settings & Performance
+local SetTab = Tabs:NewTab("Settings")
+local PerfSec = SetTab:NewSection("Performance")
+PerfSec:NewToggle("FPS Booster Extreme ⚡", function(state)
+    if state then
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") and not v:IsA("MeshPart") then
+                originalMaterials[v] = v.Material
+                v.Material = Enum.Material.SmoothPlastic
+            end
+            if v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1 end
+        end
+        lighting.GlobalShadows = false
+    else
+        for part, material in pairs(originalMaterials) do if part and part.Parent then part.Material = material end end
+        for _, v in pairs(game:GetDescendants()) do if v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 0 end end
+        lighting.GlobalShadows = true
+    end
+end)
+
+-- Music System
+local MusicSec = SetTab:NewSection("Music Player")
+local playLabel = nil
+local function UpdateMusicUI()
+    if isPlaying then BGM:Stop() BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID BGM:Play() end
+    if playLabel then playLabel.Text = "Now: " .. Playlist[curTrack].Name end
+    UpdatePlaylistHighlight()
+end
+
+MusicSec:NewToggle("Miyako Music 😜", function(state)
+    isPlaying = state
+    if state then BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID BGM:Play() else BGM:Stop() end
+end)
+MusicSec:NewVolumeSlider()
+MusicSec:NewButton("Next Track ⏭️", function() curTrack = (curTrack % #Playlist) + 1 UpdateMusicUI() end)
+MusicSec:NewButton("Prev Track ⏪", function() curTrack = (curTrack - 2) % #Playlist + 1 UpdateMusicUI() end)
+playLabel = MusicSec:NewButton("Now: " .. Playlist[curTrack].Name, function() end)
+MusicSec:NewMusicPanel(Playlist, function(index) curTrack = index UpdateMusicUI() end)
+
+-- Theme System
+local ThemeSec = SetTab:NewSection("Theme Custom")
+local rainbowColors = {
+    {Color3.fromRGB(255, 0, 0), "Red 🔴"},
+    {Color3.fromRGB(255, 127, 0), "Orange 🟠"},
+    {Color3.fromRGB(255, 255, 0), "Yellow 🟡"},
+    {Color3.fromRGB(0, 255, 0), "Green 🟢"},
+    {Color3.fromRGB(85, 110, 255), "Blue 🔵"},
+    {Color3.fromRGB(75, 0, 130), "Indigo 🟣"},
+    {Color3.fromRGB(148, 0, 211), "Violet 👾"}
+}
+local curCol = 5
+ThemeSec:NewButton("Theme: Blue 🔵", function(self)
+    curCol = (curCol % #rainbowColors) + 1
+    MIYAKO:ChangeTheme(rainbowColors[curCol][1])
+    self.Text = "Theme: " .. rainbowColors[curCol][2]
+    UpdatePlaylistHighlight()
+    SendNotification("Theme", "UI Color: " .. rainbowColors[curCol][2], 3)
+end)
+
+--// RETURN LIBRARY (Agar bisa loadstring tapi tetap jalan)
+return Tabs
