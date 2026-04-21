@@ -1,7 +1,8 @@
 --[[
-    MIYAKO - MASTERPIECE EDITION (PRO FINAL FIX V2)
+    MIYAKO - MASTERPIECE EDITION (PRO FINAL FIX V2.3)
     Owner: Andezlua (MIYAKO)
-    Status: Full Library & Integrated Features
+    Status: Full Library & Universal External Access
+    Update: Added Permanent NewSlider for universal use via loadstring
 ]]
 
 local MIYAKO = {}
@@ -623,7 +624,7 @@ function MIYAKO.CreateLib()
                     st = not st
                     statusText.Text = st and "✔" or "✘"
                     statusText.TextColor3 = st and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 200, 200)
-                    local targetColor = st and Color3.fromRGB(200, 220, 255) or Color3.fromRGB(45, 45, 50)
+                    local targetColor = st and Miyako_Theme.SchemeColor or Color3.fromRGB(45, 45, 50)
                     tween:Create(sBg, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
                     cb(st)
                 end)
@@ -642,6 +643,65 @@ function MIYAKO.CreateLib()
                 CreateRipple(b) 
                 b.MouseButton1Click:Connect(function() cb(b) end)
                 return b
+            end
+
+            --// INTEGRASI SLIDER PERMANEN KE LIBRARY
+            function El:NewSlider(text, min, max, default, cb)
+                local SliderFrame = Instance.new("Frame", sFrame)
+                SliderFrame.Size = UDim2.new(1, -16, 0, 45)
+                SliderFrame.BackgroundColor3 = Miyako_Theme.Background
+                SliderFrame.ZIndex = 13
+                Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 8)
+
+                local SliderTitle = Instance.new("TextLabel", SliderFrame)
+                SliderTitle.Size = UDim2.new(1, 0, 0, 18)
+                SliderTitle.Position = UDim2.new(0, 10, 0, 5)
+                SliderTitle.BackgroundTransparency = 1
+                SliderTitle.Text = text .. ": " .. default
+                SliderTitle.TextColor3 = Miyako_Theme.TextColor
+                SliderTitle.Font = Enum.Font.GothamBold
+                SliderTitle.TextSize = 11
+                SliderTitle.TextXAlignment = "Left"
+                SliderTitle.ZIndex = 14
+
+                local SliderBack = Instance.new("Frame", SliderFrame)
+                SliderBack.Size = UDim2.new(1, -30, 0, 4)
+                SliderBack.Position = UDim2.new(0.5, 0, 0.75, 0)
+                SliderBack.AnchorPoint = Vector2.new(0.5, 0.5)
+                SliderBack.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+                SliderBack.ZIndex = 14
+                Instance.new("UICorner", SliderBack).CornerRadius = UDim.new(1, 0)
+
+                local SliderFill = Instance.new("Frame", SliderBack)
+                SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+                SliderFill.BackgroundColor3 = Miyako_Theme.SchemeColor
+                SliderFill.ZIndex = 15
+                Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+
+                local SliderBtn = Instance.new("TextButton", SliderBack)
+                SliderBtn.Size = UDim2.new(1, 0, 1, 0)
+                SliderBtn.BackgroundTransparency = 1
+                SliderBtn.Text = ""
+                SliderBtn.ZIndex = 16
+
+                local dragging = false
+                local function Update()
+                    local mousePos = input:GetMouseLocation().X
+                    local relativePos = mousePos - SliderBack.AbsolutePosition.X
+                    local percent = math.clamp(relativePos / SliderBack.AbsoluteSize.X, 0, 1)
+                    SliderFill.Size = UDim2.new(percent, 0, 1, 0)
+                    local val = math.floor(min + (max - min) * percent)
+                    SliderTitle.Text = text .. ": " .. val
+                    cb(val)
+                end
+
+                SliderBtn.InputBegan:Connect(function(ip)
+                    if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then dragging = true end
+                end)
+                input.InputEnded:Connect(function(ip)
+                    if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then dragging = false end
+                end)
+                run.RenderStepped:Connect(function() if dragging then Update() end end)
             end
 
             function El:NewMusicPanel(playlistData, onSelected)
@@ -890,7 +950,6 @@ ThemeSec:NewButton("Theme: Blue 🔵", function(self)
 end)
 
 --// [BRIDGE UNTUK LOADSTRING]
--- Fungsi Init ini yang dipanggil user agar menu muncul dan bisa nambah tab baru
 function MIYAKO:Init()
     return MyTabs
 end
