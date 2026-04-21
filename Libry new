@@ -7,6 +7,7 @@
     - [FIXED] Notification Collision (Smart vertical queue)
     - [REBRAND] Welcome Notif: "MIYAKO IS READY"
     - [STATUS] 100% Full Script - No Simplification
+    - [LIB-FIX] Added External Tab Support for Loadstring
 ]]
 
 local MIYAKO = {}
@@ -48,7 +49,6 @@ local function SendNotification(title, text, duration)
     
     local NotifFrame = Instance.new("Frame", NotifyGui)
     NotifFrame.Size = UDim2.new(0, 210, 0, 60)
-    -- Start position off-screen
     NotifFrame.Position = UDim2.new(1, 50, 0.85, -(currentNotifIndex * 70))
     NotifFrame.BackgroundColor3 = Miyako_Theme.Background
     NotifFrame.BorderSizePixel = 0
@@ -84,7 +84,6 @@ local function SendNotification(title, text, duration)
     nText.TextWrapped = true
     nText.ZIndex = 1000001
 
-    -- Animation In
     tween:Create(NotifFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Position = UDim2.new(1, -230, 0.85, -(currentNotifIndex * 70))
     }):Play()
@@ -329,7 +328,7 @@ function MIYAKO.CreateLib()
     ConfirmOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     ConfirmOverlay.BackgroundTransparency = 1
     ConfirmOverlay.Visible = false
-    ConfirmOverlay.ZIndex = 9999 -- High ZIndex for Modal
+    ConfirmOverlay.ZIndex = 9999 
 
     local ConfirmPanel = Instance.new("Frame", ConfirmOverlay)
     ConfirmPanel.Size = UDim2.new(0, 310, 0, 150)
@@ -827,8 +826,8 @@ function MIYAKO.CreateLib()
     return Tabs
 end
 
---// PAGES
-local Tabs = MIYAKO.CreateLib()
+--// [EKSEKUSI FITUR BAWAAN]
+local MyTabs = MIYAKO.CreateLib()
 
 local function UpdatePlaylistHighlight()
     for i, btn in pairs(SongButtons) do
@@ -838,7 +837,8 @@ local function UpdatePlaylistHighlight()
     end
 end
 
-local MainTab = Tabs:NewTab("Main")
+-- Tab Main
+local MainTab = MyTabs:NewTab("Main")
 local Mov = MainTab:NewSection("Player Movement")
 Mov:NewToggle("Infinite Jump", function(s) _G.IJ = s end)
 game:GetService("UserInputService").JumpRequest:Connect(function()
@@ -848,7 +848,8 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-local SetTab = Tabs:NewTab("Settings")
+-- Tab Settings
+local SetTab = MyTabs:NewTab("Settings")
 local PerfSec = SetTab:NewSection("Performance")
 PerfSec:NewToggle("FPS Booster Extreme ⚡", function(state)
     if state then
@@ -903,5 +904,10 @@ ThemeSec:NewButton("Theme: Blue 🔵", function(self)
     UpdatePlaylistHighlight()
     SendNotification("Theme", "UI Color: " .. rainbowColors[curCol][2], 3)
 end)
+
+--// [JEMBATAN FUNGSI UNTUK LOADSTRING]
+function MIYAKO:NewTab(name)
+    return MyTabs:NewTab(name)
+end
 
 return MIYAKO
