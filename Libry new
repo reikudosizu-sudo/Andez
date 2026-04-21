@@ -1,11 +1,12 @@
 --[[
-    MIYAKO - MASTERPIECE EDITION (PRO FINAL FIX V2.2)
+    MIYAKO - MASTERPIECE EDITION (PRO FINAL FIX V2)
     Owner: Andezlua (MIYAKO)
     
     LATEST UPDATES:
-    - [HEADER FIX] Stats changed to: EXECUTOR | PING | FPS (Centered/Aligned)
-    - [CLEANUP] Main Tab Removed, only Settings Tab remains.
-    - [UI RETAIN] All original music and performance features kept 100%.
+    - [FIXED] Close Confirmation (Text & Buttons visibility 100%)
+    - [FIXED] Notification Collision (Smart vertical queue)
+    - [REBRAND] Welcome Notif: "MIYAKO IS READY"
+    - [STATUS] 100% Full Script - No Simplification
 ]]
 
 local MIYAKO = {}
@@ -34,7 +35,7 @@ local Elements_To_Update = {
     Particles = {}
 }
 
---// SYSTEM: NOTIFICATION
+--// SYSTEM: NOTIFICATION (ANTI-STACKING FIX)
 local NotifyGui = Instance.new("ScreenGui", coreGui)
 NotifyGui.Name = "Miyako_Notif_System"
 NotifyGui.DisplayOrder = 999999
@@ -47,6 +48,7 @@ local function SendNotification(title, text, duration)
     
     local NotifFrame = Instance.new("Frame", NotifyGui)
     NotifFrame.Size = UDim2.new(0, 210, 0, 60)
+    -- Start position off-screen
     NotifFrame.Position = UDim2.new(1, 50, 0.85, -(currentNotifIndex * 70))
     NotifFrame.BackgroundColor3 = Miyako_Theme.Background
     NotifFrame.BorderSizePixel = 0
@@ -82,6 +84,7 @@ local function SendNotification(title, text, duration)
     nText.TextWrapped = true
     nText.ZIndex = 1000001
 
+    -- Animation In
     tween:Create(NotifFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Position = UDim2.new(1, -230, 0.85, -(currentNotifIndex * 70))
     }):Play()
@@ -320,13 +323,13 @@ function MIYAKO.CreateLib()
     MainStroke.Thickness = 1.6
     table.insert(Elements_To_Update.Strokes, MainStroke)
 
-    --// SYSTEM: CLOSE CONFIRMATION
+    --// SYSTEM: CLOSE CONFIRMATION (RE-FIXED)
     local ConfirmOverlay = Instance.new("Frame", ScreenGui)
     ConfirmOverlay.Size = UDim2.new(1, 0, 1, 0)
     ConfirmOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     ConfirmOverlay.BackgroundTransparency = 1
     ConfirmOverlay.Visible = false
-    ConfirmOverlay.ZIndex = 9999 
+    ConfirmOverlay.ZIndex = 9999 -- High ZIndex for Modal
 
     local ConfirmPanel = Instance.new("Frame", ConfirmOverlay)
     ConfirmPanel.Size = UDim2.new(0, 310, 0, 150)
@@ -385,6 +388,7 @@ function MIYAKO.CreateLib()
     CreateRipple(NoBtn)
 
     YesBtn.MouseButton1Click:Connect(function()
+        _G.IJ = false
         BGM:Stop()
         for part, material in pairs(originalMaterials) do if part and part.Parent then part.Material = material end end
         lighting.GlobalShadows = true
@@ -406,16 +410,15 @@ function MIYAKO.CreateLib()
     Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 15)
     MIYAKO:DraggingEnabled(Header, Main)
 
-    -- [FIXED] STATS DISPLAY: DI GESER KE KIRI AGAR TENGAH (CENTERED)
     local StatsLabel = Instance.new("TextLabel", Header)
-    StatsLabel.Size = UDim2.new(0, 300, 1, 0)
-    StatsLabel.Position = UDim2.new(0.5, 35, 0.5, 0) -- Adjusted Offset to center better
-    StatsLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    StatsLabel.Size = UDim2.new(1, -120, 1, 0)
+    StatsLabel.Position = UDim2.new(0.5, 65, 0, 0) 
+    StatsLabel.AnchorPoint = Vector2.new(0.5, 0)
     StatsLabel.BackgroundTransparency = 1
-    StatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    StatsLabel.Font = Enum.Font.GothamBold 
-    StatsLabel.TextSize = 13
-    StatsLabel.Text = "EXECUTOR | PING: --ms | FPS: --"
+    StatsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    StatsLabel.Font = Enum.Font.GothamMedium
+    StatsLabel.TextSize = 10
+    StatsLabel.Text = "MIYAKO | PING: --ms | FPS: --"
     StatsLabel.ZIndex = 15
 
     local TitleContainer = Instance.new("Frame", Header)
@@ -451,7 +454,7 @@ function MIYAKO.CreateLib()
             if tick() - lastUpdate >= 0.5 then
                 local fps = math.floor(1/run.RenderStepped:Wait())
                 local ping = math.floor(stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-                StatsLabel.Text = "EXECUTOR | PING: "..ping.."ms | FPS: "..fps
+                StatsLabel.Text = "MIYAKO | PING: "..ping.."ms | FPS: "..fps
                 lastUpdate = tick()
             end
         end)
@@ -627,8 +630,12 @@ function MIYAKO.CreateLib()
                     st = not st
                     statusText.Text = st and "✔" or "✘"
                     statusText.TextColor3 = st and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 200, 200)
+                    
                     local targetColor = st and Color3.fromRGB(200, 220, 255) or Color3.fromRGB(45, 45, 50)
                     tween:Create(sBg, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
+                    
+                    local stateTxt = st and "ON" or "OFF"
+                    SendNotification("Feature", text .. " is " .. stateTxt, 3)
                     cb(st)
                 end)
             end
@@ -648,7 +655,8 @@ function MIYAKO.CreateLib()
                 return b
             end
 
-            function El:NewMusicPanel(playlistData)
+            function El:NewMusicPanel(playlistData, onSelected)
+                local isOpen = false
                 local toggleBtn = Instance.new("TextButton", sFrame)
                 toggleBtn.Size = UDim2.new(1, -16, 0, 40)
                 toggleBtn.BackgroundColor3 = Miyako_Theme.Background
@@ -690,6 +698,7 @@ function MIYAKO.CreateLib()
                 PTitle.TextXAlignment = "Left"
                 PTitle.BackgroundTransparency = 1
                 PTitle.ZIndex = 1002
+                table.insert(Elements_To_Update.Indicators, PTitle)
 
                 local closeX = Instance.new("TextButton", PHeader)
                 closeX.Size = UDim2.new(0, 24, 0, 24)
@@ -709,76 +718,190 @@ function MIYAKO.CreateLib()
                 P_Scroll.ZIndex = 1001
                 local P_List = Instance.new("UIListLayout", P_Scroll)
                 P_List.Padding = UDim.new(0, 6)
-                P_List.HorizontalAlignment = "Center"
 
-                P_List:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                    P_Scroll.CanvasSize = UDim2.new(0, 0, 0, P_List.AbsoluteContentSize.Y + 10)
-                end)
-
-                local function RefreshList()
-                    for _, v in pairs(P_Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+                local function LoadMusicWithSkeleton()
+                    for _, v in pairs(P_Scroll:GetChildren()) do if v:IsA("Frame") or v:IsA("TextButton") then v:Destroy() end end
                     for i, song in ipairs(playlistData) do
                         local sBtn = Instance.new("TextButton", P_Scroll)
                         sBtn.Size = UDim2.new(1, -10, 0, 32)
                         sBtn.BackgroundColor3 = (i == curTrack) and Miyako_Theme.SchemeColor or Miyako_Theme.ElementColor
-                        sBtn.BackgroundTransparency = (i == curTrack) and 0.4 or 0
                         sBtn.Text = "  " .. i .. ". " .. song.Name
-                        sBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        sBtn.TextColor3 = Miyako_Theme.TextColor
                         sBtn.Font = Enum.Font.GothamMedium
                         sBtn.TextSize = 11
                         sBtn.TextXAlignment = "Left"
                         sBtn.ZIndex = 1002
                         Instance.new("UICorner", sBtn).CornerRadius = UDim.new(0, 6)
-                        
-                        sBtn.MouseButton1Click:Connect(function()
-                            curTrack = i
-                            BGM.SoundId = "rbxassetid://" .. song.ID
-                            BGM:Play()
-                            SendNotification("MIYAKO MUSIC", "Playing: " .. song.Name, 3)
-                            RefreshList()
-                        end)
+                        CreateRipple(sBtn)
+                        SongButtons[i] = sBtn
+                        sBtn.MouseButton1Click:Connect(function() onSelected(i) end)
                     end
                 end
-
-                toggleBtn.MouseButton1Click:Connect(function()
-                    Panel.Visible = not Panel.Visible
-                    if Panel.Visible then RefreshList() end
+                P_List:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    P_Scroll.CanvasSize = UDim2.new(0, 0, 0, P_List.AbsoluteContentSize.Y + 10)
                 end)
-                closeX.MouseButton1Click:Connect(function() Panel.Visible = false end)
+                local function SyncToggle(val)
+                    isOpen = val Panel.Visible = val
+                    toggleBtn.Text = val and "📂 Close Playlist" or "📁 Open Playlist"
+                    if val then LoadMusicWithSkeleton() end
+                end
+                toggleBtn.MouseButton1Click:Connect(function() SyncToggle(not isOpen) end)
+                closeX.MouseButton1Click:Connect(function() SyncToggle(false) end)
             end
 
+            function El:NewVolumeSlider()
+                local VolFrame = Instance.new("Frame", sFrame)
+                VolFrame.Size = UDim2.new(1, -16, 0, 50)
+                VolFrame.BackgroundColor3 = Miyako_Theme.Background
+                VolFrame.ZIndex = 13
+                Instance.new("UICorner", VolFrame).CornerRadius = UDim.new(0, 8)
+
+                local VolTitle = Instance.new("TextLabel", VolFrame)
+                VolTitle.Size = UDim2.new(1, 0, 0, 18)
+                VolTitle.Position = UDim2.new(0, 0, 0, 5)
+                VolTitle.BackgroundTransparency = 1
+                VolTitle.Text = "Volume: " .. math.round(BGM.Volume * 100) .. "%"
+                VolTitle.TextColor3 = Miyako_Theme.TextColor
+                VolTitle.Font = Enum.Font.GothamBold
+                VolTitle.TextSize = 11
+                VolTitle.ZIndex = 14
+
+                local SliderBack = Instance.new("Frame", VolFrame)
+                SliderBack.Size = UDim2.new(1, -80, 0, 4)
+                SliderBack.Position = UDim2.new(0.5, 0, 0, 35)
+                SliderBack.AnchorPoint = Vector2.new(0.5, 0.5)
+                SliderBack.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+                SliderBack.ZIndex = 14
+                Instance.new("UICorner", SliderBack).CornerRadius = UDim.new(1, 0)
+
+                local SliderFill = Instance.new("Frame", SliderBack)
+                SliderFill.Size = UDim2.new(BGM.Volume, 0, 1, 0) 
+                SliderFill.BackgroundColor3 = Miyako_Theme.SchemeColor
+                SliderFill.ZIndex = 15
+                Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+                table.insert(Elements_To_Update.Strokes, SliderFill)
+
+                local function UpdateVolumeVisual(newVal)
+                    BGM.Volume = math.clamp(newVal, 0, 1)
+                    VolTitle.Text = "Volume: " .. math.round(BGM.Volume * 100) .. "%"
+                    tween:Create(SliderFill, TweenInfo.new(0.3), {Size = UDim2.new(BGM.Volume, 0, 1, 0)}):Play()
+                end
+
+                local MinusBtn = Instance.new("TextButton", VolFrame)
+                MinusBtn.Size = UDim2.new(0, 30, 0, 30)
+                MinusBtn.Position = UDim2.new(0, 5, 0.5, -5)
+                MinusBtn.BackgroundTransparency = 1
+                MinusBtn.Text = "-"
+                MinusBtn.TextColor3 = Miyako_Theme.TextColor
+                MinusBtn.Font = Enum.Font.GothamBold
+                MinusBtn.TextSize = 20
+                MinusBtn.ZIndex = 15
+                MinusBtn.MouseButton1Click:Connect(function() UpdateVolumeVisual(BGM.Volume - 0.1) end)
+
+                local PlusBtn = Instance.new("TextButton", VolFrame)
+                PlusBtn.Size = UDim2.new(0, 30, 0, 30)
+                PlusBtn.Position = UDim2.new(1, -35, 0.5, -5)
+                PlusBtn.BackgroundTransparency = 1
+                PlusBtn.Text = "+"
+                PlusBtn.TextColor3 = Miyako_Theme.TextColor
+                PlusBtn.Font = Enum.Font.GothamBold
+                PlusBtn.TextSize = 20
+                PlusBtn.ZIndex = 15
+                PlusBtn.MouseButton1Click:Connect(function() UpdateVolumeVisual(BGM.Volume + 0.1) end)
+            end
             return El
         end
         return Sections
     end
+    
+    function MIYAKO:ChangeTheme(newColor)
+        Miyako_Theme.SchemeColor = newColor
+        for _, v in pairs(Elements_To_Update.Strokes) do if v:IsA("UIStroke") then v.Color = newColor else v.BackgroundColor3 = newColor end end
+        for _, v in pairs(Elements_To_Update.Indicators) do v.TextColor3 = newColor end
+        for _, p in pairs(Elements_To_Update.Particles) do p.BackgroundColor3 = newColor end
+    end
+
+    --// INITIAL NOTIFY (Welcome)
+    SendNotification("MIYAKO IS READY", "Hello, " .. lp.DisplayName .. "! HUB is Loaded.", 6)
+
     return Tabs
 end
 
---// INITIALIZE UI
-local Lib = MIYAKO.CreateLib()
-local SettingsTab = Lib:NewTab("Settings")
-local MusicSec = SettingsTab:NewSection("Music & Audio")
+--// PAGES
+local Tabs = MIYAKO.CreateLib()
 
-MusicSec:NewToggle("Enable Background Music", function(state)
-    if state then
-        BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID
-        BGM:Play()
-    else
-        BGM:Stop()
+local function UpdatePlaylistHighlight()
+    for i, btn in pairs(SongButtons) do
+        if btn and btn.Parent then
+            tween:Create(btn, TweenInfo.new(0.3), {BackgroundColor3 = (i == curTrack) and Miyako_Theme.SchemeColor or Miyako_Theme.ElementColor}):Play()
+        end
+    end
+end
+
+local MainTab = Tabs:NewTab("Main")
+local Mov = MainTab:NewSection("Player Movement")
+Mov:NewToggle("Infinite Jump", function(s) _G.IJ = s end)
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.IJ and lp.Character then 
+        local h = lp.Character:FindFirstChildOfClass("Humanoid")
+        if h then h:ChangeState("Jumping") end
     end
 end)
 
-MusicSec:NewMusicPanel(Playlist)
-
-local VisualSec = SettingsTab:NewSection("Visuals & Performance")
-VisualSec:NewButton("Fix Lighting / Fullbright", function()
-    lighting.Brightness = 2
-    lighting.ClockTime = 14
-    lighting.FogEnd = 100000
-    lighting.GlobalShadows = false
-    SendNotification("SYSTEM", "Lighting has been optimized.", 3)
+local SetTab = Tabs:NewTab("Settings")
+local PerfSec = SetTab:NewSection("Performance")
+PerfSec:NewToggle("FPS Booster Extreme ⚡", function(state)
+    if state then
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") and not v:IsA("MeshPart") then
+                originalMaterials[v] = v.Material
+                v.Material = Enum.Material.SmoothPlastic
+            end
+            if v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1 end
+        end
+        lighting.GlobalShadows = false
+    else
+        for part, material in pairs(originalMaterials) do if part and part.Parent then part.Material = material end end
+        for _, v in pairs(game:GetDescendants()) do if v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 0 end end
+        lighting.GlobalShadows = true
+    end
 end)
 
-SendNotification("MIYAKO LOADED", "Welcome back, Masterpiece Edition.", 5)
+local MusicSec = SetTab:NewSection("Music Player")
+local playLabel = nil
+local function UpdateMusicUI()
+    if isPlaying then BGM:Stop() BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID BGM:Play() end
+    if playLabel then playLabel.Text = "Now: " .. Playlist[curTrack].Name end
+    UpdatePlaylistHighlight()
+end
+
+MusicSec:NewToggle("Miyako Music 😜", function(state)
+    isPlaying = state
+    if state then BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID BGM:Play() else BGM:Stop() end
+end)
+MusicSec:NewVolumeSlider()
+MusicSec:NewButton("Next Track ⏭️", function() curTrack = (curTrack % #Playlist) + 1 UpdateMusicUI() end)
+MusicSec:NewButton("Prev Track ⏪", function() curTrack = (curTrack - 2) % #Playlist + 1 UpdateMusicUI() end)
+playLabel = MusicSec:NewButton("Now: " .. Playlist[curTrack].Name, function() end)
+MusicSec:NewMusicPanel(Playlist, function(index) curTrack = index UpdateMusicUI() end)
+
+local ThemeSec = SetTab:NewSection("Theme Custom")
+local rainbowColors = {
+    {Color3.fromRGB(255, 0, 0), "Red 🔴"},
+    {Color3.fromRGB(255, 127, 0), "Orange 🟠"},
+    {Color3.fromRGB(255, 255, 0), "Yellow 🟡"},
+    {Color3.fromRGB(0, 255, 0), "Green 🟢"},
+    {Color3.fromRGB(85, 110, 255), "Blue 🔵"},
+    {Color3.fromRGB(75, 0, 130), "Indigo 🟣"},
+    {Color3.fromRGB(148, 0, 211), "Violet 👾"}
+}
+local curCol = 5
+ThemeSec:NewButton("Theme: Blue 🔵", function(self)
+    curCol = (curCol % #rainbowColors) + 1
+    MIYAKO:ChangeTheme(rainbowColors[curCol][1])
+    self.Text = "Theme: " .. rainbowColors[curCol][2]
+    UpdatePlaylistHighlight()
+    SendNotification("Theme", "UI Color: " .. rainbowColors[curCol][2], 3)
+end)
 
 return MIYAKO
