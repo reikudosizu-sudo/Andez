@@ -1,5 +1,5 @@
--- [[ MIYAKO FLY CONTROL - V8.2 PREMIUM ]]
--- UPDATE: Smart Position Memory & Center Default Icon
+-- [[ MIYAKO FLY CONTROL - V8.3 FINAL ]]
+-- UPDATE: FIX CLOSE BUTTON (Total Exit), Position Memory, & Center Default
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -16,9 +16,9 @@ local lastIconPos = UDim2.new(0.5, -27, 0.5, -27)
 
 -- Setup ScreenGui
 local FlyGui = Instance.new("ScreenGui", game.CoreGui)
-FlyGui.Name = "MiyakoFly_V8.2"
+FlyGui.Name = "MiyakoFly_V8.3"
 
--- [[ FUNGSI DRAG MANUAL DENGAN MEMORY ]]
+-- [[ FUNGSI DRAG MANUAL ]]
 local function MakeDraggable(frame, isIcon)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -29,7 +29,6 @@ local function MakeDraggable(frame, isIcon)
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then 
                     dragging = false 
-                    -- Simpan posisi terakhir jika ini adalah Icon FLY
                     if isIcon then lastIconPos = frame.Position end
                 end
             end)
@@ -51,7 +50,7 @@ end
 -- [[ TOMBOL RESTORE / ICON ]]
 local FlyRestore = Instance.new("TextButton", FlyGui)
 FlyRestore.Size = UDim2.new(0, 55, 0, 55)
-FlyRestore.Position = lastIconPos -- Mulai dari tengah
+FlyRestore.Position = lastIconPos
 FlyRestore.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 FlyRestore.Text = "FLY"
 FlyRestore.TextColor3 = Color3.new(1, 1, 1)
@@ -61,7 +60,7 @@ FlyRestore.Visible = false
 Instance.new("UICorner", FlyRestore).CornerRadius = UDim.new(0, 15)
 local RestoreStroke = Instance.new("UIStroke", FlyRestore)
 RestoreStroke.Color = Color3.fromRGB(255, 0, 0); RestoreStroke.Thickness = 2
-MakeDraggable(FlyRestore, true) -- True untuk aktifkan memori posisi
+MakeDraggable(FlyRestore, true)
 
 -- [[ MAIN PANEL ]]
 local FlyUI = Instance.new("Frame", FlyGui)
@@ -73,7 +72,7 @@ local MainStroke = Instance.new("UIStroke", FlyUI)
 MainStroke.Color = Color3.fromRGB(100, 0, 0); MainStroke.Thickness = 1.5
 MakeDraggable(FlyUI, false)
 
--- HEADER & BUTTONS
+-- HEADER
 local FlyHeader = Instance.new("Frame", FlyUI)
 FlyHeader.Size = UDim2.new(1, 0, 0, 32); FlyHeader.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
 Instance.new("UICorner", FlyHeader)
@@ -82,6 +81,7 @@ local FlyTitle = Instance.new("TextLabel", FlyHeader)
 FlyTitle.Text = "FLY CONTROL"; FlyTitle.Size = UDim2.new(1, -70, 1, 0); FlyTitle.Position = UDim2.new(0, 10, 0, 0)
 FlyTitle.BackgroundTransparency = 1; FlyTitle.TextColor3 = Color3.new(1, 1, 1); FlyTitle.Font = "GothamBold"; FlyTitle.TextSize = 11; FlyTitle.TextXAlignment = "Left"
 
+-- TOMBOL CLOSE (X) & MINIMIZE (-)
 local FlyClose = Instance.new("TextButton", FlyHeader)
 FlyClose.Text = "X"; FlyClose.Size = UDim2.new(0, 26, 0, 26); FlyClose.Position = UDim2.new(1, -30, 0, 3)
 FlyClose.BackgroundColor3 = Color3.fromRGB(180, 0, 0); FlyClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyClose).CornerRadius = UDim.new(0, 6)
@@ -108,7 +108,7 @@ local function MakeBtn(txt, pos, dir)
 end
 MakeBtn("▲", UDim2.new(0.35, 0, 0, 0), Vector3.new(0,0,-1)); MakeBtn("▼", UDim2.new(0.35, 0, 0.7, 0), Vector3.new(0,0,1)); MakeBtn("◀", UDim2.new(0, 0, 0.35, 0), Vector3.new(-1,0,0)); MakeBtn("▶", UDim2.new(0.7, 0, 0.35, 0), Vector3.new(1,0,0))
 
--- [[ CORE LOGIC ]]
+-- [[ LOGIKA TERBANG ]]
 local function SetFly(state)
     flying = state
     FlyToggle.Text = flying and "FLY: ON" or "FLY: OFF"
@@ -125,15 +125,15 @@ local function SetFly(state)
     end
 end
 
--- FUNCTIONS
+-- INTERAKSI TOMBOL
 FlyToggle.MouseButton1Click:Connect(function() SetFly(not flying) end)
 SUp.MouseButton1Click:Connect(function() flySpeed = flySpeed + 10; SpeedLabel.Text = "SPEED: " .. flySpeed end)
 SDown.MouseButton1Click:Connect(function() flySpeed = math.max(10, flySpeed - 10); SpeedLabel.Text = "SPEED: " .. flySpeed end)
 
--- LOGIKA MINIMIZE DENGAN MEMORY POSISI
+-- MINIMIZE (-) : Sembunyi ke Icon
 FlyMin.MouseButton1Click:Connect(function() 
     FlyUI.Visible = false
-    FlyRestore.Position = lastIconPos -- Tampil di posisi terakhir (atau tengah jika baru pertama)
+    FlyRestore.Position = lastIconPos
     FlyRestore.Visible = true 
 end)
 
@@ -142,11 +142,10 @@ FlyRestore.MouseButton1Click:Connect(function()
     FlyRestore.Visible = false 
 end)
 
+-- CLOSE (X) : Matikan Total & Hapus GUI
 FlyClose.MouseButton1Click:Connect(function() 
-    SetFly(false)
-    FlyUI.Visible = false
-    FlyRestore.Position = lastIconPos
-    FlyRestore.Visible = true 
+    SetFly(false) -- Matikan fitur fly
+    FlyGui:Destroy() -- Hapus seluruh GUI (Panel & Icon hilang total)
 end)
 
-print("MIYAKO FLY V8.2 - Position Memory Active!")
+print("MIYAKO FLY V8.3 - Close Button Fixed (Total Exit)")
