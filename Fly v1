@@ -1,0 +1,152 @@
+-- [[ MIYAKO FLY CONTROL - V8.2 PREMIUM ]]
+-- UPDATE: Smart Position Memory & Center Default Icon
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local UserInputService = game:GetService("UserInputService")
+
+local flySpeed = 110
+local flying = false
+local moveDir = Vector3.new(0,0,0)
+local bv, bg
+
+-- Variabel Penyimpan Posisi Icon (Default: Tengah Layar)
+local lastIconPos = UDim2.new(0.5, -27, 0.5, -27)
+
+-- Setup ScreenGui
+local FlyGui = Instance.new("ScreenGui", game.CoreGui)
+FlyGui.Name = "MiyakoFly_V8.2"
+
+-- [[ FUNGSI DRAG MANUAL DENGAN MEMORY ]]
+local function MakeDraggable(frame, isIcon)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then 
+                    dragging = false 
+                    -- Simpan posisi terakhir jika ini adalah Icon FLY
+                    if isIcon then lastIconPos = frame.Position end
+                end
+            end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- [[ TOMBOL RESTORE / ICON ]]
+local FlyRestore = Instance.new("TextButton", FlyGui)
+FlyRestore.Size = UDim2.new(0, 55, 0, 55)
+FlyRestore.Position = lastIconPos -- Mulai dari tengah
+FlyRestore.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+FlyRestore.Text = "FLY"
+FlyRestore.TextColor3 = Color3.new(1, 1, 1)
+FlyRestore.Font = "GothamBold"
+FlyRestore.TextSize = 14
+FlyRestore.Visible = false
+Instance.new("UICorner", FlyRestore).CornerRadius = UDim.new(0, 15)
+local RestoreStroke = Instance.new("UIStroke", FlyRestore)
+RestoreStroke.Color = Color3.fromRGB(255, 0, 0); RestoreStroke.Thickness = 2
+MakeDraggable(FlyRestore, true) -- True untuk aktifkan memori posisi
+
+-- [[ MAIN PANEL ]]
+local FlyUI = Instance.new("Frame", FlyGui)
+FlyUI.Size = UDim2.new(0, 170, 0, 160)
+FlyUI.Position = UDim2.new(0.5, -85, 0.4, -80)
+FlyUI.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Instance.new("UICorner", FlyUI).CornerRadius = UDim.new(0, 12)
+local MainStroke = Instance.new("UIStroke", FlyUI)
+MainStroke.Color = Color3.fromRGB(100, 0, 0); MainStroke.Thickness = 1.5
+MakeDraggable(FlyUI, false)
+
+-- HEADER & BUTTONS
+local FlyHeader = Instance.new("Frame", FlyUI)
+FlyHeader.Size = UDim2.new(1, 0, 0, 32); FlyHeader.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+Instance.new("UICorner", FlyHeader)
+
+local FlyTitle = Instance.new("TextLabel", FlyHeader)
+FlyTitle.Text = "FLY CONTROL"; FlyTitle.Size = UDim2.new(1, -70, 1, 0); FlyTitle.Position = UDim2.new(0, 10, 0, 0)
+FlyTitle.BackgroundTransparency = 1; FlyTitle.TextColor3 = Color3.new(1, 1, 1); FlyTitle.Font = "GothamBold"; FlyTitle.TextSize = 11; FlyTitle.TextXAlignment = "Left"
+
+local FlyClose = Instance.new("TextButton", FlyHeader)
+FlyClose.Text = "X"; FlyClose.Size = UDim2.new(0, 26, 0, 26); FlyClose.Position = UDim2.new(1, -30, 0, 3)
+FlyClose.BackgroundColor3 = Color3.fromRGB(180, 0, 0); FlyClose.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyClose).CornerRadius = UDim.new(0, 6)
+
+local FlyMin = Instance.new("TextButton", FlyHeader)
+FlyMin.Text = "-"; FlyMin.Size = UDim2.new(0, 26, 0, 26); FlyMin.Position = UDim2.new(1, -60, 0, 3)
+FlyMin.BackgroundColor3 = Color3.fromRGB(50, 50, 50); FlyMin.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", FlyMin).CornerRadius = UDim.new(0, 6)
+
+-- CONTROLS
+local FlyToggle = Instance.new("TextButton", FlyUI)
+FlyToggle.Size = UDim2.new(0.9, 0, 0, 35); FlyToggle.Position = UDim2.new(0.05, 0, 0.28, 0); FlyToggle.Text = "FLY: OFF"; FlyToggle.BackgroundColor3 = Color3.fromRGB(130, 0, 0); FlyToggle.TextColor3 = Color3.new(1, 1, 1); FlyToggle.Font = "GothamBold"; Instance.new("UICorner", FlyToggle)
+
+local SpeedLabel = Instance.new("TextLabel", FlyUI); SpeedLabel.Size = UDim2.new(1, 0, 0, 20); SpeedLabel.Position = UDim2.new(0, 0, 0.58, 0); SpeedLabel.Text = "SPEED: " .. flySpeed; SpeedLabel.TextColor3 = Color3.new(1, 1, 1); SpeedLabel.BackgroundTransparency = 1; SpeedLabel.Font = "GothamBold"; SpeedLabel.TextSize = 10
+
+local SUp = Instance.new("TextButton", FlyUI); SUp.Text = "+"; SUp.Size = UDim2.new(0, 45, 0, 30); SUp.Position = UDim2.new(0.6, 0, 0.72, 0); SUp.BackgroundColor3 = Color3.fromRGB(40,40,40); SUp.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", SUp)
+local SDown = Instance.new("TextButton", FlyUI); SDown.Text = "-"; SDown.Size = UDim2.new(0, 45, 0, 30); SDown.Position = UDim2.new(0.12, 0, 0.72, 0); SDown.BackgroundColor3 = Color3.fromRGB(40,40,40); SDown.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", SDown)
+
+-- ARROWS
+local ArrowFrame = Instance.new("Frame", FlyGui); ArrowFrame.Size = UDim2.new(0, 180, 0, 180); ArrowFrame.Position = UDim2.new(0.05, 0, 0.25, 0); ArrowFrame.BackgroundTransparency = 1; ArrowFrame.Visible = false 
+local function MakeBtn(txt, pos, dir)
+    local b = Instance.new("TextButton", ArrowFrame); b.Text = txt; b.Size = UDim2.new(0, 52, 0, 52); b.Position = pos; b.BackgroundColor3 = Color3.fromRGB(0,0,0); b.BackgroundTransparency = 0.5; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; b.TextSize = 25; Instance.new("UICorner", b)
+    b.MouseButton1Down:Connect(function() moveDir = dir end)
+    b.MouseButton1Up:Connect(function() moveDir = Vector3.new(0,0,0) end)
+end
+MakeBtn("▲", UDim2.new(0.35, 0, 0, 0), Vector3.new(0,0,-1)); MakeBtn("▼", UDim2.new(0.35, 0, 0.7, 0), Vector3.new(0,0,1)); MakeBtn("◀", UDim2.new(0, 0, 0.35, 0), Vector3.new(-1,0,0)); MakeBtn("▶", UDim2.new(0.7, 0, 0.35, 0), Vector3.new(1,0,0))
+
+-- [[ CORE LOGIC ]]
+local function SetFly(state)
+    flying = state
+    FlyToggle.Text = flying and "FLY: ON" or "FLY: OFF"
+    FlyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 130, 0) or Color3.fromRGB(130, 0, 0)
+    ArrowFrame.Visible = flying
+    local char = LocalPlayer.Character; local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    if flying then
+        char.Humanoid.PlatformStand = true; bv = Instance.new("BodyVelocity", hrp); bv.MaxForce = Vector3.new(9e9, 9e9, 9e9); bg = Instance.new("BodyGyro", hrp); bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        task.spawn(function() while flying do bv.Velocity = (moveDir.Magnitude > 0) and (Camera.CFrame:VectorToWorldSpace(moveDir) * flySpeed) or Vector3.new(0, 0.1, 0); bg.CFrame = Camera.CFrame; task.wait() end end)
+    else
+        if bv then bv:Destroy() end; if bg then bg:Destroy() end
+        if char and char:FindFirstChild("Humanoid") then char.Humanoid.PlatformStand = false end
+    end
+end
+
+-- FUNCTIONS
+FlyToggle.MouseButton1Click:Connect(function() SetFly(not flying) end)
+SUp.MouseButton1Click:Connect(function() flySpeed = flySpeed + 10; SpeedLabel.Text = "SPEED: " .. flySpeed end)
+SDown.MouseButton1Click:Connect(function() flySpeed = math.max(10, flySpeed - 10); SpeedLabel.Text = "SPEED: " .. flySpeed end)
+
+-- LOGIKA MINIMIZE DENGAN MEMORY POSISI
+FlyMin.MouseButton1Click:Connect(function() 
+    FlyUI.Visible = false
+    FlyRestore.Position = lastIconPos -- Tampil di posisi terakhir (atau tengah jika baru pertama)
+    FlyRestore.Visible = true 
+end)
+
+FlyRestore.MouseButton1Click:Connect(function() 
+    FlyUI.Visible = true
+    FlyRestore.Visible = false 
+end)
+
+FlyClose.MouseButton1Click:Connect(function() 
+    SetFly(false)
+    FlyUI.Visible = false
+    FlyRestore.Position = lastIconPos
+    FlyRestore.Visible = true 
+end)
+
+print("MIYAKO FLY V8.2 - Position Memory Active!")
