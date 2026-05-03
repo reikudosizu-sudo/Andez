@@ -1,8 +1,8 @@
 --[[
-    MIYAKO - MASTERPIECE EDITION (PRO FINAL FIX V2.3)
+    MIYAKO - MASTERPIECE EDITION (PRO FINAL FIX V2.5)
     Owner: Andezlua (MIYAKO)
     Status: Full Library & Universal External Access
-    Update: Added Permanent NewSlider for universal use via loadstring
+    Update: Dynamic Button Alignment, Permanent Slider, & Anti-Simplification Full Code
 ]]
 
 local MIYAKO = {}
@@ -630,22 +630,36 @@ function MIYAKO.CreateLib()
                 end)
             end
 
-            function El:NewButton(text, cb)
+            --// [ADAPTIVE BUTTON SYSTEM]
+            function El:NewButton(text, align, cb)
+                if type(align) == "function" then cb = align align = "Left" end
+                align = align or "Left"
+
                 local b = Instance.new("TextButton", sFrame)
                 b.Size = UDim2.new(1, -16, 0, 38)
                 b.BackgroundColor3 = Miyako_Theme.Background
-                b.Text = text
                 b.TextColor3 = Miyako_Theme.TextColor
-                b.Font = Enum.Font.GothamMedium 
+                b.Font = Enum.Font.GothamBold
                 b.TextSize = 13 
                 b.ZIndex = 13
                 Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
                 CreateRipple(b) 
+
+                if align == "Left" then
+                    b.TextXAlignment = Enum.TextXAlignment.Left
+                    b.Text = "  " .. text
+                elseif align == "Right" then
+                    b.TextXAlignment = Enum.TextXAlignment.Right
+                    b.Text = text .. "  "
+                else
+                    b.TextXAlignment = Enum.TextXAlignment.Center
+                    b.Text = text
+                end
+
                 b.MouseButton1Click:Connect(function() cb(b) end)
                 return b
             end
 
-            --// INTEGRASI SLIDER PERMANEN KE LIBRARY
             function El:NewSlider(text, min, max, default, cb)
                 local SliderFrame = Instance.new("Frame", sFrame)
                 SliderFrame.Size = UDim2.new(1, -16, 0, 45)
@@ -869,11 +883,11 @@ function MIYAKO.CreateLib()
         for _, p in pairs(Elements_To_Update.Particles) do p.BackgroundColor3 = newColor end
     end
 
-    SendNotification("MIYAKO IS READY", "Hello, " .. lp.DisplayName .. "! HUB Loaded.", 6)
+    SendNotification("MIYAKO IS READY", "Hello Master, HUB Loaded!", 6)
     return Tabs
 end
 
---// EKSEKUSI FITUR BAWAAN (PERMANEN)
+--// EKSEKUSI FITUR BAWAAN
 local MyTabs = MIYAKO.CreateLib()
 
 local function UpdatePlaylistHighlight()
@@ -884,7 +898,6 @@ local function UpdatePlaylistHighlight()
     end
 end
 
--- Tab Settings (Bawaan)
 local SetTab = MyTabs:NewTab("Settings")
 local PerfSec = SetTab:NewSection("Performance")
 PerfSec:NewToggle("FPS Booster Extreme ⚡", function(state)
@@ -914,9 +927,9 @@ MusicSec:NewToggle("Miyako Music 😜", function(state)
     if state then BGM.SoundId = "rbxassetid://" .. Playlist[curTrack].ID BGM:Play() else BGM:Stop() end
 end)
 MusicSec:NewVolumeSlider()
-MusicSec:NewButton("Next Track ⏭️", function() curTrack = (curTrack % #Playlist) + 1 UpdateMusicUI() end)
-MusicSec:NewButton("Prev Track ⏪", function() curTrack = (curTrack - 2) % #Playlist + 1 UpdateMusicUI() end)
-playLabel = MusicSec:NewButton("Now: " .. Playlist[curTrack].Name, function() end)
+MusicSec:NewButton("Next Track ⏭️", "Center", function() curTrack = (curTrack % #Playlist) + 1 UpdateMusicUI() end)
+MusicSec:NewButton("Prev Track ⏪", "Center", function() curTrack = (curTrack - 2) % #Playlist + 1 UpdateMusicUI() end)
+playLabel = MusicSec:NewButton("Now: " .. Playlist[curTrack].Name, "Center", function() end)
 MusicSec:NewMusicPanel(Playlist, function(index) curTrack = index UpdateMusicUI() end)
 
 local ThemeSec = SetTab:NewSection("Theme Custom")
@@ -930,7 +943,7 @@ local rainbowColors = {
     {Color3.fromRGB(148, 0, 211), "Violet 👾"}
 }
 local curCol = 5
-ThemeSec:NewButton("Theme: Blue 🔵", function(self)
+ThemeSec:NewButton("Theme: Blue 🔵", "Center", function(self)
     curCol = (curCol % #rainbowColors) + 1
     MIYAKO:ChangeTheme(rainbowColors[curCol][1])
     self.Text = "Theme: " .. rainbowColors[curCol][2]
