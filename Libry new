@@ -884,17 +884,6 @@ local function UpdatePlaylistHighlight()
     end
 end
 
--- Tab Main (Bawaan)
-local MainTab = MyTabs:NewTab("Main")
-local Mov = MainTab:NewSection("Player Movement")
-Mov:NewToggle("Infinite Jump", function(s) _G.IJ = s end)
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if _G.IJ and lp.Character then 
-        local h = lp.Character:FindFirstChildOfClass("Humanoid")
-        if h then h:ChangeState("Jumping") end
-    end
-end)
-
 -- Tab Settings (Bawaan)
 local SetTab = MyTabs:NewTab("Settings")
 local PerfSec = SetTab:NewSection("Performance")
