@@ -1,0 +1,133 @@
+--[[
+    MIYAKO HUB - OFFICIAL SCRIPT
+    Developer: Andez
+    Status: 100% Work & Optimized
+    Update: Added TP in TELEPORT Tab (All Caps UI)
+]]
+
+--// 1. AMBIL LIBRARY DARI GITHUB
+local MiyakoLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Libry%20new"))()
+local Window = MiyakoLib:Init()
+
+--// 2. VARIABEL KONTROL
+local lp = game:GetService("Players").LocalPlayer
+local runService = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
+
+-- Speed Control
+local isSpeedEnabled = false
+local walkspeedValue = 16
+
+-- Jump Control (Infinite Jump)
+local isJumpEnabled = false
+
+--// 3. SISTEM TUNGGU
+task.wait(0.2)
+
+--// 4. BUAT TAB MAIN (HURUF BESAR SEMUA)
+local MainTab = Window:NewTab("MAIN")
+local MovementSec = MainTab:NewSection("MOVEMENT HACK")
+local MainSec = MainTab:NewSection("FITUR UTAMA")
+
+--// 5. BUAT TAB BOXING BETA (HURUF BESAR SEMUA)
+local BoxingTab = Window:NewTab("BOXING BETA")
+local CombatSec = BoxingTab:NewSection("COMBAT FEATURES")
+
+--// 6. BUAT TAB CHAOS (HURUF BESAR SEMUA)
+local ChaosTab = Window:NewTab("CHAOS")
+local ChaosSec = ChaosTab:NewSection("CHAOS FEATURES")
+
+--// 7. BUAT TAB TELEPORT (HURUF BESAR SEMUA)
+local TeleportTab = Window:NewTab("TELEPORT")
+local TeleportSec = TeleportTab:NewSection("TELEPORT FEATURES")
+
+--// 8. ISI TAB MAIN
+
+-- SPEED HACK
+MovementSec:NewToggle("Speed Hack", function(state)
+    isSpeedEnabled = state
+    if not state then
+        pcall(function() lp.Character.Humanoid.WalkSpeed = 16 end)
+    end
+end)
+
+MovementSec:NewSlider("Power Speed", 16, 300, 16, function(v)
+    walkspeedValue = v
+end)
+
+-- JUMP HACK
+MovementSec:NewToggle("Jump Hack", function(state)
+    isJumpEnabled = state
+end)
+
+-- Tombol Fitur Utama (Center)
+MainSec:NewButton("MIYAKO STICK", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tempel"))()
+end)
+
+MainSec:NewButton("Fly V1", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v1"))()
+end)
+
+MainSec:NewButton("Fly V2", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v2"))()
+end)
+
+MainSec:NewButton("Animasi V1", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi"))()
+end)
+
+MainSec:NewButton("Animasi V2", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi%20emot%20v2%20fixs"))()
+end)
+
+--// 9. ISI TAB BOXING BETA
+CombatSec:NewButton("Miyako XXV", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Box%20bb"))()
+end)
+
+CombatSec:NewButton("Miyako XXL", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Getar"))()
+end)
+
+CombatSec:NewButton("BB V1", "Center", function()
+    loadstring(game:HttpGet("https://rawscripts.net/raw/Boxing-Beta!-boxing-beta-fighting-speed-changer-88804"))()
+end)
+
+--// 10. ISI TAB CHAOS
+ChaosSec:NewButton("Touch Fling", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Touch%20fling"))()
+end)
+
+ChaosSec:NewButton("Spect", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Spec%2Brusuh"))()
+end)
+
+--// 11. ISI TAB TELEPORT
+TeleportSec:NewButton("Miyako Manager", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20manager"))()
+end)
+
+TeleportSec:NewButton("Tp", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tp"))()
+end)
+
+--// 12. LOGIK PERGERAKAN
+uis.JumpRequest:Connect(function()
+    if isJumpEnabled then
+        pcall(function()
+            lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end)
+    end
+end)
+
+runService.Heartbeat:Connect(function()
+    if isSpeedEnabled then
+        pcall(function()
+            local humanoid = lp.Character and lp.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = walkspeedValue
+            end
+        end)
+    end
+end)
