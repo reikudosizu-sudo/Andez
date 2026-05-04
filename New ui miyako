@@ -2,7 +2,7 @@
     MIYAKO HUB - OFFICIAL SCRIPT
     Developer: Andez
     Status: 100% Work & Optimized
-    Update: Added TP in TELEPORT Tab (All Caps UI)
+    Update: ALL CAPS TEXT & ADDED TOUCH FLING V2
 ]]
 
 --// 1. AMBIL LIBRARY DARI GITHUB
@@ -41,52 +41,52 @@ local ChaosSec = ChaosTab:NewSection("CHAOS FEATURES")
 local TeleportTab = Window:NewTab("TELEPORT")
 local TeleportSec = TeleportTab:NewSection("TELEPORT FEATURES")
 
---// 8. ISI TAB MAIN
+--// 8. ISI TAB MAIN (SEMUA TEKS KAPITAL)
 
 -- SPEED HACK
-MovementSec:NewToggle("Speed Hack", function(state)
+MovementSec:NewToggle("SPEED HACK", function(state)
     isSpeedEnabled = state
     if not state then
         pcall(function() lp.Character.Humanoid.WalkSpeed = 16 end)
     end
 end)
 
-MovementSec:NewSlider("Power Speed", 16, 300, 16, function(v)
+MovementSec:NewSlider("POWER SPEED", 16, 300, 16, function(v)
     walkspeedValue = v
 end)
 
 -- JUMP HACK
-MovementSec:NewToggle("Jump Hack", function(state)
+MovementSec:NewToggle("JUMP HACK", function(state)
     isJumpEnabled = state
 end)
 
--- Tombol Fitur Utama (Center)
+-- FITUR UTAMA (CENTER & KAPITAL)
 MainSec:NewButton("MIYAKO STICK", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tempel"))()
 end)
 
-MainSec:NewButton("Fly V1", "Center", function()
+MainSec:NewButton("FLY V1", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v1"))()
 end)
 
-MainSec:NewButton("Fly V2", "Center", function()
+MainSec:NewButton("FLY V2", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v2"))()
 end)
 
-MainSec:NewButton("Animasi V1", "Center", function()
+MainSec:NewButton("ANIMASI V1", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi"))()
 end)
 
-MainSec:NewButton("Animasi V2", "Center", function()
+MainSec:NewButton("ANIMASI V2", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi%20emot%20v2%20fixs"))()
 end)
 
---// 9. ISI TAB BOXING BETA
-CombatSec:NewButton("Miyako XXV", "Center", function()
+--// 9. ISI TAB BOXING BETA (SEMUA TEKS KAPITAL)
+CombatSec:NewButton("MIYAKO XXV", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Box%20bb"))()
 end)
 
-CombatSec:NewButton("Miyako XXL", "Center", function()
+CombatSec:NewButton("MIYAKO XXL", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Getar"))()
 end)
 
@@ -94,25 +94,30 @@ CombatSec:NewButton("BB V1", "Center", function()
     loadstring(game:HttpGet("https://rawscripts.net/raw/Boxing-Beta!-boxing-beta-fighting-speed-changer-88804"))()
 end)
 
---// 10. ISI TAB CHAOS
-ChaosSec:NewButton("Touch Fling", "Center", function()
+--// 10. ISI TAB CHAOS (SEMUA TEKS KAPITAL)
+ChaosSec:NewButton("TOUCH FLING", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Touch%20fling"))()
 end)
 
-ChaosSec:NewButton("Spect", "Center", function()
+-- TOUCH FLING V2 (BARU - DI BAWAH V1)
+ChaosSec:NewButton("TOUCH FLING V2", "Center", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fling%20V2%20Beta"))()
+end)
+
+ChaosSec:NewButton("SPECT", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Spec%2Brusuh"))()
 end)
 
---// 11. ISI TAB TELEPORT
-TeleportSec:NewButton("Miyako Manager", "Center", function()
+--// 11. ISI TAB TELEPORT (SEMUA TEKS KAPITAL)
+TeleportSec:NewButton("MIYAKO MANAGER", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20manager"))()
 end)
 
-TeleportSec:NewButton("Tp", "Center", function()
+TeleportSec:NewButton("TP", "Center", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tp"))()
 end)
 
---// 12. LOGIK PERGERAKAN
+--// 12. LOGIK PERGERAKAN (INFINITE JUMP & PERSISTENT SPEED)
 uis.JumpRequest:Connect(function()
     if isJumpEnabled then
         pcall(function()
