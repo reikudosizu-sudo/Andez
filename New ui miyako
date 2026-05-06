@@ -1,138 +1,341 @@
 --[[
-    MIYAKO HUB - OFFICIAL SCRIPT
-    Developer: Andez
-    Status: 100% Work & Optimized
-    Update: ALL CAPS TEXT & ADDED TOUCH FLING V2
+    MIYAKO HUB - MASTERPIECE EDITION (BILINGUAL MAINTENANCE)
+    Developer: DEV MIYAKO
+    Status: Ultra Focused, Blur Effect, Maintenance Mode (on/off), Advanced Smart Tags, Anti-Cache System
 ]]
 
---// 1. AMBIL LIBRARY DARI GITHUB
-local MiyakoLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Libry%20new"))()
-local Window = MiyakoLib:Init()
+local HttpService = game:GetService("HttpService")
+local Lighting = game:GetService("Lighting")
+local UpdateURL = "https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/update.json"
 
---// 2. VARIABEL KONTROL
-local lp = game:GetService("Players").LocalPlayer
-local runService = game:GetService("RunService")
-local uis = game:GetService("UserInputService")
-
--- Speed Control
-local isSpeedEnabled = false
-local walkspeedValue = 16
-
--- Jump Control (Infinite Jump)
-local isJumpEnabled = false
-
---// 3. SISTEM TUNGGU
-task.wait(0.2)
-
---// 4. BUAT TAB MAIN (HURUF BESAR SEMUA)
-local MainTab = Window:NewTab("MAIN")
-local MovementSec = MainTab:NewSection("MOVEMENT HACK")
-local MainSec = MainTab:NewSection("FITUR UTAMA")
-
---// 5. BUAT TAB BOXING BETA (HURUF BESAR SEMUA)
-local BoxingTab = Window:NewTab("BOXING BETA")
-local CombatSec = BoxingTab:NewSection("COMBAT FEATURES")
-
---// 6. BUAT TAB CHAOS (HURUF BESAR SEMUA)
-local ChaosTab = Window:NewTab("CHAOS")
-local ChaosSec = ChaosTab:NewSection("CHAOS FEATURES")
-
---// 7. BUAT TAB TELEPORT (HURUF BESAR SEMUA)
-local TeleportTab = Window:NewTab("TELEPORT")
-local TeleportSec = TeleportTab:NewSection("TELEPORT FEATURES")
-
---// 8. ISI TAB MAIN (SEMUA TEKS KAPITAL)
-
--- SPEED HACK
-MovementSec:NewToggle("SPEED HACK", function(state)
-    isSpeedEnabled = state
-    if not state then
-        pcall(function() lp.Character.Humanoid.WalkSpeed = 16 end)
-    end
-end)
-
-MovementSec:NewSlider("POWER SPEED", 16, 300, 16, function(v)
-    walkspeedValue = v
-end)
-
--- JUMP HACK
-MovementSec:NewToggle("JUMP HACK", function(state)
-    isJumpEnabled = state
-end)
-
--- FITUR UTAMA (CENTER & KAPITAL)
-MainSec:NewButton("MIYAKO STICK", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tempel"))()
-end)
-
-MainSec:NewButton("FLY V1", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v1"))()
-end)
-
-MainSec:NewButton("FLY V2", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v2"))()
-end)
-
-MainSec:NewButton("ANIMASI V1", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi"))()
-end)
-
-MainSec:NewButton("ANIMASI V2", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi%20emot%20v2%20fixs"))()
-end)
-
---// 9. ISI TAB BOXING BETA (SEMUA TEKS KAPITAL)
-CombatSec:NewButton("MIYAKO XXV", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Box%20bb"))()
-end)
-
-CombatSec:NewButton("MIYAKO XXL", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Getar"))()
-end)
-
-CombatSec:NewButton("BB V1", "Center", function()
-    loadstring(game:HttpGet("https://rawscripts.net/raw/Boxing-Beta!-boxing-beta-fighting-speed-changer-88804"))()
-end)
-
---// 10. ISI TAB CHAOS (SEMUA TEKS KAPITAL)
-ChaosSec:NewButton("TOUCH FLING", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Touch%20fling"))()
-end)
-
--- TOUCH FLING V2 (BARU - DI BAWAH V1)
-ChaosSec:NewButton("TOUCH FLING V2", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fling%20V2%20Beta"))()
-end)
-
-ChaosSec:NewButton("SPECT", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Spec%2Brusuh"))()
-end)
-
---// 11. ISI TAB TELEPORT (SEMUA TEKS KAPITAL)
-TeleportSec:NewButton("MIYAKO MANAGER", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20manager"))()
-end)
-
-TeleportSec:NewButton("TP", "Center", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tp"))()
-end)
-
---// 12. LOGIK PERGERAKAN (INFINITE JUMP & PERSISTENT SPEED)
-uis.JumpRequest:Connect(function()
-    if isJumpEnabled then
-        pcall(function()
-            lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+--// 1. FUNGSI AMBIL DATA (ANTI-CACHE SYSTEM)
+local function GetUpdateData()
+    local success, result = pcall(function()
+        -- [DIPERBAIKI] Tambahkan query waktu acak (?t=os.time) untuk memaksa Roblox mengambil data terbaru (Bypass Cache)
+        local bypassCacheURL = UpdateURL .. "?t=" .. tostring(os.time())
+        return game:HttpGet(bypassCacheURL)
+    end)
+    
+    if success then
+        local decodeSuccess, decodedData = pcall(function()
+            return HttpService:JSONDecode(result)
         end)
+        if decodeSuccess then return decodedData end
     end
-end)
+    return nil
+end
 
-runService.Heartbeat:Connect(function()
-    if isSpeedEnabled then
-        pcall(function()
-            local humanoid = lp.Character and lp.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = walkspeedValue
-            end
-        end)
+--// 2. FUNGSI UI NOTIFIKASI & BILINGUAL MAINTENANCE
+local function ShowUpdateUI(updateData, OnFinish)
+    local coreGui = game:GetService("CoreGui")
+    local tween = game:GetService("TweenService")
+    local version = updateData.version or "?.?"
+    local changelog = updateData.news or "NO DATA AVAILABLE"
+    local uDateStr = updateData.date or os.date("%d %B %Y")
+    local status = updateData.status or "on"
+
+    -- Konfigurasi Mode Maintenance (on / off)
+    local isMainten = (status == "off")
+    local accentColor = isMainten and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(85, 110, 255)
+    local subTitleColor = isMainten and Color3.fromRGB(255, 150, 150) or Color3.fromRGB(150, 180, 255)
+    
+    if coreGui:FindFirstChild("Miyako_Update_System") then
+        coreGui.Miyako_Update_System:Destroy()
     end
-end)
+
+    local Blur = Instance.new("BlurEffect", Lighting)
+    Blur.Size = 0
+    Blur.Name = "Miyako_Blur"
+
+    local UpdateGui = Instance.new("ScreenGui", coreGui)
+    UpdateGui.Name = "Miyako_Update_System"
+    UpdateGui.DisplayOrder = 9999999
+    UpdateGui.IgnoreGuiInset = true
+
+    local Overlay = Instance.new("Frame", UpdateGui)
+    Overlay.Size = UDim2.new(1, 0, 1, 0)
+    Overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Overlay.BackgroundTransparency = 1
+    Overlay.BorderSizePixel = 0
+    
+    local UPanel = Instance.new("Frame", Overlay)
+    UPanel.Size = UDim2.new(0, 420, 0, 320)
+    UPanel.Position = UDim2.new(0.5, -210, -1.5, 0) 
+    UPanel.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+    UPanel.ClipsDescendants = true
+    UPanel.BorderSizePixel = 0
+    Instance.new("UICorner", UPanel).CornerRadius = UDim.new(0, 20)
+
+    local UStroke = Instance.new("UIStroke", UPanel)
+    UStroke.Color = accentColor
+    UStroke.Thickness = 2.5
+    UStroke.Transparency = 1
+
+    local UDate = Instance.new("TextLabel", UPanel)
+    UDate.Size = UDim2.new(0, 100, 0, 20)
+    UDate.Position = UDim2.new(1, -115, 0, 10)
+    UDate.Text = uDateStr
+    UDate.TextColor3 = Color3.fromRGB(150, 150, 150)
+    UDate.Font = Enum.Font.GothamMedium
+    UDate.TextSize = 11
+    UDate.BackgroundTransparency = 1
+    UDate.TextTransparency = 1
+    UDate.TextXAlignment = Enum.TextXAlignment.Right
+
+    local UTitle = Instance.new("TextLabel", UPanel)
+    UTitle.Size = UDim2.new(1, 0, 0, 30)
+    UTitle.Position = UDim2.new(0, 0, 0, 10)
+    UTitle.Text = isMainten and "SYSTEM MAINTENANCE ⚠️" or "UPDATE - VERSION " .. version
+    UTitle.TextColor3 = accentColor
+    UTitle.Font = Enum.Font.GothamBold
+    UTitle.TextSize = 20 
+    UTitle.BackgroundTransparency = 1
+    UTitle.TextTransparency = 1
+    UTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+    local Divider = Instance.new("Frame", UPanel)
+    Divider.Size = UDim2.new(1, -40, 0, 1.5)
+    Divider.Position = UDim2.new(0, 20, 0, 45) 
+    Divider.BackgroundColor3 = accentColor
+    Divider.BorderSizePixel = 0
+    Divider.BackgroundTransparency = 1
+
+    local USubTitle = Instance.new("TextLabel", UPanel)
+    USubTitle.Size = UDim2.new(1, 0, 0, 25)
+    USubTitle.Position = UDim2.new(0, 0, 0, 55)
+    USubTitle.Text = isMainten and "MAINTENANCE INFO 📢" or "MIYAKO INFORMATION 📢"
+    USubTitle.TextColor3 = subTitleColor
+    USubTitle.Font = Enum.Font.GothamBold
+    USubTitle.TextSize = 16 
+    USubTitle.BackgroundTransparency = 1
+    USubTitle.TextTransparency = 1
+    USubTitle.TextXAlignment = Enum.TextXAlignment.Center 
+
+    local Scroll = Instance.new("ScrollingFrame", UPanel)
+    Scroll.Size = UDim2.new(1, -40, 1, -155)
+    Scroll.Position = UDim2.new(0, 20, 0, 85)
+    Scroll.BackgroundTransparency = 1
+    Scroll.ScrollBarThickness = 3
+    Scroll.ScrollBarImageColor3 = accentColor
+    Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Scroll.BorderSizePixel = 0
+
+    local UText = Instance.new("TextLabel", Scroll)
+    UText.Size = UDim2.new(1, -10, 0, 0)
+    UText.TextColor3 = Color3.fromRGB(230, 230, 230)
+    UText.Font = Enum.Font.GothamMedium
+    UText.TextSize = 14 
+    UText.BackgroundTransparency = 1
+    UText.TextXAlignment = Enum.TextXAlignment.Left
+    UText.TextYAlignment = Enum.TextYAlignment.Top
+    UText.TextWrapped = true
+    UText.TextTransparency = 1
+    UText.AutomaticSize = Enum.AutomaticSize.Y
+    UText.RichText = true
+    UText.MaxVisibleGraphemes = 0
+
+    -- Penggabungan teks (Indo + English jika Maintenance)
+    local displayChangelog = changelog:upper()
+    if isMainten then
+        if not displayChangelog:find("ENG VERSION") then
+            displayChangelog = displayChangelog .. "\n\n----------------------------\n[ENG VERSION]\nSYSTEM IS CURRENTLY UNDER MAINTENANCE. PLEASE WAIT UNTIL THE PROCESS IS FINISHED.\n- DEV MIYAKO"
+        end
+    end
+
+    local function GetColoredText(isHighlight)
+        local processed = displayChangelog
+        
+        processed = processed:gsub("%f[%a]FIXED%f[%A]", '<font color="#FFA500">FIXED</font>')
+        processed = processed:gsub("%[FIXED%]", '<font color="#FFA500">[FIXED]</font>')
+        processed = processed:gsub("%f[%a]FIX%f[%A]", '<font color="#FFA500">FIX</font>')
+        processed = processed:gsub("%[FIX%]", '<font color="#FFA500">[FIX]</font>')
+        
+        processed = processed:gsub("%f[%a]REMOVED%f[%A]", '<font color="#FF0000">REMOVED</font>')
+        processed = processed:gsub("%[REMOVED%]", '<font color="#FF0000">[REMOVED]</font>')
+        processed = processed:gsub("%f[%a]REMOVE%f[%A]", '<font color="#FF0000">REMOVE</font>')
+        processed = processed:gsub("%[REMOVE%]", '<font color="#FF0000">[REMOVE]</font>')
+
+        processed = processed:gsub("%f[%a]BUG%f[%A]", '<font color="#DC143C">BUG</font>')
+        processed = processed:gsub("%[BUG%]", '<font color="#DC143C">[BUG]</font>')
+
+        local newColor = isHighlight and "#00FF7F" or "#FFFFFF"
+        processed = processed:gsub("%f[%a]NEW%f[%A]", '<font color="'..newColor..'">NEW</font>')
+        processed = processed:gsub("%[NEW%]", '<font color="'..newColor..'">[NEW]</font>')
+        
+        return processed
+    end
+    UText.Text = GetColoredText(true)
+
+    local ContBtn = Instance.new("TextButton", UPanel)
+    ContBtn.Size = UDim2.new(0, 200, 0, 45)
+    ContBtn.Position = UDim2.new(0.5, -100, 1, -60)
+    ContBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    ContBtn.Text = "" 
+    ContBtn.AutoButtonColor = false
+    ContBtn.ClipsDescendants = true
+    Instance.new("UICorner", ContBtn).CornerRadius = UDim.new(0, 10)
+
+    local ProgressBar = Instance.new("Frame", ContBtn)
+    ProgressBar.Size = UDim2.new(0, 0, 1, 0)
+    ProgressBar.BackgroundColor3 = accentColor
+    ProgressBar.BorderSizePixel = 0
+    Instance.new("UICorner", ProgressBar).CornerRadius = UDim.new(0, 10)
+
+    local ContText = Instance.new("TextLabel", ContBtn)
+    ContText.Size = UDim2.new(1, 0, 1, 0)
+    ContText.BackgroundTransparency = 1
+    ContText.Text = "PLEASE WAIT..."
+    ContText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ContText.Font = Enum.Font.GothamBold
+    ContText.TextSize = 14
+    ContText.TextTransparency = 1
+
+    --// ANIMASI MASUK
+    tween:Create(Blur, TweenInfo.new(0.6), {Size = 24}):Play()
+    tween:Create(Overlay, TweenInfo.new(0.5), {BackgroundTransparency = 0.5}):Play()
+    tween:Create(UPanel, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -210, 0.5, -160), BackgroundTransparency = 0}):Play()
+    tween:Create(UStroke, TweenInfo.new(0.5), {Transparency = 0}):Play()
+    task.wait(0.4)
+
+    tween:Create(UTitle, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+    tween:Create(UDate, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+    tween:Create(Divider, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
+    tween:Create(USubTitle, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+    tween:Create(ContText, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+    task.wait(0.2)
+
+    UText.TextTransparency = 0
+    task.spawn(function()
+        local textLength = utf8.len(UText.ContentText) or 100
+        for i = 1, textLength do
+            UText.MaxVisibleGraphemes = i
+            task.wait(0.01)
+        end
+        UText.MaxVisibleGraphemes = -1
+        local isHighlight = true
+        while UText.Parent do
+            isHighlight = not isHighlight
+            UText.Text = GetColoredText(isHighlight)
+            task.wait(0.5)
+        end
+    end)
+
+    -- Progress Bar 3 Detik
+    tween:Create(ProgressBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)}):Play()
+    for i = 3, 1, -1 do
+        ContText.Text = "READING... " .. i
+        task.wait(1)
+    end
+    
+    -- Status Tombol Akhir
+    ContText.Text = isMainten and "CLOSE" or "CONTINUE"
+    ContBtn.AutoButtonColor = true
+
+    ContBtn.MouseButton1Click:Connect(function()
+        if ContText.Text == "CONTINUE" or ContText.Text == "CLOSE" then
+            local isClosing = (ContText.Text == "CLOSE")
+            tween:Create(Blur, TweenInfo.new(0.4), {Size = 0}):Play()
+            tween:Create(Overlay, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+            local out = tween:Create(UPanel, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Position = UDim2.new(0.5, -210, -1.5, 0), BackgroundTransparency = 1})
+            out:Play()
+            out.Completed:Connect(function()
+                Blur:Destroy()
+                UpdateGui:Destroy()
+                if not isClosing then OnFinish() end
+            end)
+        end
+    end)
+end
+
+--// 3. FUNGSI UTAMA (100% UTUH)
+local function ExecuteMiyakoHub()
+    local MiyakoLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Libry%20new"))()
+    local Window = MiyakoLib:Init()
+
+    local lp = game:GetService("Players").LocalPlayer
+    local runService = game:GetService("RunService")
+    local uis = game:GetService("UserInputService")
+    local isSpeedEnabled, isJumpEnabled, walkspeedValue = false, false, 16
+
+    -- TABS (DEVELOPER: DEV MIYAKO)
+    local MainTab = Window:NewTab("MAIN")
+    local MovementSec = MainTab:NewSection("MOVEMENT HACK")
+    local MainSec = MainTab:NewSection("FITUR UTAMA")
+
+    MovementSec:NewToggle("SPEED HACK", function(state)
+        isSpeedEnabled = state
+        if not state then pcall(function() lp.Character.Humanoid.WalkSpeed = 16 end) end
+    end)
+    MovementSec:NewSlider("POWER SPEED", 16, 300, 16, function(v) walkspeedValue = v end)
+    MovementSec:NewToggle("JUMP HACK", function(state) isJumpEnabled = state end)
+
+    MainSec:NewButton("MIYAKO STICK", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tempel"))()
+    end)
+    MainSec:NewButton("FLY V1", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v1"))()
+    end)
+    MainSec:NewButton("FLY V2", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fly%20v2"))()
+    end)
+    MainSec:NewButton("ANIMASI V1", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi"))()
+    end)
+    MainSec:NewButton("ANIMASI V2", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi%20emot%20v2%20fixs"))()
+    end)
+
+    local BoxingTab = Window:NewTab("BOXING BETA")
+    local CombatSec = BoxingTab:NewSection("COMBAT FEATURES")
+    CombatSec:NewButton("MIYAKO XXV", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Box%20bb"))()
+    end)
+    CombatSec:NewButton("MIYAKO XXL", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Getar"))()
+    end)
+    CombatSec:NewButton("BB V1", "Center", function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Boxing-Beta!-boxing-beta-fighting-speed-changer-88804"))()
+    end)
+
+    local ChaosTab = Window:NewTab("CHAOS")
+    local ChaosSec = ChaosTab:NewSection("CHAOS FEATURES")
+    ChaosSec:NewButton("TOUCH FLING", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Touch%20fling"))()
+    end)
+    ChaosSec:NewButton("TOUCH FLING V2", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Fling%20V2%20Beta"))()
+    end)
+    ChaosSec:NewButton("SPECT", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Spec%2Brusuh"))()
+    end)
+
+    local TeleportTab = Window:NewTab("TELEPORT")
+    local TeleportSec = TeleportTab:NewSection("TELEPORT FEATURES")
+    TeleportSec:NewButton("MIYAKO MANAGER", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20manager"))()
+    end)
+    TeleportSec:NewButton("TP", "Center", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tp"))()
+    end)
+
+    uis.JumpRequest:Connect(function()
+        if isJumpEnabled then pcall(function() lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end) end
+    end)
+    runService.Heartbeat:Connect(function()
+        if isSpeedEnabled then
+            pcall(function()
+                local hum = lp.Character and lp.Character:FindFirstChild("Humanoid")
+                if hum then hum.WalkSpeed = walkspeedValue end
+            end)
+        end
+    end)
+end
+
+--// 4. EKSEKUSI
+local updateData = GetUpdateData()
+if updateData then
+    ShowUpdateUI(updateData, ExecuteMiyakoHub)
+else
+    ExecuteMiyakoHub()
+end
