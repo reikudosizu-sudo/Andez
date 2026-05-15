@@ -285,6 +285,9 @@ local function ExecuteMiyakoHub()
     MainSec:NewButton("ANIMASI V2", function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Animasi%20emot%20v2%20fixs"))()
     end)
+    MainSec:NewButton("ESP PRO", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/ESP"))()
+    end)
 
     local BoxingTab = Window:NewTab("BOXING BETA")
     local CombatSec = BoxingTab:NewSection("COMBAT FEATURES")
@@ -319,7 +322,6 @@ local function ExecuteMiyakoHub()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tp"))()
     end)
 
-    --// TAB VD TELAH DITAMBAHKAN DI SINI
     local VdTab = Window:NewTab("VD")
     local VdSec = VdTab:NewSection("VD FEATURES")
     VdSec:NewButton("VD BY TEL RBLX", function()
