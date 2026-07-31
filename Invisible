@@ -1,0 +1,134 @@
+--!strict
+-- Configuration
+local CONFIG = { 
+    TOGGLE_KEY = Enum.KeyCode.X, 
+    INVISIBILITY_POSITION = Vector3.new(-25.95, 84, 3537.55), 
+    SUCCESS_COLOR = Color3.fromRGB(0, 255, 140), 
+    TEXT_COLOR = Color3.fromRGB(245, 245, 245), 
+} 
+
+-- Services
+local Players = game:GetService("Players") 
+local UserInputService = game:GetService("UserInputService") 
+local TweenService = game:GetService("TweenService") 
+local CoreGui = game:GetService("CoreGui")
+
+-- Variables
+local player = Players.LocalPlayer 
+local playerState = { 
+    isInvisible = false, 
+} 
+
+-- GUI Elements
+local screenGui: ScreenGui 
+local emojiButton: TextButton 
+
+-- Bersihkan UI lama jika dieksekusi ulang
+if CoreGui:FindFirstChild("Miyako_FE_Invisible") then
+    CoreGui.Miyako_FE_Invisible:Destroy()
+end
+
+-- Utility Functions
+local function setCharacterTransparency(character: Model, transparency: number)
+    for _, descendant in pairs(character:GetDescendants()) do 
+        if descendant:IsA("BasePart") or descendant:IsA("Decal") then 
+            descendant.Transparency = transparency 
+        end 
+    end 
+end 
+
+local function updateStatusUI() 
+    if not emojiButton then return end 
+    if playerState.isInvisible then 
+        emojiButton.Text = "👻" 
+        TweenService:Create(emojiButton, TweenInfo.new(0.3), {TextColor3 = CONFIG.SUCCESS_COLOR}):Play() 
+    else 
+        emojiButton.Text = "👁️" 
+        TweenService:Create(emojiButton, TweenInfo.new(0.3), {TextColor3 = CONFIG.TEXT_COLOR}):Play() 
+    end 
+end 
+
+-- Core Logic Function (FE Seat Weld Method)
+local function toggleInvisibility() 
+    if not player.Character then return end 
+    playerState.isInvisible = not playerState.isInvisible 
+    
+    if playerState.isInvisible then 
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart") :: BasePart? 
+        if not hrp then return end 
+        local savedPosition = hrp.CFrame 
+        
+        -- Pindahkan karakter ke tempat tersembunyi
+        player.Character:MoveTo(CONFIG.INVISIBILITY_POSITION) 
+        task.wait(0.15) 
+        
+        -- Buat kursi tak terlihat
+        local seat = Instance.new("Seat") 
+        seat.Name = "invischair" 
+        seat.Anchored = false 
+        seat.CanCollide = false 
+        seat.Transparency = 1 
+        seat.Position = CONFIG.INVISIBILITY_POSITION 
+        seat.Parent = workspace 
+        
+        -- Weld (las) karakter ke kursi
+        local weld = Instance.new("Weld") 
+        weld.Part0 = seat 
+        weld.Part1 = player.Character:FindFirstChild("Torso") or player.Character:FindFirstChild("UpperTorso") 
+        weld.Parent = seat 
+        task.wait() 
+        
+        -- Kembalikan posisi kursi (membawa karakter) ke posisi awal
+        seat.CFrame = savedPosition 
+        
+        -- Efek Ghost Mode secara lokal agar tahu posisimu
+        setCharacterTransparency(player.Character, 0.5) 
+    else 
+        local invisChair = workspace:FindFirstChild("invischair") 
+        if invisChair then 
+            invisChair:Destroy() 
+        end 
+        if player.Character then 
+            setCharacterTransparency(player.Character, 0) 
+        end 
+    end 
+    updateStatusUI() 
+end 
+
+-- GUI Creation (Clean Emoji Floating Button)
+local function createGUI() 
+    screenGui = Instance.new("ScreenGui") 
+    screenGui.Name = "Miyako_FE_Invisible" 
+    screenGui.ResetOnSpawn = false 
+    screenGui.Parent = CoreGui 
+    
+    emojiButton = Instance.new("TextButton") 
+    emojiButton.Size = UDim2.new(0, 60, 0, 60) 
+    -- Nilai Y diubah menjadi 0.55 agar posisi tombol naik sedikit lagi
+    emojiButton.Position = UDim2.new(1, -280, 0.55, 0) 
+    emojiButton.BackgroundTransparency = 1 
+    emojiButton.Text = "👁️" 
+    emojiButton.TextColor3 = CONFIG.TEXT_COLOR 
+    emojiButton.TextSize = 36 
+    emojiButton.Font = Enum.Font.GothamBold
+    emojiButton.AutoButtonColor = false
+    emojiButton.Parent = screenGui 
+    
+    -- Efek animasi 
+    emojiButton.MouseButton1Down:Connect(function() 
+        TweenService:Create(emojiButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {Size = UDim2.new(0, 55, 0, 55)}):Play() 
+    end) 
+    emojiButton.MouseButton1Up:Connect(function() 
+        TweenService:Create(emojiButton, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 60, 0, 60)}):Play() 
+    end) 
+end 
+
+-- Initialization
+createGUI() 
+emojiButton.MouseButton1Click:Connect(toggleInvisibility) 
+
+UserInputService.InputBegan:Connect(function(input, processed) 
+    if not processed and input.KeyCode == CONFIG.TOGGLE_KEY then 
+        toggleInvisibility() 
+    end 
+end)
