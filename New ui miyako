@@ -11,7 +11,6 @@ local UpdateURL = "https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs
 --// 1. FUNGSI AMBIL DATA (ANTI-CACHE SYSTEM)
 local function GetUpdateData()
     local success, result = pcall(function()
-        -- Tambahkan query waktu acak (?t=os.time) untuk memaksa Roblox mengambil data terbaru (Bypass Cache)
         local bypassCacheURL = UpdateURL .. "?t=" .. tostring(os.time())
         return game:HttpGet(bypassCacheURL)
     end)
@@ -34,7 +33,6 @@ local function ShowUpdateUI(updateData, OnFinish)
     local uDateStr = updateData.date or os.date("%d %B %Y")
     local status = updateData.status or "on"
 
-    -- Konfigurasi Mode Maintenance (on / off)
     local isMainten = (status == "off")
     local accentColor = isMainten and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(85, 110, 255)
     local subTitleColor = isMainten and Color3.fromRGB(255, 150, 150) or Color3.fromRGB(150, 180, 255)
@@ -109,51 +107,23 @@ local function ShowUpdateUI(updateData, OnFinish)
     USubTitle.TextSize = 16 
     USubTitle.BackgroundTransparency = 1
     USubTitle.TextTransparency = 1
-    USubTitle.TextXAlignment = Enum.TextXAlignment.Center 
+    USubTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-    local Scroll = Instance.new("ScrollingFrame", UPanel)
-    Scroll.Size = UDim2.new(1, -40, 1, -155)
-    Scroll.Position = UDim2.new(0, 20, 0, 85)
-    Scroll.BackgroundTransparency = 1
-    Scroll.ScrollBarThickness = 3
-    Scroll.ScrollBarImageColor3 = accentColor
-    Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    Scroll.BorderSizePixel = 0
-
-    local UText = Instance.new("TextLabel", Scroll)
-    UText.Size = UDim2.new(1, -10, 0, 0)
-    UText.TextColor3 = Color3.fromRGB(230, 230, 230)
-    UText.Font = Enum.Font.GothamMedium
-    UText.TextSize = 14 
+    local UText = Instance.new("TextLabel", UPanel)
+    UText.Size = UDim2.new(1, -40, 0, 140)
+    UText.Position = UDim2.new(0, 20, 0, 90)
     UText.BackgroundTransparency = 1
+    UText.RichText = true
+    UText.TextWrapped = true
     UText.TextXAlignment = Enum.TextXAlignment.Left
     UText.TextYAlignment = Enum.TextYAlignment.Top
-    UText.TextWrapped = true
+    UText.Font = Enum.Font.Gotham
+    UText.TextSize = 13
+    UText.TextColor3 = Color3.fromRGB(200, 200, 200)
     UText.TextTransparency = 1
-    UText.AutomaticSize = Enum.AutomaticSize.Y
-    UText.RichText = true
-    UText.MaxVisibleGraphemes = 0
-
-    -- Penggabungan teks (Indo + English jika Maintenance)
-    local displayChangelog = changelog:upper()
-    if isMainten then
-        if not displayChangelog:find("ENG VERSION") then
-            displayChangelog = displayChangelog .. "\n\n----------------------------\n[ENG VERSION]\nSYSTEM IS CURRENTLY UNDER MAINTENANCE. PLEASE WAIT UNTIL THE PROCESS IS FINISHED.\n- DEV MIYAKO"
-        end
-    end
 
     local function GetColoredText(isHighlight)
-        local processed = displayChangelog
-        
-        processed = processed:gsub("%f[%a]FIXED%f[%A]", '<font color="#FFA500">FIXED</font>')
-        processed = processed:gsub("%[FIXED%]", '<font color="#FFA500">[FIXED]</font>')
-        processed = processed:gsub("%f[%a]FIX%f[%A]", '<font color="#FFA500">FIX</font>')
-        processed = processed:gsub("%[FIX%]", '<font color="#FFA500">[FIX]</font>')
-        
-        processed = processed:gsub("%f[%a]REMOVED%f[%A]", '<font color="#FF0000">REMOVED</font>')
-        processed = processed:gsub("%[REMOVED%]", '<font color="#FF0000">[REMOVED]</font>')
-        processed = processed:gsub("%f[%a]REMOVE%f[%A]", '<font color="#FF0000">REMOVE</font>')
+        local processed = changelog
         processed = processed:gsub("%[REMOVE%]", '<font color="#FF0000">[REMOVE]</font>')
 
         processed = processed:gsub("%f[%a]BUG%f[%A]", '<font color="#DC143C">BUG</font>')
@@ -287,6 +257,9 @@ local function ExecuteMiyakoHub()
     end)
     MainSec:NewButton("ESP PRO", function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/ESP"))()
+    end)
+    MainSec:NewButton("AUTO AIM PRO", function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Auto%20aim"))()
     end)
 
     local BoxingTab = Window:NewTab("BOXING BETA")
