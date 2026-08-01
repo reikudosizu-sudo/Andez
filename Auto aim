@@ -1,0 +1,898 @@
+-- // MIYAKO HUB v10.2 - TARGET PRIORITY (CLOSEST PLAYER)
+-- // Developer: Dev Miyako
+-- // Executor Compatibility: Delta
+
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Konfigurasi Awal
+local smoothnessFactor = 0.2 
+local maxDistance = 500 
+local isAttacking = false
+local currentLockedCharacter = nil 
+local teamCheckEnabled = true 
+local targetPriority = "Crosshair" -- "Crosshair" atau "Distance"
+
+-- Pembersihan GUI & ESP Versi Lama
+if CoreGui:FindFirstChild("MIYAKO_INTERFACE") then
+    CoreGui.MIYAKO_INTERFACE:Destroy()
+end
+if CoreGui:FindFirstChild("MiyakoESPFolder") then
+    CoreGui.MiyakoESPFolder:Destroy()
+end
+if workspace.Terrain:FindFirstChild("MiyakoESPBeam") then
+    workspace.Terrain.MiyakoESPBeam:Destroy()
+end
+if workspace.Terrain:FindFirstChild("MiyakoAtt0") then
+    workspace.Terrain.MiyakoAtt0:Destroy()
+end
+if workspace.Terrain:FindFirstChild("MiyakoAtt1") then
+    workspace.Terrain.MiyakoAtt1:Destroy()
+end
+
+-- // SETUP ESP (LINE 3D & ANIMATED ICON) //
+local ESPFolder = Instance.new("Folder")
+ESPFolder.Name = "MiyakoESPFolder"
+ESPFolder.Parent = CoreGui
+
+local TargetIconGui = Instance.new("BillboardGui")
+TargetIconGui.Name = "TargetIcon"
+TargetIconGui.Parent = ESPFolder
+TargetIconGui.AlwaysOnTop = true
+TargetIconGui.Size = UDim2.new(0, 30, 0, 30)
+TargetIconGui.Enabled = false
+
+local TargetIconImage = Instance.new("ImageLabel")
+TargetIconImage.Parent = TargetIconGui
+TargetIconImage.BackgroundTransparency = 1
+TargetIconImage.Size = UDim2.new(1, 0, 1, 0)
+TargetIconImage.Image = "rbxassetid://6031068420" 
+TargetIconImage.ImageColor3 = Color3.fromRGB(255, 50, 50)
+
+local Att0 = Instance.new("Attachment")
+Att0.Name = "MiyakoAtt0"
+local Att1 = Instance.new("Attachment")
+Att1.Name = "MiyakoAtt1"
+
+local ESPBeam = Instance.new("Beam")
+ESPBeam.Name = "MiyakoESPBeam"
+ESPBeam.Attachment0 = Att0
+ESPBeam.Attachment1 = Att1
+ESPBeam.FaceCamera = true
+ESPBeam.Width0 = 0.04 
+ESPBeam.Width1 = 0.04 
+ESPBeam.LightEmission = 1
+ESPBeam.Transparency = NumberSequence.new(0.2)
+
+-- Setup ScreenGui Utama
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MIYAKO_INTERFACE"
+ScreenGui.Parent = CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- // FLOATING ICON MINIMIZE //
+local FloatingIcon = Instance.new("ImageButton")
+FloatingIcon.Name = "FloatingIcon"
+FloatingIcon.Parent = ScreenGui
+FloatingIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+FloatingIcon.Position = UDim2.new(0.5, -22, 0, 20)
+FloatingIcon.Size = UDim2.new(0, 44, 0, 44)
+FloatingIcon.Image = "rbxassetid://6031068420" 
+FloatingIcon.ImageColor3 = Color3.fromRGB(255, 95, 135)
+FloatingIcon.Active = true
+FloatingIcon.Draggable = true 
+FloatingIcon.Visible = false 
+Instance.new("UICorner", FloatingIcon).CornerRadius = UDim.new(1, 0) 
+local FloatStroke = Instance.new("UIStroke", FloatingIcon)
+FloatStroke.Color = Color3.fromRGB(255, 95, 135)
+FloatStroke.Thickness = 2.5
+
+-- Setup MainFrame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.Position = UDim2.new(0.5, -130, 0.5, -145)
+MainFrame.Size = UDim2.new(0, 260, 0, 290)
+MainFrame.Active = true
+MainFrame.Draggable = true 
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(50, 50, 70)
+Instance.new("UIStroke", MainFrame).Thickness = 1.2
+
+-- Setup Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Parent = MainFrame
+TitleBar.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+TitleBar.Size = UDim2.new(1, 0, 0, 32)
+TitleBar.BorderSizePixel = 0
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
+
+local TitleCover = Instance.new("Frame")
+TitleCover.Parent = TitleBar
+TitleCover.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+TitleCover.Position = UDim2.new(0, 0, 0.7, 0)
+TitleCover.Size = UDim2.new(1, 0, 0.3, 0)
+TitleCover.BorderSizePixel = 0
+
+local TitleText = Instance.new("TextLabel")
+TitleText.Parent = TitleBar
+TitleText.BackgroundTransparency = 1
+TitleText.Position = UDim2.new(0, 10, 0, 0)
+TitleText.Size = UDim2.new(0.6, 0, 1, 0)
+TitleText.Font = Enum.Font.GothamBold
+TitleText.Text = "MIYAKO HUB"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextSize = 12
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+
+local VersionText = Instance.new("TextLabel")
+VersionText.Parent = TitleBar
+VersionText.BackgroundTransparency = 1
+VersionText.Position = UDim2.new(0, 93, 0, 1)
+VersionText.Size = UDim2.new(0.3, 0, 1, 0)
+VersionText.Font = Enum.Font.Gotham
+VersionText.Text = "v10.2"
+VersionText.TextColor3 = Color3.fromRGB(110, 140, 255)
+VersionText.TextSize = 10
+VersionText.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Parent = TitleBar
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
+CloseButton.Position = UDim2.new(1, -26, 0.5, -8)
+CloseButton.Size = UDim2.new(0, 16, 0, 16)
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Text = "✕"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 8
+CloseButton.BorderSizePixel = 0
+Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 4)
+
+-- Minimize Button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Parent = TitleBar
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 175, 50)
+MinimizeButton.Position = UDim2.new(1, -48, 0.5, -8)
+MinimizeButton.Size = UDim2.new(0, 16, 0, 16)
+MinimizeButton.Font = Enum.Font.GothamBold
+MinimizeButton.Text = "–"
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeButton.TextSize = 9
+MinimizeButton.BorderSizePixel = 0
+Instance.new("UICorner", MinimizeButton).CornerRadius = UDim.new(0, 4)
+
+-- Tab Navigation Bar
+local TabBar = Instance.new("Frame")
+TabBar.Parent = MainFrame
+TabBar.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+TabBar.Position = UDim2.new(0, 0, 0, 32)
+TabBar.Size = UDim2.new(1, 0, 0, 26)
+TabBar.BorderSizePixel = 0
+
+local TabCombatBtn = Instance.new("TextButton")
+TabCombatBtn.Parent = TabBar
+TabCombatBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+TabCombatBtn.Position = UDim2.new(0, 6, 0, 3)
+TabCombatBtn.Size = UDim2.new(0.5, -8, 1, -4)
+TabCombatBtn.Font = Enum.Font.GothamBold
+TabCombatBtn.Text = "COMBAT"
+TabCombatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabCombatBtn.TextSize = 10
+TabCombatBtn.BorderSizePixel = 0
+Instance.new("UICorner", TabCombatBtn).CornerRadius = UDim.new(0, 4)
+
+local TabSettingsBtn = Instance.new("TextButton")
+TabSettingsBtn.Parent = TabBar
+TabSettingsBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 26) 
+TabSettingsBtn.Position = UDim2.new(0.5, 2, 0, 3)
+TabSettingsBtn.Size = UDim2.new(0.5, -8, 1, -4)
+TabSettingsBtn.Font = Enum.Font.GothamBold
+TabSettingsBtn.Text = "SETTINGS & 1V1"
+TabSettingsBtn.TextColor3 = Color3.fromRGB(150, 150, 170)
+TabSettingsBtn.TextSize = 10
+TabSettingsBtn.BorderSizePixel = 0
+Instance.new("UICorner", TabSettingsBtn).CornerRadius = UDim.new(0, 4)
+
+-- // TAB 1: COMBAT //
+local Tab1Container = Instance.new("ScrollingFrame")
+Tab1Container.Parent = MainFrame
+Tab1Container.BackgroundTransparency = 1
+Tab1Container.Position = UDim2.new(0, 0, 0, 58)
+Tab1Container.Size = UDim2.new(1, 0, 1, -58)
+Tab1Container.CanvasSize = UDim2.new(0, 0, 0, 365) -- Diperluas Untuk Tombol Priority
+Tab1Container.ScrollBarThickness = 2
+Tab1Container.BorderSizePixel = 0
+
+local Layout1 = Instance.new("UIListLayout", Tab1Container)
+Layout1.HorizontalAlignment = Enum.HorizontalAlignment.Center
+Layout1.SortOrder = Enum.SortOrder.LayoutOrder
+Layout1.Padding = UDim.new(0, 6)
+Instance.new("UIPadding", Tab1Container).PaddingTop = UDim.new(0, 8)
+
+-- 1. Auto Aim (Master)
+local AutoAimButton = Instance.new("TextButton", Tab1Container)
+AutoAimButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+AutoAimButton.Size = UDim2.new(0, 240, 0, 32)
+AutoAimButton.Font = Enum.Font.GothamSemibold
+AutoAimButton.Text = "   Auto Aim (Master): OFF"
+AutoAimButton.TextColor3 = Color3.fromRGB(255, 95, 95)
+AutoAimButton.TextSize = 11
+AutoAimButton.TextXAlignment = Enum.TextXAlignment.Left
+AutoAimButton.BorderSizePixel = 0
+AutoAimButton.LayoutOrder = 1
+Instance.new("UICorner", AutoAimButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", AutoAimButton).Color = Color3.fromRGB(40, 40, 55)
+
+-- 2. Aim Mode
+local AimModeButton = Instance.new("TextButton", Tab1Container)
+AimModeButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+AimModeButton.Size = UDim2.new(0, 240, 0, 32)
+AimModeButton.Font = Enum.Font.GothamSemibold
+AimModeButton.Text = "   Aim Mode: Always Lock"
+AimModeButton.TextColor3 = Color3.fromRGB(220, 220, 240)
+AimModeButton.TextSize = 11
+AimModeButton.TextXAlignment = Enum.TextXAlignment.Left
+AimModeButton.BorderSizePixel = 0
+AimModeButton.LayoutOrder = 2
+Instance.new("UICorner", AimModeButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", AimModeButton).Color = Color3.fromRGB(40, 40, 55)
+
+-- 3. Priority Button (FITUR BARU)
+local PriorityButton = Instance.new("TextButton", Tab1Container)
+PriorityButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+PriorityButton.Size = UDim2.new(0, 240, 0, 32)
+PriorityButton.Font = Enum.Font.GothamSemibold
+PriorityButton.Text = "   Priority: Crosshair"
+PriorityButton.TextColor3 = Color3.fromRGB(110, 140, 255)
+PriorityButton.TextSize = 11
+PriorityButton.TextXAlignment = Enum.TextXAlignment.Left
+PriorityButton.BorderSizePixel = 0
+PriorityButton.LayoutOrder = 3
+Instance.new("UICorner", PriorityButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", PriorityButton).Color = Color3.fromRGB(40, 40, 55)
+
+-- 4. Target Part
+local TargetPartButton = Instance.new("TextButton", Tab1Container)
+TargetPartButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+TargetPartButton.Size = UDim2.new(0, 240, 0, 32)
+TargetPartButton.Font = Enum.Font.GothamSemibold
+TargetPartButton.Text = "   Target: Kepala"
+TargetPartButton.TextColor3 = Color3.fromRGB(220, 220, 240)
+TargetPartButton.TextSize = 11
+TargetPartButton.TextXAlignment = Enum.TextXAlignment.Left
+TargetPartButton.BorderSizePixel = 0
+TargetPartButton.LayoutOrder = 4
+Instance.new("UICorner", TargetPartButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", TargetPartButton).Color = Color3.fromRGB(40, 40, 55)
+
+-- 5. Target ESP
+local TargetESPButton = Instance.new("TextButton", Tab1Container)
+TargetESPButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+TargetESPButton.Size = UDim2.new(0, 240, 0, 32)
+TargetESPButton.Font = Enum.Font.GothamSemibold
+TargetESPButton.Text = "   Target Line & Icon: OFF"
+TargetESPButton.TextColor3 = Color3.fromRGB(255, 95, 95)
+TargetESPButton.TextSize = 11
+TargetESPButton.TextXAlignment = Enum.TextXAlignment.Left
+TargetESPButton.BorderSizePixel = 0
+TargetESPButton.LayoutOrder = 5
+Instance.new("UICorner", TargetESPButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", TargetESPButton).Color = Color3.fromRGB(40, 40, 55)
+
+-- 6. Wall Check
+local WallCheckButton = Instance.new("TextButton", Tab1Container)
+WallCheckButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+WallCheckButton.Size = UDim2.new(0, 240, 0, 32)
+WallCheckButton.Font = Enum.Font.GothamSemibold
+WallCheckButton.Text = "   Wall Check: ON"
+WallCheckButton.TextColor3 = Color3.fromRGB(95, 255, 135)
+WallCheckButton.TextSize = 11
+WallCheckButton.TextXAlignment = Enum.TextXAlignment.Left
+WallCheckButton.BorderSizePixel = 0
+WallCheckButton.LayoutOrder = 6
+Instance.new("UICorner", WallCheckButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", WallCheckButton).Color = Color3.fromRGB(40, 40, 55)
+
+-- 7. Team Check
+local TeamCheckButton = Instance.new("TextButton", Tab1Container)
+TeamCheckButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+TeamCheckButton.Size = UDim2.new(0, 240, 0, 32)
+TeamCheckButton.Font = Enum.Font.GothamSemibold
+TeamCheckButton.Text = "   Team Check: ON"
+TeamCheckButton.TextColor3 = Color3.fromRGB(95, 255, 135)
+TeamCheckButton.TextSize = 11
+TeamCheckButton.TextXAlignment = Enum.TextXAlignment.Left
+TeamCheckButton.BorderSizePixel = 0
+TeamCheckButton.LayoutOrder = 7
+Instance.new("UICorner", TeamCheckButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", TeamCheckButton).Color = Color3.fromRGB(40, 40, 55)
+
+-- 8. Slider Smoothness 
+local SliderFrame = Instance.new("Frame", Tab1Container)
+SliderFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+SliderFrame.Size = UDim2.new(0, 240, 0, 40)
+SliderFrame.BorderSizePixel = 0
+SliderFrame.LayoutOrder = 8
+Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", SliderFrame).Color = Color3.fromRGB(40, 40, 55)
+
+local SliderText = Instance.new("TextLabel", SliderFrame)
+SliderText.BackgroundTransparency = 1
+SliderText.Position = UDim2.new(0, 10, 0, 4)
+SliderText.Size = UDim2.new(1, -20, 0, 14)
+SliderText.Font = Enum.Font.GothamSemibold
+SliderText.Text = "Smoothness: 0.2"
+SliderText.TextColor3 = Color3.fromRGB(200, 200, 220)
+SliderText.TextSize = 10
+SliderText.TextXAlignment = Enum.TextXAlignment.Left
+
+local SliderButton = Instance.new("TextButton", SliderFrame)
+SliderButton.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+SliderButton.Position = UDim2.new(0, 10, 0, 22)
+SliderButton.Size = UDim2.new(1, -20, 0, 9)
+SliderButton.Text = ""
+SliderButton.AutoButtonColor = false
+SliderButton.BorderSizePixel = 0
+Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(0, 4)
+
+local SliderFill = Instance.new("Frame", SliderButton)
+SliderFill.BackgroundColor3 = Color3.fromRGB(110, 140, 255)
+SliderFill.Size = UDim2.new(0.04, 0, 1, 0)
+SliderFill.BorderSizePixel = 0
+Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(0, 4)
+
+local SliderThumb = Instance.new("Frame", SliderFill)
+SliderThumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SliderThumb.Position = UDim2.new(1, -4, 0.5, -5)
+SliderThumb.Size = UDim2.new(0, 8, 0, 10)
+SliderThumb.BorderSizePixel = 0
+Instance.new("UICorner", SliderThumb).CornerRadius = UDim.new(0, 3)
+
+-- 9. Slider Max Distance
+local DistSliderFrame = Instance.new("Frame", Tab1Container)
+DistSliderFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+DistSliderFrame.Size = UDim2.new(0, 240, 0, 40)
+DistSliderFrame.BorderSizePixel = 0
+DistSliderFrame.LayoutOrder = 9
+Instance.new("UICorner", DistSliderFrame).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", DistSliderFrame).Color = Color3.fromRGB(40, 40, 55)
+
+local DistSliderText = Instance.new("TextLabel", DistSliderFrame)
+DistSliderText.BackgroundTransparency = 1
+DistSliderText.Position = UDim2.new(0, 10, 0, 4)
+DistSliderText.Size = UDim2.new(1, -20, 0, 14)
+DistSliderText.Font = Enum.Font.GothamSemibold
+DistSliderText.Text = "Max Distance: 500m"
+DistSliderText.TextColor3 = Color3.fromRGB(200, 200, 220)
+DistSliderText.TextSize = 10
+DistSliderText.TextXAlignment = Enum.TextXAlignment.Left
+
+local DistSliderButton = Instance.new("TextButton", DistSliderFrame)
+DistSliderButton.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+DistSliderButton.Position = UDim2.new(0, 10, 0, 22)
+DistSliderButton.Size = UDim2.new(1, -20, 0, 9)
+DistSliderButton.Text = ""
+DistSliderButton.AutoButtonColor = false
+DistSliderButton.BorderSizePixel = 0
+Instance.new("UICorner", DistSliderButton).CornerRadius = UDim.new(0, 4)
+
+local DistSliderFill = Instance.new("Frame", DistSliderButton)
+DistSliderFill.BackgroundColor3 = Color3.fromRGB(255, 95, 135)
+DistSliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+DistSliderFill.BorderSizePixel = 0
+Instance.new("UICorner", DistSliderFill).CornerRadius = UDim.new(0, 4)
+
+local DistSliderThumb = Instance.new("Frame", DistSliderFill)
+DistSliderThumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+DistSliderThumb.Position = UDim2.new(1, -4, 0.5, -5)
+DistSliderThumb.Size = UDim2.new(0, 8, 0, 10)
+DistSliderThumb.BorderSizePixel = 0
+Instance.new("UICorner", DistSliderThumb).CornerRadius = UDim.new(0, 3)
+
+-- // TAB 2: SETTINGS & 1V1 //
+local Tab2Container = Instance.new("ScrollingFrame", MainFrame)
+Tab2Container.BackgroundTransparency = 1
+Tab2Container.Position = UDim2.new(0, 0, 0, 58)
+Tab2Container.Size = UDim2.new(1, 0, 1, -58)
+Tab2Container.CanvasSize = UDim2.new(0, 0, 0, 210)
+Tab2Container.ScrollBarThickness = 2
+Tab2Container.Visible = false
+Tab2Container.BorderSizePixel = 0
+
+local Layout2 = Instance.new("UIListLayout", Tab2Container)
+Layout2.HorizontalAlignment = Enum.HorizontalAlignment.Center
+Layout2.SortOrder = Enum.SortOrder.LayoutOrder
+Layout2.Padding = UDim.new(0, 6)
+Instance.new("UIPadding", Tab2Container).PaddingTop = UDim.new(0, 8)
+
+-- 1v1 Section
+local Mode1v1Section = Instance.new("Frame", Tab2Container)
+Mode1v1Section.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+Mode1v1Section.Size = UDim2.new(0, 240, 0, 45)
+Mode1v1Section.BorderSizePixel = 0
+Mode1v1Section.LayoutOrder = 1
+Instance.new("UICorner", Mode1v1Section).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", Mode1v1Section).Color = Color3.fromRGB(40, 40, 55)
+
+local LockTargetToggle = Instance.new("TextButton", Mode1v1Section)
+LockTargetToggle.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+LockTargetToggle.Position = UDim2.new(0, 5, 0, 5)
+LockTargetToggle.Size = UDim2.new(1, -10, 0, 32)
+LockTargetToggle.Font = Enum.Font.GothamSemibold
+LockTargetToggle.Text = "1v1 Lock: OFF"
+LockTargetToggle.TextColor3 = Color3.fromRGB(255, 95, 95)
+LockTargetToggle.TextSize = 11
+LockTargetToggle.BorderSizePixel = 0
+Instance.new("UICorner", LockTargetToggle).CornerRadius = UDim.new(0, 4)
+
+-- Player List Section
+local PlayerListSection = Instance.new("Frame", Tab2Container)
+PlayerListSection.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+PlayerListSection.Size = UDim2.new(0, 240, 0, 130)
+PlayerListSection.BorderSizePixel = 0
+PlayerListSection.LayoutOrder = 2
+Instance.new("UICorner", PlayerListSection).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", PlayerListSection).Color = Color3.fromRGB(40, 40, 55)
+
+local PlayerSearchBox = Instance.new("TextBox", PlayerListSection)
+PlayerSearchBox.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+PlayerSearchBox.Position = UDim2.new(0, 5, 0, 5)
+PlayerSearchBox.Size = UDim2.new(1, -10, 0, 24)
+PlayerSearchBox.Font = Enum.Font.Gotham
+PlayerSearchBox.PlaceholderText = "Cari nama (biar mudah)..."
+PlayerSearchBox.Text = ""
+PlayerSearchBox.TextColor3 = Color3.fromRGB(240, 240, 255)
+PlayerSearchBox.PlaceholderColor3 = Color3.fromRGB(130, 130, 150)
+PlayerSearchBox.TextSize = 10
+PlayerSearchBox.ClearTextOnFocus = false
+PlayerSearchBox.BorderSizePixel = 0
+Instance.new("UICorner", PlayerSearchBox).CornerRadius = UDim.new(0, 4)
+
+local PlayerScrollFrame = Instance.new("ScrollingFrame", PlayerListSection)
+PlayerScrollFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
+PlayerScrollFrame.Position = UDim2.new(0, 5, 0, 33)
+PlayerScrollFrame.Size = UDim2.new(1, -10, 0, 90)
+PlayerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+PlayerScrollFrame.ScrollBarThickness = 2
+PlayerScrollFrame.BorderSizePixel = 0
+Instance.new("UICorner", PlayerScrollFrame).CornerRadius = UDim.new(0, 4)
+
+local ScrollListLayout = Instance.new("UIListLayout", PlayerScrollFrame)
+ScrollListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ScrollListLayout.Padding = UDim.new(0, 2)
+
+-- // LOGIKA PINDAH TAB //
+TabCombatBtn.MouseButton1Click:Connect(function()
+    Tab1Container.Visible = true
+    Tab2Container.Visible = false
+    TabCombatBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+    TabCombatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabSettingsBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+    TabSettingsBtn.TextColor3 = Color3.fromRGB(150, 150, 170)
+end)
+
+TabSettingsBtn.MouseButton1Click:Connect(function()
+    Tab1Container.Visible = false
+    Tab2Container.Visible = true
+    TabSettingsBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+    TabSettingsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabCombatBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+    TabCombatBtn.TextColor3 = Color3.fromRGB(150, 150, 170)
+end)
+
+-- // FUNGSI TEAM CHECK LOGIC //
+local function isTeammate(player)
+    if not teamCheckEnabled then return false end
+    if not LocalPlayer.Team then return false end
+    return player.Team == LocalPlayer.Team
+end
+
+-- // LOGIKA VARIABEL //
+local targets = {"Head", "HumanoidRootPart", "RightLowerLeg"}
+local targetNames = {"Kepala", "Badan", "Kaki"}
+local currentTargetIndex = 1
+
+TargetPartButton.MouseButton1Click:Connect(function()
+    currentTargetIndex = currentTargetIndex + 1
+    if currentTargetIndex > #targets then currentTargetIndex = 1 end
+    TargetPartButton.Text = "   Target: " .. targetNames[currentTargetIndex]
+end)
+
+TargetESPButton.MouseButton1Click:Connect(function()
+    targetEspEnabled = not targetEspEnabled
+    if targetEspEnabled then
+        TargetESPButton.Text = "   Target Line & Icon: ON"
+        TargetESPButton.TextColor3 = Color3.fromRGB(95, 255, 135)
+    else
+        TargetESPButton.Text = "   Target Line & Icon: OFF"
+        TargetESPButton.TextColor3 = Color3.fromRGB(255, 95, 95)
+    end
+end)
+
+PriorityButton.MouseButton1Click:Connect(function()
+    if targetPriority == "Crosshair" then
+        targetPriority = "Distance"
+        PriorityButton.Text = "   Priority: Closest Player"
+        PriorityButton.TextColor3 = Color3.fromRGB(255, 175, 50) -- Orange text
+    else
+        targetPriority = "Crosshair"
+        PriorityButton.Text = "   Priority: Crosshair"
+        PriorityButton.TextColor3 = Color3.fromRGB(110, 140, 255) -- Biru text
+    end
+end)
+
+WallCheckButton.MouseButton1Click:Connect(function()
+    wallCheckEnabled = not wallCheckEnabled
+    if wallCheckEnabled then
+        WallCheckButton.Text = "   Wall Check: ON"
+        WallCheckButton.TextColor3 = Color3.fromRGB(95, 255, 135)
+    else
+        WallCheckButton.Text = "   Wall Check: OFF"
+        WallCheckButton.TextColor3 = Color3.fromRGB(255, 95, 95)
+    end
+end)
+
+TeamCheckButton.MouseButton1Click:Connect(function()
+    teamCheckEnabled = not teamCheckEnabled
+    if teamCheckEnabled then
+        TeamCheckButton.Text = "   Team Check: ON"
+        TeamCheckButton.TextColor3 = Color3.fromRGB(95, 255, 135)
+    else
+        TeamCheckButton.Text = "   Team Check: OFF"
+        TeamCheckButton.TextColor3 = Color3.fromRGB(255, 95, 95)
+    end
+    if updatePlayerList then updatePlayerList() end
+end)
+
+AutoAimButton.MouseButton1Click:Connect(function()
+    autoAimEnabled = not autoAimEnabled
+    if autoAimEnabled then
+        AutoAimButton.Text = "   Auto Aim (Master): ON"
+        AutoAimButton.TextColor3 = Color3.fromRGB(95, 255, 135)
+    else
+        AutoAimButton.Text = "   Auto Aim (Master): OFF"
+        AutoAimButton.TextColor3 = Color3.fromRGB(255, 95, 95)
+    end
+end)
+
+AimModeButton.MouseButton1Click:Connect(function()
+    if aimMode == "Always" then
+        aimMode = "OnAttack"
+        AimModeButton.Text = "   Aim Mode: On Attack"
+        AimModeButton.TextColor3 = Color3.fromRGB(255, 175, 50) 
+    else
+        aimMode = "Always"
+        AimModeButton.Text = "   Aim Mode: Always Lock"
+        AimModeButton.TextColor3 = Color3.fromRGB(220, 220, 240)
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end 
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isAttacking = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isAttacking = false
+    end
+end)
+
+LockTargetToggle.MouseButton1Click:Connect(function()
+    lock1v1Enabled = not lock1v1Enabled
+    if lock1v1Enabled then
+        LockTargetToggle.Text = "1v1 Lock: ON (HARD LOCK)"
+        LockTargetToggle.TextColor3 = Color3.fromRGB(95, 255, 135)
+    else
+        LockTargetToggle.Text = "1v1 Lock: OFF"
+        LockTargetToggle.TextColor3 = Color3.fromRGB(255, 95, 95)
+    end
+end)
+
+-- AUTO REFRESH PLAYER LIST
+function updatePlayerList()
+    for _, child in pairs(PlayerScrollFrame:GetChildren()) do
+        if child:IsA("TextButton") then child:Destroy() end
+    end
+
+    local searchText = string.lower(PlayerSearchBox.Text)
+    local count = 0
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local playerName = player.Name
+            local displayName = player.DisplayName
+            
+            if searchText == "" or string.find(string.lower(playerName), searchText) or string.find(string.lower(displayName), searchText) then
+                if not isTeammate(player) then
+                    count = count + 1
+                    
+                    local pBtn = Instance.new("TextButton", PlayerScrollFrame)
+                    pBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+                    pBtn.Size = UDim2.new(1, 0, 0, 20)
+                    pBtn.Font = Enum.Font.Gotham
+                    pBtn.Text = "  " .. displayName .. " (@" .. playerName .. ")"
+                    pBtn.TextColor3 = (selectedTargetPlayer == player) and Color3.fromRGB(95, 255, 135) or Color3.fromRGB(220, 220, 240)
+                    pBtn.TextSize = 10
+                    pBtn.TextXAlignment = Enum.TextXAlignment.Left
+                    pBtn.BorderSizePixel = 0
+                    Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 3)
+                    
+                    pBtn.MouseButton1Click:Connect(function()
+                        if selectedTargetPlayer == player then
+                            selectedTargetPlayer = nil
+                            lock1v1Enabled = false
+                            LockTargetToggle.Text = "1v1 Lock: OFF"
+                            LockTargetToggle.TextColor3 = Color3.fromRGB(255, 95, 95)
+                        else
+                            selectedTargetPlayer = player
+                        end
+                        updatePlayerList()
+                    end)
+                end
+            end
+        end
+    end
+    PlayerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, count * 22)
+end
+
+PlayerSearchBox:GetPropertyChangedSignal("Text"):Connect(updatePlayerList)
+
+for _, player in pairs(Players:GetPlayers()) do
+    player:GetPropertyChangedSignal("Team"):Connect(updatePlayerList)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    updatePlayerList()
+    player:GetPropertyChangedSignal("Team"):Connect(updatePlayerList)
+end)
+
+Players.PlayerRemoving:Connect(updatePlayerList)
+updatePlayerList()
+
+-- // LOGIKA SLIDER //
+local draggingSmoothSlider = false
+local draggingDistSlider = false
+
+SliderButton.MouseButton1Down:Connect(function() draggingSmoothSlider = true end)
+DistSliderButton.MouseButton1Down:Connect(function() draggingDistSlider = true end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingSmoothSlider = false
+        draggingDistSlider = false
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    local mousePos = UserInputService:GetMouseLocation()
+    
+    if draggingSmoothSlider then
+        local sliderPos = SliderButton.AbsolutePosition
+        local sliderSize = SliderButton.AbsoluteSize
+        local relativeX = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
+        SliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
+        smoothnessFactor = math.round((relativeX * 4.9 + 0.1) * 10) / 10
+        SliderText.Text = "Smoothness: " .. tostring(smoothnessFactor)
+    end
+    
+    if draggingDistSlider then
+        local sliderPos = DistSliderButton.AbsolutePosition
+        local sliderSize = DistSliderButton.AbsoluteSize
+        local relativeX = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
+        DistSliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
+        maxDistance = math.round(relativeX * 1000) 
+        DistSliderText.Text = "Max Distance: " .. tostring(maxDistance) .. "m"
+    end
+end)
+
+-- // LOGIKA FLOATING ICON & MINIMIZE //
+MinimizeButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    FloatingIcon.Visible = true
+end)
+
+FloatingIcon.MouseButton1Click:Connect(function()
+    FloatingIcon.Visible = false
+    MainFrame.Visible = true
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    if ESPFolder then ESPFolder:Destroy() end
+    if ESPBeam then ESPBeam:Destroy() end
+    if Att0 then Att0:Destroy() end
+    if Att1 then Att1:Destroy() end
+    ScreenGui:Destroy()
+end)
+
+-- LOGIKA VISIBILITY
+local function isVisible(targetPart)
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin)
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+    raycastParams.IgnoreWater = true
+    local result = workspace:Raycast(origin, direction, raycastParams)
+    
+    if result and result.Instance:IsDescendantOf(targetPart.Parent) then return true end
+    return result == nil
+end
+
+-- MENCARI PEMAIN (STICKY LOCK + TARGET PRIORITY)
+local function getNearestPlayer()
+    local selectedPartName = targets[currentTargetIndex]
+    
+    -- 1V1 TARGET MANUAL
+    if lock1v1Enabled and selectedTargetPlayer and selectedTargetPlayer.Character then
+        local char = selectedTargetPlayer.Character
+        if char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
+            local targetPart = char:FindFirstChild(selectedPartName) or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Head") or char.PrimaryPart
+            if targetPart then
+                if not wallCheckEnabled or isVisible(targetPart) then return targetPart end
+            end
+        end
+    end
+
+    if not autoAimEnabled then
+        currentLockedCharacter = nil
+        return nil 
+    end
+
+    local myChar = LocalPlayer.Character
+    local myRoot = myChar and (myChar:FindFirstChild("HumanoidRootPart") or myChar.PrimaryPart or myChar:FindFirstChild("Head"))
+    if not myRoot then return nil end
+
+    -- SISTEM STICKY LOCK PADA AUTO AIM
+    if currentLockedCharacter and currentLockedCharacter:FindFirstChild("Humanoid") and currentLockedCharacter.Humanoid.Health > 0 then
+        local lockedPlayer = Players:GetPlayerFromCharacter(currentLockedCharacter)
+        local isTeam = lockedPlayer and isTeammate(lockedPlayer)
+        
+        if not isTeam then
+            local targetPart = currentLockedCharacter:FindFirstChild(selectedPartName) or currentLockedCharacter:FindFirstChild("Head") or currentLockedCharacter.PrimaryPart
+            if targetPart then
+                local distToPlayer = (targetPart.Position - myRoot.Position).Magnitude
+                if distToPlayer <= maxDistance then
+                    if not wallCheckEnabled or isVisible(targetPart) then
+                        return targetPart -- Tahan Lock ke orang ini
+                    end
+                end
+            end
+        else
+            currentLockedCharacter = nil 
+        end
+    end
+
+    -- CARI MUSUH BARU BERDASARKAN PRIORITAS (CROSSHAIR vs DISTANCE)
+    local nearestTarget = nil
+    local shortestDistance = math.huge
+    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and not isTeammate(player) then
+            local char = player.Character
+            if char and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
+                local targetPart = char:FindFirstChild(selectedPartName) or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Head") or char.PrimaryPart
+                
+                if targetPart then
+                    local distToPlayer = (targetPart.Position - myRoot.Position).Magnitude
+                    
+                    if distToPlayer <= maxDistance then
+                        if not wallCheckEnabled or isVisible(targetPart) then
+                            local screenPoint, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+                            
+                            if onScreen then
+                                if targetPriority == "Crosshair" then
+                                    local mousePos = Vector2.new(screenPoint.X, screenPoint.Y)
+                                    local distanceFromCenter = (mousePos - screenCenter).Magnitude
+                                    if distanceFromCenter < shortestDistance then
+                                        shortestDistance = distanceFromCenter
+                                        nearestTarget = targetPart
+                                    end
+                                elseif targetPriority == "Distance" then
+                                    -- Prioritas: Jarak Paling Dekat Dengan Karakter Kita
+                                    if distToPlayer < shortestDistance then
+                                        shortestDistance = distToPlayer
+                                        nearestTarget = targetPart
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    if nearestTarget then
+        currentLockedCharacter = nearestTarget.Parent
+    else
+        currentLockedCharacter = nil
+    end
+    
+    return nearestTarget
+end
+
+-- // LOOP UTAMA: AIMBOT & 3D ANIMATED ESP //
+RunService.RenderStepped:Connect(function()
+    local shouldAim = false
+    local targetPart = nil
+    
+    if lock1v1Enabled and selectedTargetPlayer then
+        shouldAim = true
+    elseif autoAimEnabled then
+        if aimMode == "Always" then
+            shouldAim = true
+        elseif aimMode == "OnAttack" and isAttacking then
+            shouldAim = true
+        end
+    end
+    
+    if not shouldAim then
+        currentLockedCharacter = nil
+    end
+    
+    if autoAimEnabled or lock1v1Enabled then
+        targetPart = getNearestPlayer()
+    end
+    
+    -- LOGIKA GARIS TRACER & ANIMASI IKON (SMART ESP)
+    if targetEspEnabled and targetPart and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
+        local myHead = LocalPlayer.Character.Head
+        
+        Att0.Parent = workspace.Terrain
+        Att1.Parent = workspace.Terrain
+        ESPBeam.Parent = workspace.Terrain
+        
+        Att0.WorldPosition = myHead.Position
+        Att1.WorldPosition = targetPart.Position
+        
+        TargetIconGui.Adornee = targetPart
+        TargetIconGui.Enabled = true
+        
+        local timeTick = tick()
+        TargetIconImage.Rotation = (timeTick * 100) % 360 
+        local pulseSize = 25 + (math.sin(timeTick * 6) * 5)
+        TargetIconGui.Size = UDim2.new(0, pulseSize, 0, pulseSize)
+        
+        if isVisible(targetPart) then
+            ESPBeam.Color = ColorSequence.new(Color3.fromRGB(255, 50, 50)) 
+            TargetIconImage.ImageColor3 = Color3.fromRGB(255, 50, 50)
+        else
+            ESPBeam.Color = ColorSequence.new(Color3.fromRGB(50, 255, 50)) 
+            TargetIconImage.ImageColor3 = Color3.fromRGB(50, 255, 50)
+        end
+    else
+        Att0.Parent = nil
+        Att1.Parent = nil
+        ESPBeam.Parent = nil
+        TargetIconGui.Enabled = false
+    end
+    
+    -- Logika Kamera 
+    local myChar = LocalPlayer.Character
+    local myRoot = myChar and (myChar:FindFirstChild("HumanoidRootPart") or myChar.PrimaryPart or myChar:FindFirstChild("Head"))
+    
+    if shouldAim and targetPart and myRoot then
+        local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+        local speed = lock1v1Enabled and 1.0 or smoothnessFactor
+        
+        if speed >= 1.0 then
+            Camera.CFrame = targetCFrame 
+        else
+            Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, speed)
+        end
+    end
+end)
