@@ -1,0 +1,31 @@
+-- [ Dev Miyako Noclip Script ] --
+-- Optimized for Delta Executor
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+
+local LocalPlayer = Players.LocalPlayer
+local NoclipActive = true -- Set ke false jika ingin noclip mati secara default
+
+-- Fungsi utama untuk mematikan collision (tabrakan)
+local function NoclipLoop()
+    if NoclipActive and LocalPlayer.Character then
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
+end
+
+-- Menghubungkan fungsi ke Stepped (berjalan tepat sebelum kalkulasi physics Roblox)
+RunService.Stepped:Connect(NoclipLoop)
+
+-- Notifikasi bahwa script berjalan sukses
+StarterGui:SetCore("SendNotification", {
+    Title = "Miyako Noclip",
+    Text = "no clip on",
+    Icon = "",
+    Duration = 5
+})
