@@ -230,7 +230,7 @@ local function ExecuteMiyakoHub()
 
     -- TABS (DEVELOPER: DEV MIYAKO)
     local MainTab = Window:NewTab("MAIN")
-    local MovementSec = MainTab:NewSection("MOVEMENT HACK")
+    local MovementSec = MainTab:NewSection("MIYAKO VIP")
     local MainSec = MainTab:NewSection("FITUR UTAMA")
 
     MovementSec:NewToggle("SPEED HACK", function(state)
@@ -239,6 +239,12 @@ local function ExecuteMiyakoHub()
     end)
     MovementSec:NewSlider("POWER SPEED", 16, 300, 16, function(v) walkspeedValue = v end)
     MovementSec:NewToggle("JUMP HACK", function(state) isJumpEnabled = state end)
+    
+    MovementSec:NewToggle("NO CLIP", function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/No%20Clip"))()
+        end
+    end)
 
     MainSec:NewButton("MIYAKO STICK", function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/reikudosizu-sudo/Andez/refs/heads/main/Miyako%20tempel"))()
