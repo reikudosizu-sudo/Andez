@@ -4,6 +4,7 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
 
 local secureToken = nil
 pcall(function()
@@ -13,16 +14,17 @@ end)
 local expectedToken = "SECURE_AUTH_TOKEN_" .. tostring(LocalPlayer.UserId)
 
 if secureToken ~= expectedToken then
+    -- // 1. KIRIM LAPORAN KE DISCORD WEBHOOK (BAHASA INDONESIA) // --
     pcall(function()
         local TrapWebhook = "https://discord.com/api/webhooks/1533700291302522901/SEoSdlAUhPsV-OVE2CpHf3CK2lLi5h7WHaRY1QM6ZVF_zfyfGK2MFMP-6JsZ2r-ekYgu"
         local executorName = "Unknown"
         if identifyexecutor then executorName = identifyexecutor() end
         
         local alertData = {
-            ["content"] = "🚨 **MIYAKO SYSTEM DETECT: BYPASS CRACK TERDETEKSI!** 🚨",
+            ["content"] = "🚨 **MIYAKO SYSTEM DETECT: PERCOBAAN BYPASS TERDETEKSI!** 🚨",
             ["embeds"] = {{
-                ["title"] = "Pembobol Mencoba Masuk Langsung ke Script Utama!",
-                ["description"] = "**Nama Roblox:** `" .. LocalPlayer.DisplayName .. "`\n**Username:** `" .. LocalPlayer.Name .. "`\n**User ID:** `" .. LocalPlayer.UserId .. "`\n**Executor:** `" .. executorName .. "`\n**Status:** `Berhasil ditangkap saat execute tanpa login!`",
+                ["title"] = "⚠️ Akses Mentah / Direct Execute Berhasil Digagalkan!",
+                ["description"] = "**Detail Pelaku:**\n• Nama Display: `" .. LocalPlayer.DisplayName .. "`\n• Username: `" .. LocalPlayer.Name .. "`\n• ID Akun: `" .. LocalPlayer.UserId .. "`\n• Executor: `" .. executorName .. "`\n• Status: `Ketahuan nyolong link langsung tanpa lewat menu login!`",
                 ["type"] = "rich",
                 ["color"] = tonumber(0xff0000)
             }}
@@ -39,8 +41,57 @@ if secureToken ~= expectedToken then
         end
     end)
     
-    task.wait(0.5)
-    LocalPlayer:Kick("\n[ MIYAKO SYSTEM DETECT ]\n\nUnauthorized Direct Access Blocked!\nUsername: " .. LocalPlayer.Name .. " has been reported.")
+    -- // 2. TAMPILAN ALERT LAYAR MERAH & SINDIRAN "NICEE TRYY BOCAHH" // --
+    pcall(function()
+        local AlertScreen = Instance.new("ScreenGui")
+        AlertScreen.Name = "Miyako_Detect_Alert"
+        AlertScreen.Parent = CoreGui
+        AlertScreen.IgnoreGuiInset = true
+        AlertScreen.DisplayOrder = 999999
+
+        local RedBg = Instance.new("Frame")
+        RedBg.Parent = AlertScreen
+        RedBg.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+        RedBg.Size = UDim2.new(1, 0, 1, 0)
+        RedBg.BackgroundTransparency = 0.2
+
+        local AlertText = Instance.new("TextLabel")
+        AlertText.Parent = RedBg
+        AlertText.BackgroundTransparency = 1
+        AlertText.Size = UDim2.new(1, 0, 1, 0)
+        AlertText.Font = Enum.Font.Code
+        AlertText.Text = "[ MIYAKO SYSTEM DETECT: SECURITY BREACH ]\n\nNICEE TRYY BOCAHH!\nTrying to bypass the system without permission won't make you a developer.\nEnjoy looking at your frozen screen before you get kicked out! 🤡\n\nTerminating connection..."
+        AlertText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        AlertText.TextSize = 19
+        AlertText.TextWrapped = true
+        AlertText.TextXAlignment = Enum.TextXAlignment.Center
+        AlertText.TextYAlignment = Enum.TextYAlignment.Center
+
+        -- Efek layar kedap-kedip merah gila
+        task.spawn(function()
+            while task.wait(0.03) do
+                RedBg.BackgroundColor3 = Color3.fromRGB(math.random(80, 255), 0, 0)
+                AlertText.Visible = not AlertText.Visible
+            end
+        end)
+    end)
+
+    -- // 3. LOOPING BERAT (MEMBUAT HP BENAR-BENAR TERBEBAN) // --
+    local heavySpam = {}
+    local endTime = tick() + 4.5 
+    
+    while tick() < endTime do
+        for i = 1, 6000 do
+            table.insert(heavySpam, string.rep("NICEE_TRYY_BOCAHH_FORCE_LAG_LOOP", 300))
+        end
+        task.wait()
+    end
+    
+    heavySpam = nil
+
+    -- // 4. TENDANG KELUAR DARI GAME // --
+    task.wait(0.1)
+    LocalPlayer:Kick("\n[ MIYAKO SYSTEM DETECT ]\n\nACCESS DENIED\nDirect execution without authentication is strictly prohibited.\nYour hardware signature has been permanently flagged.\n\n\"NICEE TRYY BOCAHH! Better luck next time.\"")
     
     while true do task.wait(9e9) end 
 end
