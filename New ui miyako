@@ -1,3 +1,53 @@
+-- ========================================================== --
+-- [🛡️] MIYAKO SYSTEM DETECT - ANTI DIRECT LOADSTRING [🛡️]
+-- ========================================================== --
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+
+local secureToken = nil
+pcall(function()
+    if getgenv then secureToken = getgenv().MIYAKO_VERIFIED_ACCESS end
+end)
+
+local expectedToken = "SECURE_AUTH_TOKEN_" .. tostring(LocalPlayer.UserId)
+
+if secureToken ~= expectedToken then
+    pcall(function()
+        local TrapWebhook = "https://discord.com/api/webhooks/1533700291302522901/SEoSdlAUhPsV-OVE2CpHf3CK2lLi5h7WHaRY1QM6ZVF_zfyfGK2MFMP-6JsZ2r-ekYgu"
+        local executorName = "Unknown"
+        if identifyexecutor then executorName = identifyexecutor() end
+        
+        local alertData = {
+            ["content"] = "🚨 **MIYAKO SYSTEM DETECT: BYPASS CRACK TERDETEKSI!** 🚨",
+            ["embeds"] = {{
+                ["title"] = "Pembobol Mencoba Masuk Langsung ke Script Utama!",
+                ["description"] = "**Nama Roblox:** `" .. LocalPlayer.DisplayName .. "`\n**Username:** `" .. LocalPlayer.Name .. "`\n**User ID:** `" .. LocalPlayer.UserId .. "`\n**Executor:** `" .. executorName .. "`\n**Status:** `Berhasil ditangkap saat execute tanpa login!`",
+                ["type"] = "rich",
+                ["color"] = tonumber(0xff0000)
+            }}
+        }
+        
+        local RequestFunction = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+        if RequestFunction then
+            RequestFunction({
+                Url = TrapWebhook,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(alertData)
+            })
+        end
+    end)
+    
+    task.wait(0.5)
+    LocalPlayer:Kick("\n[ MIYAKO SYSTEM DETECT ]\n\nUnauthorized Direct Access Blocked!\nUsername: " .. LocalPlayer.Name .. " has been reported.")
+    
+    while true do task.wait(9e9) end 
+end
+-- ========================================================== --
+-- [⬇️] SCRIPT UTAMA MIYAKO HUB (100% AMAN & UTUH) [⬇️]
+-- ========================================================== --
+
 --[[
     MIYAKO HUB - MASTERPIECE EDITION (BILINGUAL MAINTENANCE)
     Developer: DEV MIYAKO
