@@ -1,16 +1,697 @@
---[[
-███████╗██╗   ██╗██╗██╗         █████╗ ██╗  ██╗███████╗
-██╔════╝██║   ██║██║██║        ██╔══██╗╚██╗██╔╝██╔════╝
-█████╗  ██║   ██║██║██║        ███████║ ╚███╔╝ █████╗
-██╔══╝  ╚██╗ ██╔╝██║██║        ██╔══██║ ██╔██╗ ██╔══╝
-███████╗ ╚████╔╝ ██║███████╗   ██║  ██║██╔╝ ██╗███████╗
-╚══════╝  ╚═══╝  ╚═╝╚══════╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+-- ==========================================================
+-- MIYAKO V1: VEIL SILENT SPEAR (ULTIMATE TUNED - CENTER GUI BUILD)
+-- Fitur: Center Start GUI, Default OFF, Smooth Lerp Drag, 
+-- Inner Inset Padding, Killer Verification & Pure FOV Prediction.
+-- ==========================================================
 
-        STUDIOS V2 OBFUSCATOR By MAX
-        https://eaxe.net
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
 
-        Sponsored by
-        https://BloxDen.com
---]]
+local Config = {
+    Enabled = false,
+    ShowFOV = true,
+    ShowTrajectory = true,
+    FOV = 450,
+    SpearSpeed = 165,
+    Gravity = workspace.Gravity * 0.32,
+    TargetPart = "HumanoidRootPart", 
+    AutoPredict = false, 
+    LiftPower = 0.055, 
+}
 
-return(function(...)local l={"yZ!i:\"o\')","yqufa,jnJq=O85";"yZn$qHO_d/6Ol","yYu!7]j^)d*(DJ","yB36]Ko9","y8>?6sh+QRE985AD";"yq,&F)(?J?sZn@HD","yj^^i,","y8/lA.(<DmGB*R";"yZ!J\'RO#(@aO#sm,O3";"y(n16oK\"%@Gjl@@0.#","yO_\"]=o=#R).f`\\\"";"ye\"`dcO#)";"yO8E)*;1","y.I>`/OhU44%aZ\\Nj0#/Tjnu:s";"yZNOIJOaAIRK[sR2","yP_`B\\(0,/Rl,jS";"y.t7]*Z<(k@(4OFg;78","y8Z*i((D83","y9#2p?or(=uO)a","yZCYZu","y8T?tE%1FR";"yP15sFZ=QJ3eK*eE";"yZCYZ0o9","yqkm&B9#^CJ.IMGFs^Y","y98*&Y","y(\"rmtO#r","yq+\\oEB*q&";"y98*&;oj`t#rZE@DO3","ybLhQE","y9#2p?or$HirZ]";"yCDG?Vr)fq_ZCL4MBb";"yZ!J67oOlA_B`:J^";"yr/Eo\'(\\@AD(D8R";"y;ke+58TDmj(0Li0.6";"yq]8SR8J[\"","y9P4*uj4Jq,Zpt4/e<F%A";"yo\'I[3r/Q","ybljW19#2p?oOUP?o(L","yrF6QU.+J\"jeDsoc","ye?(jDojh]s","ye<F%A";"yZn##5Ol";"yrbYm,rT,;\"jnTJ2;Oc";"yrb38#OMgO?oft9g.6";"yoj1Zd%\"SI7o\'c";"yO)EDSs^pPQ.++hr;@P","ybL]RDrR0#";"ylkA@?e!A6-KpGQlr0","yK3\"@;8u[-Ir1]aa","y(du6rPhcM2KDC(Se2";"yb`mZTZn$qHO)a","ybL]3DB3#*.Zn@HD";"y[l";"yo(O>MOl";"yb`mZT","yPHV<u","ye<Fq_(E";"y%&]CQoW\\";"yZp]amO#jJ^r/k","yYu!\"LO8EQ";"yOF*NF","ybLh*Wj0)>";"yO6j@3rbZ","y8R_c#O)a","y9gZM]BL^f\'%Dbs\'O#)";"yqGef)lG1*Sb3]@","yZnmIFb3Qj@O)0DGBA8";"ybljW19#2p?o%SiIOl";"yZ0lZRB*LQ9j<I";"yq]qA]B>","yP\"VE_","y8T-pWrZgk!rei$","yb`mZTqY)%1j03","y9g/UpOl";"yO#%)T8/`F+jCcJ[","y%_V<Ij^)0+j^)<2jn2";"yO6W<3e\"`dcO#)";"yb`mZTPiR(O(E";"yjC!fhP_uYcs\'k\"LrF*","y^0","yoI5ESB*G\':Ol";"yb`mZT.rtLZ%hR_+jp;","yOHaeKPCGerqSq:Vj<I","yO6W<3ZofV";"yeK9S-";"yPDO4)PsOFFB`-lQ86\'30b7u","yZ0`J&eXH1oOs_WXK4r";"yq]):f","y9P4*uj4Jq,";"ylb&P!.@Q5qjoggL","ye<F%mjp;","yBlX0]81BO((d&hAZ\'&","yZ0lZRB\'qM<O)a","y;7MjR8eM<)qG6+Zo6","y8R_UgZnPQUO#r","yPDO4)PsOF*%a\":/%a\"`t";"yP_ak<Bj[WABLr=eq?";"yO_BFU%aPR48g1#m;uR","yo(%q`";"yq5M!motJg7r/%i<rZ@K^","ysLGnn9-%m@oBMBGBW_","yb(M3sB*h\'I";"yYu!;m","yq+M@Hj0Cl=rT/";"yb`#p#";"yb`C0cO#mf>B*W";"yP1;[/Oie-Eoj1Vi","yZnmIF8gAV";"y8R_f-8R_UforCWm(DN.)q5MKHBT","yPDO4)PsOF6Bf\'E6rTQuC;1";"yoV#FWh/U)QdIZr<.#";"y8>dCA","yq]qXcO)00";"yq5pF;%&5#";"y%&hu<";"yBfXPVoI+68%aC8uCC=<oK3D:iKLMXoK;@0";"yqke8Hr>3c/O&\\*R";"y(?.-[B>";"ye0PW\"9illb`O5lT";"yb3]nQj]";"ye0PW\"9illb`O5\'";"yb(6HTB*3l[","yqm1:Ij^-";"y98*&;oj=";"yb`mZTZ0UVQ(\\M!*rZ@^:rb3MJrJ4","y9#2p?orCW\"j4:-a","yj\'jTLh+]t`K4RXmZ!6";"ykk8c1h+LS]`%bq,%1^eGOpuTMj!UYtZn@2]jp!,,B`-lQ`OYE@O8EP6[pAj1jpplK`r0o$`.9&SOg3rF(?<A/8)n\\ArTQo^OpW","yrPl>;eKnp5PiDf:.P","yZn@HD","yq]UB?OgQ#>rZ#)Tr[";"yBW46o;]A\\$j3d*h9a2";"yq/[+$B3AU=B`os!","yb3QjLoI5_^OgQ,$","yb`mZTZn@HD","yYu!R7jY";"yq]qXfB*h*9";"yPX/cH%1Fp^Ol";"yqTY0_ZpNR\"Zl]FssG";"yqkMU#O#(@\'l.E6n;7=c","ye?$_*O#r","yqQ1@c%18H","yO8ErfB>","yrbYm,r/Q","y%&]K2rZ#)*rZpfJO#Rm=O3","yZn$?]Og+,7%\'","y8>d:)O#r";"y8e(8ij4IriBL[f2%1ra","yPh[d5O#jD";"ye<F%AbN\'o6";"ybLh*Wj0)#";"y8e(8ij4IU?lG^t","yb;1\"U";"yq.oOk%qVMhj!*@nrZ@^:rb3MJrJ4";"yOhHXZB3Mh4b(KJaP\'";"yPDO4)PsOF*%11fEo9","yb`6Qm(\"U@IBT";"yZ0U^Uo2N(co=po","yq,&F)(?J?se?(jDojh]s","yC41C#b%:B4s\'B]@sWL","yrT3)XjQ";"yb3]FD%B";"y.P";"yK[/8m.j6U&K\"eld(E","ybN\"FLj;+`n;Va;+";"yrR8+Uqt_M`9H.Vu","yq#PC598a^\'d(*Oq.7g","y8R_c#q]qA]B>";"y;OD\"ZoI5H+Ol";"yj3IJKoG*=GOHLP0qTX";"y3/@Q*";"y8/lA^oBjHZr>*A=","yb`mZTq]qA]B7A";"yB`bbU(E","yj^8#O.IPf`bBWrJB>","y8gAV";"yq5pFprei(XB>";"y%a%/.;7MFAo=4B*db";"y8Z*>";"y8T-pWrZgk\\(D:","yoB/Dejn9","y8>\"MgOl";"yZ0G1\'%iQdPj[>a";"ykG)`n.\'VQtOPMJ\"8C";"yZ!J0\'%a=)FO)FWEj0#PSOl";"y%1!pMB*R","yP_`?LbLh*Wj0H";"yb((HbK2","y8R_c#b3QjLoI5_^OgQ,$";"yP1;[/Oie-Eoj1Viq5M!l(%","y9#2#arZE)A";"ybN\"FLjoFWuj]";"yb((Hb";"yb`mZTb3QjLoI5_^OgQ,$","yZLP5ie[?YV9H\"h<e4\\";"y%q8CAeC\\LB;.].V";"y8R_f-8R_UforCWm(D:";"yeK7YE";"yq]8SWO#(c>O9NKN";"ye?$_*O#jD","y8T-pWrZgW\"O9NK$","y9g/UpOHY-OOgW","yqG\\K;j0g]U%19,","yZ!JE\'o(0\\","yPDO4)PsYc[eAU]4";"yZLP5ie[?YV9H\"h<e!cn","ye-@L/%18pEBf\'X3B`:*Qj!c/","ybljW19#2p?oO1fa;Va;+","yj!F,","yq]qA]B7A","yqG\\K;j0#B,","ye-@f","ye?$_*","ye-@L/%18p\\jnJY&";"yF.H\'B`OhNQhMq";"y.#";"yq.o7l","yq]_flo(L";"y(l3\'JBOjSr;2KG%O3";"yqt8P0e?@3u%aIh","y(n!gQj:<Q+or2j6e;\"";"yPXTN#BLgTQ";"y8/lArO#jJ^r/k","yq.oOk%qVMhj!*`_(?.k\"";"y86T[FrM:g\\K;-Y]C)d";"y8ZAqL","yq5m)-(Dd";"y%[\'<*jn.$eedK9KB2A";"ye?$_*O#(e\'%\'","yr/Eea%hIqTZ0lZRB>","y99s@\"(Dc-/o9";"yPH4:7e?(HDB>";"yo:I;ej42";"yr6tLQZp`%oKD=EmK2"}for D,B in ipairs({{1,235};{1,145};{146;235}})do while B[1]<B[2]do l[B[1]],l[B[2]],B[1],B[2]=l[B[2]],l[B[1]],B[1]+1,B[2]-1 end end local function D(D)return l[D+39682]end do local D=table.concat local B=string.char local P=string.sub local n=type local S=l local r={P=53,n=38;k=12;s=40,["/"]=19,o=0;f=13,d=47;Z=1,y=16;m=58;c=59;X=63;V=22,p=9,N=55,Y=6,a=57;E=54;i=25;["9"]=2,D=23,l=17,["6"]=14,g=8;M=49;["+"]=5;A=15;["5"]=20;["8"]=32;r=41;["4"]=28,["2"]=52;C=43;R=29,S=35;x=30,["0"]=44,["3"]=50;U=45,K=10;z=27;T=46,q=60;J=11;L=37;w=51;u=7;B=33,["1"]=4,H=24,h=56;e=18;j=31;I=21,v=42;b=26,Q=34;t=39,W=61,G=62;["7"]=48,F=3;O=36}local V=table.insert local L=string.len local f={["]"]=57;b=27;T=81,["#"]=51,["1"]=75,h=20,q=21,["8"]=22,m=52;["!"]=40;["&"]=19;["9"]=23,s=17;I=8,n=68,["("]=34,["["]=14;M=79;["5"]=56;["`"]=10;["<"]=70,[":"]=9;d=18,[")"]=49;E=60;N=12;["-"]=45;W=62,Z=26;["0"]=69,V=4;["2"]=5;l=39,u=55;["^"]=13;t=3;[";"]=38,["\\"]=43,["4"]=41,A=67;P=24,R=53,S=0,J=82;["%"]=33,p=42,Y=30;K=16,["*"]=66,f=64,o=37;r=31,["="]=7,C=15,F=77,L=65;O=32;[">"]=54,c=58,U=76;Q=84;["7"]=59;["6"]=78;[","]=1;g=50;X=73,["?"]=72;j=35;H=47;["+"]=83;["\'"]=63;e=25;i=46,["$"]=6;["\""]=44;k=29,a=74,D=71;["/"]=80;["."]=28,_=48;B=36;["3"]=11;G=2,["@"]=61}local G=math.floor for l=1,#S,1 do local O=S[l]if n(O)=="string"then local n=P(O,1,1)if n=="G"then O=P(O,2)local n=L(O)local f={}local h=1 local T=0 local Z=0 while h<=n do local l=P(O,h,h)local D=r[l]if D then T=T+D*(64^((3-Z)))Z=Z+1 if Z==4 then Z=0 local l=G(T/65536)local D=G((T%65536)/256)local P=T%256 V(f,B(l,D,P))T=0 end elseif l=="="then V(f,B(G(T/65536)))if h>=n or P(O,h+1,h+1)~="="then V(f,B(G((T%65536)/256)))end break end h=h+1 end S[l]=D(f)elseif n=="y"then O=P(O,2)local n=L(O)local r={}local h=1 while h<=n do local l=(n-h)+1 local D=l>=5 and 5 or l local S=0 local L=D>1 for l=0,4,1 do local B if l<D then local D=P(O,h+l,h+l)B=f[D]if not B then L=false break end else B=84 end S=S*85+B end if L then local l=G(S/16777216)%256 local P=G(S/65536)%256 local n=G(S/256)%256 local L=S%256 if D==5 then V(r,B(l,P,n,L))elseif D==4 then V(r,B(l,P,n))elseif D==3 then V(r,B(l,P))elseif D==2 then V(r,B(l))end end h=h+D end S[l]=D(r)end end end end return(function(l,P,n,L,V,S,r,G,N,O,d,v,A,B,Z,p,T,q,o,E,h,C,f)E,p,h,A,q,f,O,d,G,v,o,T,B,N,Z,C=function(l,D)local P=T(D)local n=function()return B(l,{},D,P)end return n end,function(l,D)local P=T(D)local n=function(n,S,r,V)return B(l,{n;S;r,V},D,P)end return n end,0,function(l,D)local P=T(D)local n=function(n,S,r)return B(l,{n;S;r},D,P)end return n end,function(l,D)local P=T(D)local n=function(n,S,r,V,L)return B(l,{n;S,r;V,L},D,P)end return n end,{},function()h=1+h G[h]=1 return h end,function(l,D)local P=T(D)local n=function(n,S,r,V,L,f)return B(l,{n,S,r;V,L;f},D,P)end return n end,{},function(l)G[l]=G[l]-1 if 0==G[l]then G[l],f[l]=nil,nil end end,function(l,D)local P=T(D)local n=function(n,S)return B(l,{n,S},D,P)end return n end,function(l)for D=1,#l,1 do G[l[D]]=1+G[l[D]]end if n then local B=n(true)local P=r(B)P[D(-39476)],P[D(-39668)],P[D(-39635)]=l,Z,function()return-1705338 end return B else return S({},{[D(-39668)]=Z,[D(-39476)]=l;[D(-39635)]=function()return-1705338 end})end end,function(B,n,S,r)local b,L,c,y,lI,w,u,X,DI,U,K,T,PI,j,a,H,R,s,e,W,k,F,z,I,M,G,Y,t,Q,J,x,BI,i,m,Z,g,h while B do if B>8812840 then if 12599230>B then if B<10662418 then if 9959956>B then if B>9295998 then if B<9712483 then if 9391356>B then J,H,a,Q,B=nil,nil,nil,nil,136655 elseif 9496083>B then G,T=D(-39565),D(-39561)B=f[S[2]]Z,Y,L=50,50,D(-39481)B[L]=G L=D(-39547)B=f[S[2]]h=l[T]T=D(-39452)G=h[T]T=200 h=G(T,Z,Y)B[L]=h B=11467307 elseif 9626649>B then B,K,I,i=9333133,nil,nil,nil else B,U=k,u B=16382169 end else if 9733926>B then I=1 Q=f[S[6]]Z=Y B=Q[Z]Z,Q=nil,D(-39637)B[Q]=I B=15911417 elseif B<9828513 then z=m j=z*s b,DI=D(-39474),2 c=e*j R=.5 w=H+c y=l[b]b=D(-39562)c=y[b]lI=R*i b=0 R=j^DI BI=lI*R lI=0 y=c(b,BI,lI)B=12001317 PI=w-y c=f[S[6]]w=c[z]j,DI=nil,2 y=PI-g b,lI=D(-39633),D(-39474)c=y[b]y=D(-39641)BI=l[lI]R,lI=.15,D(-39562)b=BI[lI]lI=.15 BI=b(lI,R,c)w[y]=BI lI=D(-39648)BI=l[lI]y,lI=D(-39648),D(-39562)b=BI[lI]R=g+PI lI=R/DI BI=b(lI,PI)w[y]=BI BI=.2 DI=f[S[5]]y=D(-39637)R=z/DI DI=.5 lI=R*DI b=BI+lI w[y]=b y=PI g,w,z,PI,c=y,nil,nil,nil,nil elseif B<9925136 then B=f[S[7]]L,Z=D(-39637),1 B[L]=Z a,L=D(-39528),D(-39585)B=l[L]J=f[S[8]]a=J[a]H={a(J)}J={B(P(H))}Z,Y,B,L=J[2],J[3],16764779,J[1]J=L else e,M=2,.5 W=M*i M=U^e k=W*M s=D(-39539)e=f[S[3]]M=e[s]W=K*M g=D(-39474)s=l[g]g,m=D(-39562),0 e=s[g]g=0 z=k+W s=e(g,z,m)z=D(-39618)M=u+s g=M-H s=g[z]e=s*I z=D(-39469)g=f[S[3]]s=g[z]B=s and 499925 or 11266477 end end else if B>9115516 then if B<9184568 then B=L and 8416829 or 6478779 elseif 9214023>B then G,h=D(-39602),D(-39594)L=l[G]G=D(-39640)B=L[G]G=B L=f[S[1]]B=L[h]h=B B,L=h and 9258864 or 14610019,h elseif 9246041>B then h,J,T,G=n[2],D(-39545),D(-39468),n[1]L=G[T]Y=l[J]J=D(-39468)Z=Y[J]Y=D(-39609)T=Z[Y]B=L==T T,L=B,h B=h and 12648127 or 1777763 else Y,Z=D(-39455),D(-39599)Z=h[Z]Z=Z(h,Y)Y=14592185>10462728 T=Z==Y L,B=T,14610019 end else if B<8878549 then if 8830265>B then G=O()B,T=nil,D(-39656)Z=N(13267239,{S[1];G})f[G]=B L=D(-39460)B=l[L]h=l[T]T=D(-39533)L=B(h,T,Z)f[G]=L G=v(G)L,B={},l[D(-39488)]elseif 8840880>B then L=f[S[2]]B,H=D(-39676),D(-39678)J=f[S[3]]Y=J[H]J=f[S[4]]B=Z[B]B=B(Z,L,Y,J)B=14456261 else e=D(-39647)M=i[e]e=0 W=M>e B,u=967926,W end else if B<8984764 then Z,B=J,H B=15489342 else B=x and 4688140 or 642824 end end end end else if B>10365878 then if 10524271>B then if B<10423486 then B=3930953 elseif 10451049>B then J,Q=D(-39468),D(-39545)L=G[J]a=l[Q]Q=D(-39468)H=a[Q]a=D(-39664)J=H[a]B=L==J B=B and 2666962 or 3636437 elseif 10488093>B then L=f[S[1]]h=D(-39666)B=L[h]B=B and 2195593 or 6559305 else B=L and 10195953 or 9333133 end else if B<10537246 then B=nil L={B}B=l[D(-39521)]elseif 10552597>B then H=L B,L=H and 7027109 or 11838758,H elseif 10610117>B then B=8722901~=12407602 L={B}B=l[D(-39677)]else h=L B=not h B=B and 1284534 or 8152668 end end else if B<10213438 then if 10090923>B then if 10023670>B then B=f[S[2]]L=B()L,B={},l[D(-39674)]elseif B<10075158 then Y=12148785<=6682572 B=f[S[4]]Z=D(-39489)B[Z]=Y B=10408925 else Y=D(-39468)Z=f[G]H=D(-39545)T=Z[Y]J=l[H]B,H=11593183,D(-39468)Y=J[H]J=D(-39609)Z=Y[J]h=T==Z L=h end else if B<10150876 then B=U and 15578735 or 6608595 else L=D(-39496)B=G[L]u,I,L=D(-39608),B,D(-39612)B=Q[L]k,L,i=D(-39608),D(-39530),B B=Q[L]K=B x=I[u]u=i[k]U=x>=u B,L=U and 12558270 or 12541340,U end end else if B<10259508 then B,x=k,u B=9056725 elseif 10291581>B then Z,Y=D(-39574),D(-39500)Z=G[Z]Z=Z(G,Y)B,h=669114,Z elseif B<10308950 then H=D(-39676)J=T==H Z,Y=J,B B=J and 6170630 or 15489342 else B=12205862 h=f[S[2]]L=h end end end end else if B>11625383 then if 12082922>B then if B<11907871 then if 11845664>B then if 11677538>B then i=f[S[6]]J,K=H,Y B=i[J]i=D(-39466)B[i]=K J,B=nil,859770 elseif 11768126>B then Z=D(-39468)T=G[Z]H,B=D(-39545),9174308 J=l[H]H=D(-39468)Y=J[H]J=D(-39609)Z=Y[J]h=T==Z L=h else a=L B,L=a and 3334849 or 15358144,a end else if 11878680>B then J=f[S[3]]H=D(-39663)Y=J[H]Z,B=Y,Y and 170840 or 1261504 else h=D(-39666)L=G[h]h=D(-39451)B=L[h]L=D(-39653)L=B[L]L=L(B)h,B=L,D(-39475)B,L=h[B],D(-39510)B=B(h,L)B=B and 11575848 or 7604059 end end else if B<11929478 then G=v(G)B,L=l[D(-39531)],{}elseif B<11974661 then Q=f[S[1]]I=D(-39518)a=Q[I]B,J=8912803,a elseif 12023048>B then j,m=not t,X+m z=F>=m z=j and z j=F<=m j=t and j z=j or z j=9753597 B=z and j z=4259032 B=B or z else I,B,i=nil,15344396,nil end end else if B<12344012 then if B<12136120 then J=f[S[1]]H,T=D(-39491),B Y=J[H]Z=G==Y B,h=Z and 5539802 or 53149,Z elseif B<12171944 then e,k=D(-39647),B M=K[e]e=0 W=M>e B,u=W and 5023003 or 10230923,W elseif 12199288>B then L,B={J},l[D(-39644)]else B=L and 8651712 or 1555245 end else if 12511751>B then T,Z=D(-39599),D(-39455)T=G[T]T=T(G,Z)Z,B=nil,8609821 h=T~=Z L=h elseif 12549805>B then B=L and 11310326 or 9542586 elseif 12576379>B then x,W,e=B,D(-39608),D(-39608)k=I[W]M=i[e]s=D(-39608)e=K[s]W=M+e u=k<=W B,U=u and 16504911 or 16382169,u else L,h,T=D(-39541),4764481<=4441564,D(-39491)B=f[S[1]]B[L]=h h=f[S[1]]L=h[T]B=L==G B=B and 6933334 or 15637287 end end end else if 11288401>B then if 10963124>B then if B>10797878 then if 10893514>B then G=O()Y=D(-39468)f[G]=n[1]Z=f[G]T=Z[Y]H=D(-39545)J=l[H]H=D(-39468)Y=J[H]J=D(-39664)Z=Y[J]h=T==Z L,B=h,h and 11593183 or 10076046 else H,J=B,Z B=Z and 13248780 or 2398438 end else if 10711957>B then T,h=D(-39651),D(-39574)h,B=G[h],11572981 h=h(G,T)L=h elseif B<10755617 then B=L and 2046135 or 10438047 else Z,Y,I=D(-39637),1,D(-39528)B=f[S[7]]B[Z]=Y B=f[S[9]]Z=B()Y=D(-39585)B=l[Y]a=f[S[8]]I=a[I]Q={I(a)}a={B(P(Q))}J,B,Y,H=a[2],8802615,a[1],a[3]end end else if 11000864>B then B=D(-39509)B=h[B]B=B(h)B=14110759 elseif 11123606>B then e,x,u=0,.5,2 U=x*Q W=D(-39474)x=i^u L=U*x u=f[S[4]]U,k=L,D(-39539)x=u[k]L=I*x x=L k=l[W]W=D(-39562)u=k[W]W=0 M=U+x k=u(W,M,e)L=K+k M,u=D(-39447),L W=f[T]k=u-W W=D(-39618)L=k[W]f[Y]=L W=f[Z]k=W[M]B=k and 14486050 or 3316160 elseif 11243954>B then B=f[S[4]]B=B and 11852570 or 3930953 else i,M,a,W,k,U,L,J,Q,B,Y,h,u,e,K,G,T,I,H,Z=nil,nil,nil,nil,nil,nil,{},nil,nil,l[D(-39616)],nil,nil,nil,nil,nil,nil,nil,nil,nil,nil end end else if B<11478085 then if B<11343589 then B=f[S[3]]L,U=D(-39541),2640021<=3632904 B[L]=U L,U=D(-39491),G B=f[S[3]]B[L]=U B=9542586 elseif B<11419533 then B=not U B=B and 1586211 or 8706443 elseif 11464760>B then a,h,L=D(-39597),nil,{}Q=A(1643470,{S[6];Y;S[4];T})Z=v(Z)H=l[a]a=H(Q)G,B=nil,l[D(-39512)]T=v(T)Y=v(Y)else L,B={},l[D(-39487)]end else if B<11530922 then J,Z,T,B=D(-39657),D(-39496),D(-39496),4062932<=8214500 f[S[1]]=B h=f[G]L=h[T]f[S[2]]=L T=f[S[3]]h=T[Z]f[S[4]]=h T=f[S[4]]B=11910952 f[S[5]]=T Y=f[G]Z=Y[J]Y=D(-39658)Y=Z[Y]J=o(13580357,{G;S[1]})Y=Y(Z,J)elseif B<11574414 then L,B={L},l[D(-39514)]elseif 11584515>B then B=680563>10450578 L={B}B=l[D(-39543)]else B=L and 11488863 or 11910952 end end end end end else if B>14930140 then if B>15586299 then if 16342866>B then if B<15813762 then if B>15660909 then if B<15689551 then B=f[S[4]]Z,L=7875837<=526155,D(-39489)B[L]=Z B=942502 else B=not J B=B and 14396381 or 4596761 end else if 15615575>B then u=D(-39630)x=Z[u]U=x==Q B,K=4913342,U elseif 15648056>B then B=f[S[2]]L=B()B=587719 else K,B=D(-39594),14834954 i=Q[K]I=i end end else if B<15958121 then Y,Q=Y+H,not a Z=Y<=J Z=Q and Z Q=Y>=J Q=a and Q Z=Q or Z Q=9714255 B=Z and Q Z=10759030 B=B or Z elseif B<16118397 then J,G=255,D(-39629)L=l[G]Y,Z,G=0,D(-39561),D(-39562)B=L[G]G=D(-39544)L=B(G)G=D(-39466)f[S[1]]=L B=f[S[1]]T=l[Z]Z=D(-39452)h=T[Z]Z=170 T=h(Z,Y,J)B[G]=T B=f[S[1]]h,G=1.5,D(-39614)B[G]=h G=D(-39472)B=f[S[1]]h=11669372>12920356 B[G]=h h,G=12651604<4727671,D(-39489)B=f[S[1]]B[G]=h B=2617872 elseif 16267766>B then J=D(-39599)J,H=Z[J],D(-39455)J=J(Z,H)H,B=8331035>=4696365,2588122 Y=J==H L=Y else a,T,K=0,D(-39580),5 L=l[T]T,Q=D(-39562),40 B=L[T]H,T=100,D(-39654)L=B(T)J=D(-39583)T=O()f[T]=L L=D(-39641)B=f[T]Y=l[J]J=D(-39562)Z=Y[J]J=0 Y=Z(J,H,a,Q)J,H=D(-39474),2 B[L]=Y a,i,L=0,D(-39474),D(-39613)B=f[T]Y=l[J]J=D(-39562)Z=Y[J]J=0 Y=Z(J,H,a)B[L]=Y Z=11915790>=3844645 B=f[T]L=D(-39470)B[L]=Z Z=h B=f[T]L=D(-39680)B[L]=Z J,Z=D(-39583),D(-39580)L=l[Z]H,Z=0,D(-39562)B=L[Z]Z=D(-39458)L=B(Z)B,Q,Z=D(-39641),0,L Y=l[J]a,J=1,D(-39562)L=Y[J]J=1 Y=L(J,H,a,Q)a=255 Z[B]=Y L,B=1,D(-39617)Z[B]=L L,B,J=D(-39556),D(-39481),D(-39561)Z[B]=L H,B=0,D(-39598)Y=l[J]J=D(-39452)L=Y[J]J=170 Y=L(J,H,a)Z[B]=Y L,B,h,Q=1,D(-39646),nil,D(-39545)Z[B]=L L,B=15557396~=6754040,D(-39485)Z[B]=L B,H=D(-39659),D(-39545)J=l[H]H=D(-39659)Y=J[H]J=D(-39464)L=Y[J]Z[B]=L Y,B=D(-39579),D(-39680)L=f[T]U=0 Z[B]=L L=l[Y]Y,I=D(-39562),D(-39545)B=L[Y]a=l[Q]Y,Q=1.5,D(-39619)H=a[Q]a=D(-39516)J=H[a]Q=l[I]I=D(-39623)a=Q[I]Q=D(-39559)H=a[Q]L=B(Y,J,H)B=f[S[1]]J=f[T]a,Y=D(-39613),L L=D(-39553)I=l[i]L,i=B[L],D(-39562)Q=I[i]i,G=0,nil I=Q(i,K,U)H={[a]=I}L=L(B,J,Y,H)B,H=D(-39558),D(-39577)B,a=L[B],1 J={[H]=a}B=B(L)B=f[S[1]]H=E(12734135,{T})L=D(-39553)L=B[L]L=L(B,Z,Y,J)B,Z=D(-39558),nil T=v(T)B,Y=L[B],nil B=B(L)J=D(-39672)L=l[J]J=D(-39523)B=L[J]J=1.5 L=B(J,H)B,L=l[D(-39550)],{}end end else if B>16535596 then if 16598386>B then L,B=h,T B=12822722 elseif B<16694057 then L=f[S[1]]G=D(-39493)B=L[G]B=B and 5756026 or 8030385 elseif B<16746095 then B,L=l[D(-39639)],{}else Y,a=J(Z,Y)B=Y and 5276494 or 7820449 end else if B<16439302 then L,B=U,x B=12541340 elseif B<16500673 then a,B,H=D(-39500),15716108,D(-39574)H=h[H]H=H(h,a)J=H elseif 16520017>B then s,k,e=D(-39555),B,D(-39555)M=I[e]e=i[s]W=M>=e u,B=W,W and 5759519 or 9710712 else i=D(-39489)I=Q[i]L,B=I,10512135 end end end else if B<15337419 then if 15144452>B then if B>15071423 then if B<15111729 then I=a U=f[S[4]]x=U(i)B,K=x and 15528839 or 5426285,x else B,a,H=10538085,D(-39588),D(-39574)H=J[H]H=H(J,a)L=H end else if 15021155>B then Y,J,T=D(-39574),D(-39500),B Y=G[Y]Y=Y(G,J)J=nil Z=Y~=J h,B=Z,Z and 1287354 or 16536070 elseif 15048172>B then Z,h=D(-39478),B T=l[Z]G,B=T,T and 3895985 or 4163915 else B=L and 10536407 or 2118683 end end else if 15176540>B then e,g=D(-39620),D(-39555)M=l[e]e,s=D(-39562),D(-39608)W=M[e]e=u[s]s=u[g]M=W(e,s)W=D(-39633)k=M-Z B=k[W]k=B B=k<Y B=B and 15422260 or 15341267 elseif B<15217745 then B=L and 16004825 or 2617872 elseif B<15286060 then B=x and 11376852 or 10105800 else L=f[S[6]]a,Q=Z,1 B=L[a]L=D(-39637)B[L]=Q a,B=nil,14107767 end end else if 15415824>B then if 15342831>B then k,B=nil,7269592 elseif 15351270>B then a,i=Q(H,a)B=a and 15090694 or 12192714 elseif 15383766>B then Q=L B,L=Q and 16535123 or 10512135,Q else K,i,I,B,U=nil,nil,nil,14340889,nil end else if 15455801>B then e,B,s,M=D(-39495),k,D(-39447),D(-39630)Y=B B,W=15341267,{[M]=i,[e]=U,[s]=K}J=W elseif 15509090>B then B,L=Y,Z B=15052152 elseif 15553787>B then B,x=5426285,D(-39594)U=i[x]K=U else B=D(-39509)B=U[B]B=B(U)B=6608595 end end end end else if B<13961826 then if B>13056106 then if B<13374464 then if B<13179251 then B=D(-39509)B=Q[B]B=B(Q)B=4076459 elseif 13258009>B then I=D(-39561)Q=l[I]i,I,K=255,D(-39452),100 a=Q[I]I=0 Q=a(I,i,K)B,J=2398438,Q elseif 13312951>B then L,G,J=D(-39626),n[1],D(-39503)B=l[L]L=B()Y=l[J]T=L J=Y()Z,h=not J,{V(2,P(n))}B,L=Z and 10295068 or 15052152,Z else L=f[S[1]]G=D(-39594)B=L[G]G=B L,B=G,G and 12482163 or 8609821 end else if 13403382>B then B=f[S[1]]B=B and 2677892 or 12758986 elseif B<13498427 then B=f[S[1]]J,L=D(-39542),D(-39574)L=B[L]L=L(B,J)J=L B,L=J and 15132764 or 10538085,J elseif B<13698121 then G=f[S[1]]h=D(-39498)L=G[h]Z=D(-39545)T=l[Z]Z=D(-39498)h=T[Z]T=D(-39592)G=h[T]B=L==G B=B and 5239120 or 3561824 else G=D(-39594)L=f[S[1]]B=L[G]G=B B,L=G and 14513316 or 10653126,G end end else if B>12790854 then if B<12888980 then L,B={L},l[D(-39611)]elseif 12959126>B then B=L and 14498429 or 11221431 elseif B<12982752 then B=f[S[1]]T=f[S[1]]L,Z=D(-39551),D(-39551)h=T[Z]G=not h B[L]=G G=D(-39551)L=f[S[1]]B=L[G]B=B and 12603971 or 2401514 else Z,Y,T=D(-39574),D(-39511),B Z=G[Z]Z=Z(G,Y)h,B=Z,Z and 669114 or 10288094 end else if B>12691131 then if 12746560>B then B=f[S[1]]B=B and 7528763 or 6830544 else B,L=l[D(-39519)],{}end else if B<12605144 then B=f[S[2]]T,G,L=D(-39561),D(-39650),D(-39481)B[L]=G L,Z=D(-39547),200 B=f[S[2]]h=l[T]T=D(-39452)G=h[T]Y,T=100,0 h=G(T,Z,Y)B[L]=h B=4054325 elseif B<12627222 then h=D(-39496)L=f[S[1]]Q,T=D(-39608),D(-39529)B=L[h]h=B L=l[T]Y,Z,T=1,20,D(-39610)B=L[T]T=G*Z Z=0 L=B(T,Z,Y)T,Y=L,D(-39608)Z=h[Y]Y=D(-39524)L=Z[Y]a=f[S[2]]I=D(-39555)H=a[Q]a,Q=D(-39524),D(-39608)J=H[a]a=h[Q]Q=D(-39524)H=a[Q]Y=J-H Z=Y*T J=D(-39555)B=L+Z Z=B Y=h[J]J=D(-39524)L=Y[J]Q=f[S[2]]a=Q[I]I,Q=D(-39555),D(-39524)H=a[Q]Q=h[I]I=D(-39524)a=Q[I]J=H-a Y=J*T Q,h=0,nil B=L+Y Y=B B=f[S[1]]L,a=D(-39496),D(-39583)H=l[a]a=D(-39562)J=H[a]a=0 H=J(a,Z,Q,Y)B[L]=H B,Z,T,Y=148447,nil,nil,nil else B,Z=1777763,not T L=Z end end end end else if B>14492239 then if 14628612>B then if 14505872>B then B=f[S[4]]B=B and 15662994 or 942502 elseif 14538314>B then h,B=D(-39574),10653126 h,T=G[h],D(-39500)h=h(G,T)L=h elseif 14586666>B then L=f[S[1]]B=not L f[S[1]]=B L=f[S[1]]B=L and 4834213 or 8201121 else Y=f[S[2]]J=Y()Z,T=not J,L B,L=Z and 12955238 or 4111057,Z end else if B<14741080 then Y=D(-39630)B=f[S[2]]Z=f[S[3]]T=Z[Y]Z=D(-39594)h=T[Z]L=B(h)B=f[S[4]]B=B and 7517196 or 2049812 elseif B<14841655 then B=I and 1915839 or 14340889 elseif 14855259>B then B=Y B,h=16536070,Z else K,x=D(-39580),1 L=l[K]K=D(-39562)B=L[K]K,U=D(-39624),D(-39602)L=B(K)i,B,K=L,D(-39451),D(-39661)i[B]=K B=D(-39680)K=l[U]i[B]=K K=O()B={}f[K]=B U=O()B=15 f[U]=B u=f[U]k,B=u,5135620 u=1 W=u u=0 M=W<u u=x-W end end else if B<14341788 then if B<14195977 then if 14109263>B then Z=J+Z L,a=Z<=Y,not H L=a and L a=Y<=Z a=H and a L=a or L a=15333572 B=L and a L=9903430 B=B or L elseif B<14151124 then T=D(-39580)L=l[T]T=D(-39562)B=L[T]T,i,Z=D(-39625),D(-39479),D(-39450)L=B(T)T=O()f[T]=L L=D(-39451)B=f[T]Q=D(-39608)B[L]=Z B=f[T]Z,L=14610685<=6200047,D(-39504)B[L]=Z Z,L=2092502<10133200,D(-39471)B=f[T]B[L]=Z Z=G B=f[T]L=D(-39680)B[L]=Z U,Z=D(-39583),D(-39602)L=l[Z]Z=D(-39640)B=L[Z]L,x,Z=D(-39484),0,B B=Z[L]Y=B B,L=220,175 H=L a=Y[Q]J,Q,I=B,2,D(-39555)L=a/Q Q,M=2,0 a=J/Q B=L-a a,k=B,1 Q=Y[I]I=2 L=Q/I I=2 Q=H/I B=L-Q I=D(-39580)L=l[I]y,I,Q=32,D(-39562),B B=L[I]I=D(-39589)L=B(I)I=O()f[I]=L B=f[I]L=D(-39451)B[L]=i B=f[I]L=D(-39641)K=l[U]U=D(-39459)i=K[U]t=D(-39583)K=i(J,H)B[L]=K L=D(-39496)B=f[I]U=D(-39583)K=l[U]U=D(-39562)i=K[U]U=0 K=i(U,a,x,Q)B[L]=K B=f[I]u,L,U=15,D(-39568),D(-39620)K=l[U]U,c=D(-39562),0 i=K[U]U,x=0,0 K=i(U,x)w=-30 B[L]=K L,U=D(-39547),D(-39561)B=f[I]K=l[U]U=D(-39452)i=K[U]x,U=15,15 K=i(U,x,u)i=0 B[L]=K L=D(-39631)B=f[I]x=8 B[L]=i B=f[I]i=f[T]L=D(-39680)B[L]=i i=D(-39580)L=l[i]U,i=D(-39578),D(-39562)B=L[i]K=f[I]i=D(-39649)L=B(i,K)K=l[U]B,U=D(-39572),D(-39562)i=K[U]U=0 K=i(U,x)u,x,i=255,0,D(-39580)L[B]=K U=D(-39561)L=l[i]i=D(-39562)B=L[i]i=D(-39669)L=B(i)B,i=D(-39466),L K=l[U]U=D(-39452)L=K[U]W,U=-6,170 K=L(U,x,u)i[B]=K L,m,B=2,0,D(-39614)i[B]=L BI,B,K=25,D(-39680),D(-39580)L=f[I]i[B]=L L=l[K]x,K=D(-39583),D(-39562)B=L[K]u,Y,K=-6,nil,D(-39589)L=B(K)K=L U=l[x]B,DI,Z,x=D(-39641),0,nil,D(-39562)L=U[x]x=1 U=L(x,u,k,W)K[B]=U k,x=0,D(-39583)U=l[x]g,W,x=0,3,D(-39562)L=U[x]x,u,B=0,3,D(-39496)U=L(x,u,k,W)k=15 K[B]=U B,x,u=D(-39547),D(-39561),15 U=l[x]x=D(-39452)L=U[x]x,W=15,1 U=L(x,u,k)L=9095682~=8927516 K[B]=U B=D(-39671)K[B]=L L=f[I]B,U=D(-39680),D(-39580)K[B]=L L=l[U]U=D(-39562)B=L[U]U,u=D(-39649),D(-39578)L=B(U,K)x=l[u]k,u,B=6,D(-39562),D(-39572)U=x[u]u=0 x=U(u,k)L[B]=x U=D(-39580)L=l[U]U=D(-39562)B=L[U]U,k=D(-39569),0 L=B(U)B,u,U=D(-39641),D(-39583),L x=l[u]u,e=D(-39562),0 L=x[u]u=1 x=L(u,k,W,M)L=1 U[B]=x B=D(-39617)U[B]=L L,k,M,B=D(-39655),D(-39545),1,D(-39462)U[B]=L u=l[k]B,k=D(-39534),D(-39534)x=u[k]u=D(-39448)L=x[u]U[B]=L k,L,B=D(-39583),K,D(-39680)U[B]=L z,x=0,D(-39580)L=l[x]s,x=30,D(-39562)B=L[x]x=D(-39589)L=B(x)x=L u=l[k]B,W,k=D(-39641),0,D(-39562)L=u[k]k,G=1,nil u=L(k,W,M,e)x[B]=u B,W,k=D(-39547),0,D(-39561)u=l[k]k,M=D(-39452),0 L=u[k]k=0 u=L(k,W,M)x[B]=u L,B,M=.35,D(-39617),0 x[B]=L L,B,W=0,D(-39631),D(-39583)x[B]=L u,B,L=D(-39580),D(-39680),K x[B]=L L=l[u]u=D(-39562)B=L[u]u=D(-39589)L=B(u)u,B=L,D(-39641)k=l[W]e,W=0,D(-39562)L=k[W]W=1 k=L(W,M,e,s)W,s=D(-39561),1 u[B]=k k=l[W]M,B,W=0,D(-39547),D(-39452)L=k[W]W,e=0,0 k=L(W,M,e)u[B]=k k,B,L,M=D(-39580),D(-39617),.4,D(-39583)u[B]=L e,L,B=-60,0,D(-39631)u[B]=L B,L=D(-39680),x u[B]=L L=l[k]k=D(-39562)B=L[k]k=D(-39458)L=B(k)PI,k=1,L W=l[M]M,B=D(-39562),D(-39641)L=W[M]M=1 W=L(M,e,s,g)k[B]=W B,M,s,g=D(-39496),D(-39583),0,0 W=l[M]M=D(-39562)L=W[M]e,M=10,0 W=L(M,e,s,g)k[B]=W B,L=D(-39617),1 k[B]=L B,L=D(-39481),D(-39566)k[B]=L B,M=D(-39598),D(-39561)W=l[M]i,s,M=nil,255,D(-39452)L=W[M]e,M=255,255 W=L(M,e,s)k[B]=W s,B,e=D(-39583),D(-39454),D(-39545)M=l[e]e=D(-39454)W=M[e]M=D(-39480)L=W[M]k[B]=L e,B=D(-39545),D(-39659)M=l[e]j,e=0,D(-39659)W=M[e]M=D(-39591)L=W[M]k[B]=L W,L,B=D(-39580),13,D(-39636)k[B]=L B,L=D(-39680),u k[B]=L L=l[W]W=D(-39562)B=L[W]W=D(-39463)L=B(W)W=O()f[W]=L B=f[W]g,L=30,D(-39641)e=l[s]s=D(-39459)M=e[s]s=30 e=M(s,g)B[L]=e s,g=D(-39583),-60 B=f[W]L=D(-39496)e=l[s]s=D(-39562)M=e[s]s=1 e=M(s,g,z,m)B[L]=e M=1 B=f[W]L=D(-39617)B[L]=M z=255 B=f[W]M,L=D(-39483),D(-39481)B[L]=M m,s,L=0,D(-39561),D(-39598)B=f[W]e=l[s]s=D(-39452)M=e[s]g,s=255,255 e=M(s,g,z)B[L]=e g=D(-39545)B=f[W]L=D(-39659)s=l[g]g=D(-39659)e=s[g]s=D(-39591)M=e[s]B[L]=M B=f[W]L,M,g=D(-39636),20,30 B[L]=M M,z,L=u,0,D(-39680)B=f[W]B[L]=M M=D(-39580)L=l[M]M=D(-39562)B=L[M]M=D(-39463)L=B(M)B,M,s,lI=D(-39641),L,D(-39583),0 e=l[s]s=D(-39459)L=e[s]s=30 e=L(s,g)M[B]=e B,s=D(-39496),D(-39583)e=l[s]s,g=D(-39562),-30 L=e[s]s=1 e=L(s,g,z,m)M[B]=e L,B,s=1,D(-39617),D(-39561)M[B]=L L,B=D(-39608),D(-39481)M[B]=L e=l[s]z,B,s=50,D(-39598),D(-39452)L=e[s]s,g=255,50 e=L(s,g,z)g=D(-39545)M[B]=e m=O()s=l[g]z=O()g,B=D(-39659),D(-39659)e=s[g]s=D(-39591)L=e[s]M[B]=L L,B,K=16,D(-39636),nil M[B]=L L,B,s=u,D(-39680),nil g=O()e=nil M[B]=L L,B=nil,nil f[g]=B f[z]=L f[m]=e e=O()f[e]=s s=D(-39496)L=f[I]B=L[s]L=D(-39506)s=O()f[s]=B B=u[L]L=D(-39658)L=B[L]F=p(10836726,{g,m;I,e,s})L=L(B,F)L=D(-39645)F=d(832721,{z})B=u[L]L=D(-39658)L=B[L]L=L(B,F)L=f[S[1]]F=D(-39645)B=L[F]F=q(135999,{z,g,m;e,I;s})L=D(-39658)L=B[L]L=L(B,F)L=f[S[2]]F=D(-39527)B=L[F]L=D(-39658)L=B[L]F=o(8285897,{I;s})L=L(B,F)F=D(-39580)L=l[F]F=D(-39562)B=L[F]F=D(-39589)L=B(F)B,F=D(-39641),L X=l[t]t=D(-39562)L=X[t]H,t=nil,1 X=L(t,j,PI,w)J,j,t=nil,0,D(-39583)F[B]=X PI,B=0,D(-39496)X=l[t]t=D(-39562)L=X[t]t,w=0,30 X=L(t,j,PI,w)L=1 F[B]=X B,X=D(-39617),D(-39580)F[B]=L B,L=D(-39680),x F[B]=L L=l[X]PI,X,a=D(-39583),D(-39562),nil B=L[X]w,X=-20,D(-39463)L=B(X)X=O()f[X]=L L=D(-39641)B=f[X]j=l[PI]PI=D(-39562)t=j[PI]PI=1 j=t(PI,w,c,y)y=8 B[L]=j B=f[X]L,PI=D(-39496),D(-39583)j=l[PI]PI,w,c=D(-39562),10,0 t=j[PI]U,PI=nil,0 j=t(PI,w,c,y)B[L]=j w=50 B=f[X]PI=D(-39561)j=l[PI]L,PI,b=D(-39547),D(-39452),32 t=j[PI]c,PI=50,200 j=t(PI,w,c)B[L]=j t,L=D(-39565),D(-39481)B=f[X]B[L]=t L=D(-39598)B=f[X]c,PI=255,D(-39561)j=l[PI]PI,w=D(-39452),255 t=j[PI]PI=255 j=t(PI,w,c)w=D(-39545)B[L]=j L=D(-39659)B=f[X]PI=l[w]w=D(-39659)j=PI[w]y,PI,w=0,D(-39591),4 t=j[PI]c=-20 B[L]=t B=f[X]L,t,PI=D(-39636),11,D(-39578)B[L]=t L=D(-39680)B=f[X]t=F B[L]=t t=D(-39580)L=l[t]t=D(-39562)B=L[t]t=D(-39649)j=f[X]L=B(t,j)j=l[PI]B,PI=D(-39572),D(-39562)t=j[PI]PI=0 j=t(PI,w)t=D(-39580)L[B]=j L=l[t]t=D(-39562)B=L[t]t,w=D(-39463),D(-39583)L=B(t)t=O()f[t]=L L=D(-39641)B=f[t]PI=l[w]w=D(-39562)j=PI[w]w=1 PI=j(w,c,y,b)y,w=0,D(-39583)B[L]=PI c=10 B=f[t]L=D(-39496)PI=l[w]w,b=D(-39562),46 j=PI[w]w=0 PI=j(w,c,y,b)w,c,y=D(-39561),50,50 e=v(e)u=nil B[L]=PI B=f[t]L=D(-39547)PI=l[w]w=D(-39452)j=PI[w]w=200 PI=j(w,c,y)B[L]=PI w,y,j=D(-39561),255,D(-39652)B=f[t]R,L=1,D(-39481)B[L]=j L=D(-39598)B=f[t]PI=l[w]w=D(-39452)j=PI[w]w,c=255,255 PI=j(w,c,y)B[L]=PI L,c=D(-39659),D(-39545)B=f[t]w=l[c]c=D(-39659)PI=w[c]w,b=D(-39591),15 j=PI[w]B[L]=j B=f[t]j,y,L=11,0,D(-39636)B[L]=j j=F B=f[t]L=D(-39680)B[L]=j j,w=D(-39580),D(-39578)L=l[j]j=D(-39562)B=L[j]PI=f[t]j=D(-39649)L=B(j,PI)c,B=4,D(-39572)PI=l[w]w=D(-39562)j=PI[w]w=0 PI=j(w,c)c,j,w=-20,D(-39580),D(-39583)L[B]=PI L=l[j]j=D(-39562)B=L[j]j=D(-39458)L=B(j)j,B=L,D(-39641)PI=l[w]w=D(-39562)L=PI[w]w=1 PI=L(w,c,y,b)j[B]=PI B=D(-39496)z=v(z)b,w=85,D(-39583)PI=l[w]w=D(-39562)L=PI[w]y,c,w=0,10,0 PI=L(w,c,y,b)c=200 j[B]=PI L,B,w=1,D(-39617),D(-39561)j[B]=L L,B=D(-39465),D(-39481)j[B]=L PI=l[w]w,y,B=D(-39452),200,D(-39598)L=PI[w]w=200 PI=L(w,c,y)y,c=-20,D(-39545)j[B]=PI B=D(-39659)w=l[c]c=D(-39659)PI=w[c]w=D(-39570)L=PI[w]j[B]=L L,B=10,D(-39636)j[B]=L PI,L,B=D(-39580),F,D(-39680)j[B]=L c=D(-39583)L=l[PI]PI=D(-39562)B=L[PI]PI,b=D(-39589),0 L=B(PI)PI=L w=l[c]c=D(-39562)L=w[c]B,c=D(-39641),1 w=L(c,y,b,BI)PI[B]=w B,c=D(-39496),D(-39583)w=l[c]b,y,c=0,10,D(-39562)L=w[c]c,BI=0,102 w=L(c,y,b,BI)PI[B]=w L,y,B=1,D(-39583),D(-39617)PI[B]=L B,L,b,w=D(-39680),F,40,D(-39580)PI[B]=L L=l[w]BI,w=1,D(-39562)B=L[w]w=D(-39463)L=B(w)w=L c=l[y]B,y=D(-39641),D(-39562)L=c[y]y=0 c=L(y,b,BI,lI)w[B]=c y,B=D(-39561),D(-39547)c=l[y]y=D(-39452)L=c[y]BI=50 g=v(g)y,b=255,50 c=L(y,b,BI)L,y=D(-39483),D(-39561)w[B]=c B,x=D(-39481),nil w[B]=L c=l[y]Q,BI,y,B,b=nil,255,D(-39452),D(-39598),255 L=c[y]y=255 c=L(y,b,BI)b=D(-39545)w[B]=c y=l[b]b,B=D(-39659),D(-39659)c=y[b]y=D(-39591)L=c[y]w[B]=L BI,B,L=4,D(-39636),16 w[B]=L L,b,c,B=PI,D(-39578),D(-39580),D(-39680)w[B]=L L=l[c]c=D(-39562)B=L[c]c=D(-39649)L=B(c,w)y=l[b]b,B=D(-39562),D(-39572)c=y[b]b=0 y=c(b,BI)c,BI=D(-39580),D(-39583)L[B]=y L=l[c]lI,c=-90,D(-39562)B=L[c]c=D(-39458)L=B(c)c=O()f[c]=L B=f[c]L=D(-39641)b=l[BI]BI=D(-39562)y=b[BI]BI=1 b=y(BI,lI,R,DI)B[L]=b L,BI,R=D(-39496),D(-39583),0 B=f[c]b=l[BI]BI,DI,lI=D(-39562),0,45 y=b[BI]BI=0 b=y(BI,lI,R,DI)B[L]=b lI,BI=0,D(-39561)B=f[c]R,L=0,D(-39547)b=l[BI]BI=D(-39452)y=b[BI]DI,BI=D(-39539),0 b=y(BI,lI,R)y=.5 B[L]=b L,BI=D(-39617),D(-39538)B=f[c]B[L]=y L=D(-39481)B=f[c]b=l[BI]BI=D(-39473)y=b[BI]BI=D(-39600)R=f[S[3]]F=nil lI=R[DI]b=y(BI,lI)B[L]=b BI,R=D(-39561),255 B=f[c]DI=0 b=l[BI]BI=D(-39452)y=b[BI]L,lI,BI=D(-39598),255,255 b=y(BI,lI,R)B[L]=b lI=D(-39545)B=f[c]BI=l[lI]lI,L=D(-39659),D(-39659)b=BI[lI]BI=D(-39591)y=b[BI]B[L]=y L,y=D(-39636),13 B=f[c]B[L]=y lI,BI=4,D(-39578)B=f[c]y,L=PI,D(-39680)B[L]=y y=D(-39580)L=l[y]y=D(-39562)B=L[y]y=D(-39649)b=f[c]L=B(y,b)b=l[BI]BI,B=D(-39562),D(-39572)y=b[BI]BI=0 b=y(BI,lI)lI=40 L[B]=b BI,y=D(-39583),D(-39580)L=l[y]y=D(-39562)B=L[y]y=D(-39463)L=B(y)B=D(-39641)b=l[BI]y,BI,R=L,D(-39562),1 L=b[BI]BI=0 b=L(BI,lI,R,DI)y[B]=b B,BI,DI=D(-39496),D(-39583),0 b=l[BI]BI=D(-39562)L=b[BI]R,lI,BI=0,-40,1 b=L(BI,lI,R,DI)j,BI=nil,D(-39561)y[B]=b B=D(-39547)b=l[BI]BI=D(-39452)L=b[BI]R,BI,lI=100,0,200 b=L(BI,lI,R)BI=D(-39561)y[B]=b B,L=D(-39481),D(-39456)y[B]=L B=D(-39598)b=l[BI]BI,lI,R=D(-39452),255,255 L=b[BI]BI=255 b=L(BI,lI,R)y[B]=b lI,h=D(-39545),nil BI=l[lI]B,lI=D(-39659),D(-39659)b=BI[lI]BI=D(-39591)L=b[BI]y[B]=L B=D(-39636)s=v(s)L=16 y[B]=L B,b,R,L=D(-39680),D(-39580),4,PI y[B]=L L=l[b]lI,b=D(-39578),D(-39562)B=L[b]b=D(-39649)L=B(b,y)BI=l[lI]lI,B=D(-39562),D(-39572)b=BI[lI]lI=0 BI=b(lI,R)L[B]=BI L=f[X]b=D(-39581)B=L[b]L,lI=D(-39658),D(-39581)L=B[L]b=A(1114694,{S[3],X})L=L(B,b)L=f[t]b=D(-39581)B=L[b]b=o(12963014,{S[3],t})L=D(-39658)L=B[L]L=L(B,b)b=O()B=C(7665758,{c;S[3]})f[b]=B t=v(t)L=D(-39581)m=v(m)B=y[L]L=D(-39658)L=B[L]BI=C(2557229,{S[3],b})L=L(B,BI)L=D(-39581)BI=C(5619637,{S[3];b})B=w[L]w,L=nil,D(-39658)L=B[L]L=L(B,BI)y,B=nil,6352449<2328721 b=v(b)BI=O()f[BI]=B L=f[W]k=nil B=L[lI]L=D(-39658)X=v(X)L,PI=B[L],nil lI=E(14563313,{BI,W;S[4],I})L=L(B,lI)lI=A(2903058,{T})c=v(c)W=v(W)L=D(-39581)B=M[L]I=v(I)L=D(-39658)T=v(T)BI=v(BI)L=B[L]L=L(B,lI)M,L,B=nil,{},l[D(-39607)]else B=934581~=8132078 L={B}B=l[D(-39604)]end else if B<14270677 then Y,T=D(-39629),D(-39590)h=l[T]Z=l[Y]T=h(Z)h=D(-39482)G=T==h B,L=G and 5169840 or 15196941,G else a,B,Q=nil,8802615,nil end end else if B<14369534 then Q,I=D(-39594),D(-39675)B=a[Q]Q=D(-39574)Q=B[Q]Q=Q(B,I)B=Q and 13109722 or 4076459 elseif B<14426321 then B,L=l[D(-39457)],{}elseif B<14471155 then L,B,T,h,G,Z={},l[D(-39449)],nil,nil,nil,nil else s,M=D(-39508),D(-39447)W=f[Z]k=W[M]M=D(-39647)z=D(-39672)W=k[M]M=O()f[M]=W W=nil e=O()B=3316160 g=d(5824539,{M,S[5],Z;e})f[e]=W W=k[s]s,k=D(-39658),nil s=W[s]s=s(W,g)f[e]=s M=v(M)m=C(13390266,{e})g=l[z]z=D(-39523)W=g[z]z=2 e=v(e)g=W(z,m)end end end end end end else if B<4137486 then if B>2010699 then if 2861019>B then if B>2479371 then if 2642417>B then if B<2572675 then Z=D(-39539)B=f[S[1]]L=D(-39539)T=f[S[1]]h=T[Z]T=.001 G=h+T B[L]=G B=f[S[2]]L=B()B,L=l[D(-39486)],{}elseif 2593962>B then Y,Q=L,D(-39518)a=f[S[2]]H=a[Q]J=not H B,L=J and 10752205 or 7177285,J elseif B<2608837 then L=D(-39666)B=G[L]B=B and 11904791 or 14191489 else L,B={},l[D(-39546)]end else if B<2672427 then J,L=12544642~=10293170,D(-39541)B=f[S[3]]B[L]=J B=136655 elseif 2745589>B then L=D(-39667)B=f[S[1]]L=B[L]L=L(B)B=12758986 elseif 2816134>B then B,a=2364136,D(-39561)H=l[a]a=D(-39452)J=H[a]I,a,Q=255,170,0 H=J(a,Q,I)Y=H else T=f[S[1]]Z=D(-39680)h=T[Z]L,B=h,5519511 end end else if 2187047>B then if B>2110743 then if 2148592>B then B=f[S[2]]L={B(G,P(h))}L,B={P(L)},l[D(-39505)]else B=13916576~=15537166 L={B}B=l[D(-39537)]end else if B<2047973 then L,B={},l[D(-39605)]elseif B<2076308 then B=3193222 else B=D(-39509)B=i[B]B=B(i)B=14862162 end end else if B<2279864 then T=D(-39666)h=f[S[1]]L=h[T]h=D(-39451)B=L[h]L=D(-39653)L=B[L]L=L(B)h,B=L,D(-39475)B,L=h[B],D(-39510)B=B(h,L)B=B and 2178502 or 6690013 elseif B<2381287 then H=f[S[5]]J,B,a=1,859770,H H=1 Q=H H=0 I=Q<H H=J-Q elseif 2399976>B then B,Y=H,J B=J and 2364136 or 2813287 else L=D(-39481)B=f[S[2]]G,T,Y=D(-39652),D(-39561),50 B[L]=G L=D(-39547)B=f[S[2]]h=l[T]T=D(-39452)G=h[T]T,Z=200,50 h=G(T,Z,Y)B[L]=h B=4054325 end end end else if B<3785022 then if B<3400355 then if B<3324111 then if B<3048140 then L=D(-39509)B=f[S[1]]L=B[L]L=L(B)B,L=l[D(-39490)],{}elseif 3254691>B then G,L,B=nil,{},l[D(-39642)]else i,U,K,I,B,a,u,Q,H,J,x=nil,nil,nil,nil,11462214,nil,nil,nil,nil,nil,nil end else if 3333456>B then B=f[S[7]]J,H=D(-39466),Y B[J]=H B=not Z B=B and 4540294 or 6572378 else I,B,Q=D(-39627),15358144,D(-39574)Q=a[Q]Q=Q(a,I)L=Q end end else if 3513843>B then G,B,L=n[1],D(-39574),D(-39511)B=G[B]B=B(G,L)h=B B=not h B=B and 16727412 or 16303563 elseif 3599130>B then B,L=l[D(-39679)],{}elseif 3655248>B then B=T and 13416498 or 136655 else L,B={},l[D(-39587)]end end else if B<4001146 then if 3905439>B then B,Z=4163915,D(-39478)T=l[Z]Z=T()G=Z elseif 3922923>B then B,a,H=16764779,nil,nil elseif 3949140>B then Z=1 Y=f[S[5]]J=Y Y=1 H,B=Y,15911417 Y=0 a=H<Y Y=Z-H else u=D(-39580)x=l[u]u=D(-39562)B=x[u]u=D(-39495)z=p(8823066,{a})x=B(u)s=.8 u=O()f[u]=x x,e,k=D(-39451),D(-39545),D(-39615)B=f[u]B[x]=k B=f[u]M=l[e]x,e=D(-39494),D(-39621)W=M[e]M=D(-39554)k=W[M]e,M=.8,D(-39474)B[x]=k B=f[u]W=l[M]x,M=D(-39641),D(-39562)k=W[M]M=.8 W=k(M,e,s)k=15321238~=735459 B[x]=W B=f[u]x,e=D(-39560),D(-39545)B[x]=k x,k=D(-39535),12624609<=7226563 B=f[u]B[x]=k s,x=255,D(-39549)B=f[u]M=l[e]e=D(-39549)W=M[e]M=D(-39573)k=W[M]B[x]=k e,x=0,D(-39466)B=f[u]M=D(-39561)W=l[M]M=D(-39452)k=W[M]M=170 W=k(M,e,s)B[x]=W W=O()B=f[u]x,k=D(-39637),1 B[x]=k k,g=i,D(-39597)B=f[u]x=D(-39680)B[x]=k i=nil x=O()M=O()s=O()B=C(13358663,{H})e=O()f[x]=B k=O()B=p(4551021,{H})f[k]=B B=d(525118,{a})f[W]=B B=p(13815885,{H;a,h;k,W})f[M]=B B=d(3465862,{J})f[e]=B B=E(16660702,{Q,H;M;a,e,Y})f[s]=B B=l[g]g=B(z)g=f[Z]z=D(-39506)B=g[z]z=q(9233218,{H,a;Q})g=D(-39658)g=B[g]g=g(B,z)g=f[Z]z=D(-39517)B=g[z]g=D(-39658)z=q(7497232,{Q;s})g=B[g]g=g(B,z)g=f[T]W=v(W)z=D(-39527)e=v(e)B=g[z]g=D(-39658)g=B[g]z=E(9194828,{H,x,a,I;U,K;u;h,M,k;Q})L={}K=v(K)U=v(U)h=v(h)H=v(H)g=g(B,z)Y=v(Y)z=D(-39672)g=l[z]x=v(x)z=D(-39628)B=g[z]z=o(15044193,{Z;T,a;J})Q=v(Q)Z=v(Z)g=B(z)M=v(M)s=v(s)a=v(a)g=D(-39532)J=v(J)u=v(u)B=l[g]T=v(T)z=D(-39643)k=v(k)I=v(I)g=B(z)B=l[D(-39497)]end else if 4044645>B then h,B=D(-39656),1010845 G=l[h]h,T=D(-39548),D(-39501)h=G[h]h=h(G,T)L=h elseif B<4065392 then L,B={},l[D(-39601)]elseif B<4093758 then Q,B=nil,3914893 else H=D(-39518)J=f[S[3]]Y=J[H]Z=not Y L,B=Z,12955238 end end end end else if B<862356 then if 512521>B then if B<257348 then if 142551>B then if 94574>B then J,Q=D(-39468),D(-39545)Y=G[J]a=l[Q]B,Q=5539802,D(-39468)H=a[Q]a=D(-39664)J=H[a]Z=Y==J h=Z elseif B<136327 then T=f[S[1]]G=n[1]h=G==T L,B=h,h and 10322832 or 12205862 else Z,T,B,h,L,G,Y=nil,nil,l[D(-39492)],nil,{},nil,nil end else if 159643>B then G,B,L=nil,l[D(-39670)],{}else B,Z=1261504,T end end else if B<396094 then U=D(-39648)L=J[U]u,U=18.7,D(-39584)B=L[U]U=B x=U*u L=x*i U=nil B=H+L K=B B=11025782 elseif 460332>B then a=f[S[11]]Q,B=D(-39541),1827902 H=a[Q]Y=H elseif 486128>B then Z=L B=Z and 8837465 or 14456261 else g=f[S[5]]z=1 s=U/g g=H m=f[S[5]]F,B=m,12001317 m=1 X=m m=0 t=m>X m=z-X end end else if B>701703 then if 761580>B then B=L and 864942 or 7160890 elseif 810795>B then B=5507759>11344148 L={B}B=l[D(-39660)]elseif 846245>B then Z,G,H=D(-39468),n[1],D(-39545)T=G[Z]J=l[H]H=D(-39468)Y=J[H]J=D(-39664)Z=Y[J]h=T==Z B,L=h and 9174308 or 11697494,h else i,H=not I,Q+H J=H<=a J=i and J i=a<=H i=I and i J=i or J i=11657583 B=J and i J=3332063 B=B or J end else if B>647445 then if B<660590 then h=L B,L=h and 5185054 or 8518789,h else B=T B,L=4323974,h end else if 556418>B then Z=f[S[1]]G,h,Y=n[1],D(-39574),D(-39665)h=G[h]T=Z[Y]h=h(G,T)L,B=h,h and 11572981 or 10671710 elseif B<615271 then B,L,G=l[D(-39525)],{},nil else U,K,B=nil,nil,12044779 end end end end else if B>1353688 then if 1710616>B then if 1487633>B then U,K=D(-39447),D(-39594)B=i[K]K=D(-39662)K=B[K]K=K(B,U)u=D(-39594)B=f[S[5]]x=i[u]U=B(x)x,B=K,K and 12151174 or 9056725 elseif B<1570728 then G,L,B=nil,{},l[D(-39552)]elseif 1614840>B then u=D(-39580)x=l[u]u=D(-39562)B=x[u]u=D(-39540)x=B(u)u,B,U=D(-39675),D(-39451),x U[B]=u B,u=D(-39680),I U[B]=u B=8706443 else L,G=D(-39574),D(-39567)B=f[S[1]]L=B[L]L=L(B,G)G=L L,B=G,G and 8499104 or 652067 end else if 1802832>B then B=L and 3674060 or 6787188 elseif 1871870>B then B=J B=not Y B=B and 7130905 or 10950303 elseif B<1945551 then i,I=D(-39447),D(-39594)B=Q[I]I=B B=D(-39662)B,K=I[B],Z B=B(I,i)i=B B=Z and 15593863 or 4913342 else I,L,G=10235718>4811864,D(-39656),n B=l[L]h,x,Q,L=D(-39571),450,D(-39663),D(-39548)L,T=B[L],D(-39477)L=L(B,h)h=O()f[h]=L L=D(-39656)B=l[L]L,W,U=D(-39548),D(-39515),D(-39595)L,z=B[L],7912714<=5194622 L=L(B,T)Z=D(-39563)T=O()f[T]=L Y,L=D(-39586),D(-39656)B=l[L]L,g,H,J,i,k=D(-39548),D(-39602),D(-39520),D(-39606),D(-39469),165 L=B[L]L=L(B,Z)Z=O()f[Z]=L L=D(-39656)B=l[L]L=D(-39548)L=B[L]L=L(B,Y)Y=O()f[Y]=L L,a=D(-39656),12094805<=1624716 B=l[L]L=D(-39548)L=B[L]L=L(B,J)m=D(-39539)J=O()f[J]=L L=f[h]B=L[H]H=O()K,u=8803550<10524736,D(-39678)f[H]=B s=l[g]g,L=D(-39515),D(-39518)e=s[g]s,g=.32,D(-39551)M=e*s e,s,F=D(-39665),D(-39500),.055 B={[L]=a;[Q]=I;[i]=K,[U]=x,[u]=k;[W]=M,[e]=s;[g]=z,[m]=F}a=O()Q,K,U,i,I,L=8273370<=1144979,D(-39493),8994014<7284227,nil,D(-39491),D(-39541)f[a]=B B={[L]=Q,[I]=i,[K]=U}Q=O()I=O()f[Q]=B i=p(14200466,{I})B,L=nil,D(-39597)f[I]=B B=l[L]L=B(i)i,L=D(-39661),D(-39602)B=l[L]L=D(-39574)L=B[L]L=L(B,i)i=L B=i and 2102804 or 14862162 end end else if B<1062769 then if B<955214 then if B<879541 then U=D(-39551)L=f[Z]J=D(-39495)B=L[J]a,L,J=D(-39678),D(-39496),B B=J[L]L=f[S[4]]Q,H=D(-39515),B B=L[a]a=B L=f[S[4]]B=L[Q]I=f[T]Q=B L=H-I I=D(-39633)B=L[I]K,I=H,B B=I/a i=B L=f[S[4]]B=L[U]B=B and 343856 or 11025782 elseif B<918321 then Z=O()L=D(-39496)Y=O()T=O()B=h[L]f[T]=B B=f[S[3]]L=B()f[Z]=L B=nil f[Y]=B J=f[Z]L,B=J,J and 4512642 or 734292 else L=1 Z=f[S[5]]Y=Z Z=1 J=Z Z=0 H=Z>J Z,B=L-J,14107767 end else if B<989385 then x,B=u,k B=15238549 else G=L L,B=D(-39450),D(-39574)B=G[B]B=B(G,L)h=B B=h and 10975946 or 14110759 end end else if B<1188099 then B=f[S[1]]T=f[S[1]]Z=D(-39518)h=T[Z]L,G=D(-39518),not h B[L]=G L=f[S[1]]G=D(-39518)B=L[G]B=B and 7764676 or 9449580 elseif 1273019>B then B=Z and 8257627 or 10074270 elseif B<1285944 then B=nil L={B}B=l[D(-39461)]else a,Y,H=D(-39455),B,D(-39599)H=G[H]H=H(G,a)a=11196785~=649143 J=H==a B,Z=J and 14848356 or 7878139,J end end end end end else if B>6519042 then if B>7634908 then if B<8351363 then if B>8091526 then if 8176894>B then H,T=D(-39484),D(-39602)L=l[T]Z,T=D(-39620),D(-39640)B=L[T]a,T,i=D(-39484),B,D(-39528)L=l[Z]Z=D(-39562)B=L[Z]J=T[H]H=D(-39608)Y=J[H]J=2 Z=Y/J H=T[a]a=D(-39555)J=H[a]H=2 Y=J/H L=B(Z,Y)Y,Z=D(-39595),L L=f[S[2]]B=L[Y]Y,L=B,D(-39585)B=nil J=B B=l[L]Q=f[S[3]]i=Q[i]I={i(Q)}Q={B(P(I))}H,L,B,a=Q[2],Q[1],15344396,Q[3]Q=L elseif B<8229374 then Q=D(-39545)L=f[S[2]]h,G=D(-39483),D(-39481)L[G]=h I,Y=D(-39545),D(-39579)L=f[S[3]]h=f[S[4]]Z=l[Y]Y=D(-39562)T=Z[Y]a=l[Q]Q=D(-39619)H=a[Q]G,a,Y=D(-39553),D(-39513),.3 J=H[a]Q=l[I]I=D(-39623)a=Q[I]Q,G=D(-39559),L[G]H=a[Q]Z=T(Y,J,H)Y,a=D(-39641),D(-39583)H=l[a]a,B=D(-39459),4688617 J=H[a]a,Q=220,175 H=J(a,Q)T={[Y]=H}G=G(L,h,Z,T)L=D(-39558)L=G[L]L=L(G)elseif B<8271762 then Z=D(-39489)B=f[S[4]]Y=6872292<=15639339 B[Z]=Y H=D(-39595)B=f[S[4]]Z=D(-39536)J=f[S[3]]I=D(-39484)Y=J[H]B[Z]=Y Z,H=D(-39496),D(-39620)B=f[S[4]]i=D(-39484)J=l[H]H=D(-39562)Y=J[H]Q=G[I]I=D(-39608)a=Q[I]Q=2 H=a/Q I=G[i]i=D(-39555)Q=I[i]I=2 a=Q/I J=Y(H,a)B[Z]=J B=10408925 else G=n[1]h=f[S[1]]B,L=h and 2818981 or 5519511,h end else if B>7849294 then if B<7954262 then a,H=D(-39455),D(-39599)H,B=G[H],14848356 H=H(G,a)a=14437444<266733 J=H==a Z=J else L=D(-39493)B=f[S[1]]G=13478105~=7521807 B[L]=G h=E(4446912,{S[1]})G=D(-39672)L=l[G]G=D(-39523)B=L[G]G=2 L=B(G,h)G=D(-39594)L=f[S[2]]B=L[G]G=B B,L=G and 13002490 or 4323974,G end else if B<7715217 then L,J=D(-39481),D(-39539)B=f[S[1]]T=D(-39538)h=l[T]T=D(-39473)G=h[T]Y=f[S[2]]Z=Y[J]T=D(-39600)h=G(T,Z)B[L]=h L,B={},l[D(-39673)]elseif B<7792562 then L,T=D(-39481),D(-39561)B=f[S[2]]G=D(-39576)B[L]=G Y,L=100,D(-39547)B=f[S[2]]h=l[T]Z,T=200,D(-39452)G=h[T]T=0 h=G(T,Z,Y)B[L]=h B=11467307 else L,B={},l[D(-39593)]end end end else if 8565040>B then if B<8457966 then B=G f[S[1]]=B B=6478779 elseif 8508946>B then h=D(-39574)h,B,T=G[h],652067,D(-39622)h=h(G,T)L=h elseif B<8519524 then T=L L,B=T,T and 4560905 or 472331 else a=H i=f[S[10]]K=i(Q)I,B=K,K and 15658825 or 14834954 end else if 8630766>B then B=L and 10567109 or 10464051 elseif B<8679077 then h,H=D(-39496),D(-39608)L=G[h]h=f[S[3]]T=D(-39602)B=L-h L=l[T]h,T=B,D(-39640)B=L[T]T,L=B,D(-39484)B=T[L]Z=B J=f[S[4]]Y=J[H]a,J=D(-39555),D(-39524)L=Y[J]J=D(-39608)Y=h[J]B=L+Y Y,U=B,D(-39555)H=f[S[4]]J=H[a]H=D(-39524)L=J[H]T,H=nil,D(-39555)J=h[H]a=D(-39530)B=L+J J=B H=f[S[5]]L=H[a]K,H=D(-39608),D(-39608)B=L[H]Q=D(-39530)a=f[S[5]]H=B L=a[Q]a,Q=D(-39555),D(-39529)B=L[a]L=l[Q]a,Q=B,D(-39610)B=L[Q]Q=0 i=Z[K]I=i-H H=nil L=B(Y,Q,I)h,Y,I=nil,L,D(-39529)Q=l[I]I=D(-39610)B=Q[I]K=Z[U]i=K-a I=0 Q=B(J,I,i)K,Z,J,i=0,nil,Q,D(-39583)I=l[i]i=D(-39562)B=I[i]i=0 I=B(i,Y,K,J)f[S[6]]=I a,J,Y,B=nil,nil,nil,1555245 elseif B<8754529 then B,M,W=D(-39603),255,D(-39561)k=l[W]W=D(-39452)u=k[W]e,W=100,0 k=u(W,M,e)U[B]=k B,M,u=D(-39582),255,.65 U[B]=u B,e,W=D(-39557),150,D(-39561)k=l[W]W=D(-39452)u=k[W]W=0 k=u(W,M,e)u=.4 U[B]=k B=D(-39564)U[B]=u B=15409389 else H,Q=Y(J,H)B=H and 8520259 or 4712432 end end end else if B<7079007 then if 6808866>B then if B>6649304 then if B<6738600 then h,B=nil,6559305 else L=f[S[1]]Z=D(-39594)B=L[Z]Z=B L,B=Z,Z and 16231970 or 2588122 end else if 6565841>B then L,B=G,G and 14998118 or 12822722 elseif B<6590486 then a,H=D(-39511),D(-39574)H=h[H]H=H(h,a)J,B=H,H and 15716108 or 16496436 else B=15409389 end end else if B<6881939 then L,B={},l[D(-39632)]elseif 6937157>B then L,h=D(-39491),nil B=f[S[1]]B[L]=h B=15637287 elseif B<6984045 then W=D(-39648)k=a[W]e,W=18.7,D(-39584)B=k[W]k=B M=k*e W=M*U B=Q+W k,u=nil,B B=9946843 else a,Q,B=D(-39574),D(-39634),11838758 a=H[a]a=a(H,Q)L=a end end else if B<7383412 then if 7145897>B then B,L=l[D(-39575)],{}elseif 7169087>B then B,I=11462214,D(-39602)Q=l[I]I=D(-39640)a=Q[I]Q=D(-39648)H=a[Q]a=D(-39584)J=H[a]f[Y]=J elseif B<7223438 then J,B=not Y,10752205 L=J else x,u,B=nil,nil,642824 end else if B<7507214 then Z=D(-39541)T=f[S[1]]G=n[1]h=T[Z]B,L=h and 12121066 or 4806666,h elseif 7522979>B then B=f[S[4]]L=D(-39667)L=B[L]L=L(B)B=2049812 elseif B<7566411 then B=f[S[1]]L=D(-39509)L=B[L]L=L(B)B=6830544 else h,B=nil,14191489 end end end end else if 4968172>B then if B>4591234 then if B<4759549 then if B<4642450 then a,Q,H=D(-39495),D(-39496),D(-39496)B=J[H]H=B B=Z[a]a,i=B,D(-39678)B=a[Q]I=f[S[3]]Q,W=B,D(-39551)B=I[i]K,I=D(-39515),B i=f[S[3]]B=i[K]U,i=D(-39633),B K=Q-H B=K[U]K=B B=K/I k=f[S[3]]U,u=B,Q B=k[W]B=B and 6940981 or 9946843 elseif B<4688378 then k=D(-39496)u=U[k]k=D(-39522)k=T[k]k={k(T,u)}x,B=k[2],k[1]u=B B=x and 15156140 or 7269592 elseif 4700524>B then L,B={},l[D(-39526)]else J=B B,Y=T and 448333 or 1827902,T end else if 4819906>B then B=L and 12594489 or 587719 elseif B<4833680 then B,L=l[D(-39681)],{}elseif 4873777>B then L=f[S[2]]G,Y,B,h=D(-39481),D(-39579),4688617,D(-39456)L[G]=h Q=D(-39545)L=f[S[3]]h=f[S[4]]Z=l[Y]Y=D(-39562)T=Z[Y]Y,I=.3,D(-39545)a=l[Q]Q=D(-39619)H=a[Q]a=D(-39513)J=H[a]Q=l[I]I=D(-39623)a=Q[I]Q=D(-39559)H=a[Q]a=D(-39583)Z=T(Y,J,H)Y=D(-39641)H=l[a]a,G=D(-39459),D(-39553)J=H[a]a,Q=220,30 H=J(a,Q)G,T=L[G],{[Y]=H}G=G(L,h,Z,T)L=D(-39558)L=G[L]L=L(G)else B=D(-39574)B,U=I[B],D(-39675)B=B(I,U)U=B B,x=K and 5892573 or 15238549,K end end else if B>4526468 then if 4545657>B then B,L=l[D(-39596)],{}elseif 4555963>B then G=n[1]L=f[S[1]]B=G==L B=B and 788869 or 2599802 elseif 4573306>B then B,Z,Y=472331,D(-39574),D(-39467)Z=T[Z]Z=Z(T,Y)L=Z else x,s=u,D(-39580)e=l[s]s=D(-39562)B=e[s]s,m,F=D(-39495),D(-39545),255 e=B(s)s=12095792>8784010 B=D(-39560)e[B]=s B,s=D(-39535),10519358<5064267 e[B]=s z=l[m]m,B=D(-39549),D(-39549)g=z[m]z=D(-39573)s=g[z]e[B]=s z=D(-39561)g=l[z]B,z,m=D(-39466),D(-39452),0 s=g[z]z=170 g=s(z,m,F)z,F=D(-39474),1 e[B]=g g=l[z]B,z=D(-39641),D(-39562)s=g[z]z,m=.15,.15 g=s(z,m,F)s=1 e[B]=g B=D(-39637)e[B]=s B,s=D(-39680),i e[B]=s s=e e=nil B=f[K]B[x]=s x,B=nil,5135620 end else if B>4385443 then if B<4479777 then G=713014>=10298184 B=f[S[1]]L=D(-39493)B[L]=G B,L=l[D(-39638)],{}else H=f[Z]a=D(-39495)J=H[a]L,B=J,734292 end else if B<4211473 then B=h B,L=G and 1010845 or 4034965,G elseif 4291503>B then z=f[S[7]]F,m=M,D(-39496)z[m]=F z=f[S[7]]s,m,B,F=nil,D(-39637),11266477,.15 z[m]=F g=nil else h=L B=not h B=B and 4833147 or 894141 end end end end else if 5529656>B then if B>5257807 then if B<5351389 then H,Q=Y,D(-39594)B=a[Q]B=B and 14342687 or 3914893 elseif 5464367>B then B=K and 1420022 or 12044779 elseif B<5510980 then B=f[S[1]]L,G=D(-39539),0 B[L]=G B=9973070 else B=L and 12606317 or 148447 end else if 5177447>B then if 5079311>B then u,B=U,10230923 elseif B<5152730 then e,u=not M,u+W x=u<=k x=e and x e=u>=k e=M and e x=e or x e=4585707 B=x and e x=3967327 B=B or x else T=D(-39629)h=l[T]T=D(-39562)G=h[T]L,B=G,15196941 end else if 5212087>B then Z,T,B=D(-39507),D(-39574),8518789 T=h[T]T=T(h,Z)L=T else B=5863766>10145952 f[S[2]]=B B=3561824 end end end else if 5792029>B then if B<5579719 then B=T B,L=4806666,h elseif B<5687831 then Z,L=D(-39539),D(-39539)B=f[S[1]]T=f[S[1]]h=T[Z]T=.001 G=h-T h=D(-39539)B[L]=G G=f[S[1]]L=G[h]G=0 B=L<G B=B and 5502449 or 9973070 elseif B<5757772 then L,B={},l[D(-39502)]else g,e=D(-39555),D(-39555)M=I[e]s=i[g]z=D(-39555)g=K[z]B=9710712 e=s+g W=M<=e u=W end else if 5858556>B then L=f[S[1]]G=n[1]B=G<L B=B and 14647206 or 3193222 elseif B<6031601 then k,u=B,i B=i and 8844296 or 967926 elseif 6324704>B then I=D(-39451)Q=G[I]H,I=B,D(-39467)a=Q==I B,J=a and 11948005 or 8912803,a else G,L,B=nil,{},l[D(-39453)]end end end end end end end end B=#r return P(L)end,function(l,D)local P=T(D)local n=function(...)return B(l,{...},D,P)end return n end,function(l)local D,B=1,l[1]while B do G[B],D=G[B]-1,1+D if 0==G[B]then G[B],f[B]=nil,nil end B=l[D]end end,function(l,D)local P=T(D)local n=function(n)return B(l,{n},D,P)end return n end return(N(1975264,{}))(P(L))end)(getfenv and getfenv()or _ENV,unpack or table[D(-39499)],newproxy,{...},select,setmetatable,getmetatable)end)(...)
+local State = {
+    chargingSpear = false,
+    touchInput = nil,
+    attackCooldown = false,
+}
+
+-- ==========================================
+-- VISUALS: FOV & PURPLE TRAJECTORY + HIT DOT
+-- ==========================================
+local FOVCircle
+pcall(function()
+    if typeof(Drawing) == "table" and Drawing.new then
+        FOVCircle = Drawing.new("Circle")
+        FOVCircle.Color = Color3.fromRGB(170, 0, 255)
+        FOVCircle.Thickness = 1.5
+        FOVCircle.Filled = false
+        FOVCircle.Visible = false
+    end
+end)
+
+local PathFolder = workspace:FindFirstChild("MIYAKO_Trajectory")
+if PathFolder then PathFolder:Destroy() end
+PathFolder = Instance.new("Folder")
+PathFolder.Name = "MIYAKO_Trajectory"
+PathFolder.Parent = workspace
+
+local TrajectoryParts = {}
+local SEGMENTS = 15
+
+for i = 1, SEGMENTS do
+    local p = Instance.new("Part")
+    p.Anchored = true
+    p.CanCollide = false
+    p.Material = Enum.Material.Neon
+    p.Color = Color3.fromRGB(170, 0, 255)
+    p.Size = Vector3.new(0.15, 0.15, 1)
+    p.Transparency = 1
+    p.Parent = PathFolder
+    TrajectoryParts[i] = p
+end
+
+local HitDot = Instance.new("Part")
+HitDot.Name = "MIYAKO_HitDot"
+HitDot.Shape = Enum.PartType.Ball
+HitDot.Size = Vector3.new(0.8, 0.8, 0.8)
+HitDot.Anchored = true
+HitDot.CanCollide = false
+HitDot.Material = Enum.Material.Neon
+HitDot.Color = Color3.fromRGB(170, 0, 255)
+HitDot.Transparency = 1
+HitDot.Parent = PathFolder
+
+-- ==========================================
+-- ROLE & TARGET CHECKER
+-- ==========================================
+local function isLocalPlayerKiller()
+    local char = LocalPlayer.Character
+    if char and char:GetAttribute("spearmode") ~= nil then
+        return true
+    end
+    if LocalPlayer.Team then
+        local name = LocalPlayer.Team.Name:lower()
+        if name:find("killer") then
+            return true
+        end
+    end
+    return char and char:FindFirstChild("HumanoidRootPart") ~= nil and (char:GetAttribute("spearmode") == true or char:GetAttribute("spearmode") == false)
+end
+
+local function isSurvivorPlayer(p)
+    if p == LocalPlayer then return false end
+    if p.Team then
+        local name = p.Team.Name:lower()
+        if name:find("killer") then
+            return false
+        end
+    end
+    return true
+end
+
+local function getTargetPart(char)
+    return char:FindFirstChild(Config.TargetPart) or char:FindFirstChild("Torso")
+end
+
+local function getClosestSurvivor()
+    local myChar = LocalPlayer.Character
+    local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    local cam = workspace.CurrentCamera
+    local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+    local bestDist = Config.FOV
+    local bestTarget = nil
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if isSurvivorPlayer(p) and p.Character then
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            local part = getTargetPart(p.Character)
+            
+            if hum and hum.Health > 0 and part then
+                local screenPos, onScreen = cam:WorldToViewportPoint(part.Position)
+                if onScreen then
+                    local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+                    if dist2D < bestDist then
+                        bestDist = dist2D
+                        bestTarget = { Player = p, Part = part, Humanoid = hum }
+                    end
+                end
+            end
+        end
+    end
+    return bestTarget
+end
+
+-- ==========================================
+-- NOTIFIKASI HIT DI KEPALA SURVIVOR
+-- ==========================================
+local function spawnHitNotification(character)
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(0, 100, 0, 40)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = head
+
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1, 0, 1, 0)
+    text.BackgroundTransparency = 1
+    text.Text = "🎯 KENA!"
+    text.TextColor3 = Color3.fromRGB(170, 0, 255)
+    text.TextStrokeTransparency = 1
+    text.TextScaled = true
+    text.Font = Enum.Font.GothamBlack
+    text.Parent = billboard
+
+    local ti = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    TweenService:Create(billboard, ti, {StudsOffset = Vector3.new(0, 5, 0)}):Play()
+    TweenService:Create(text, ti, {TextTransparency = 1}):Play()
+
+    task.delay(1.5, function()
+        if billboard then billboard:Destroy() end
+    end)
+end
+
+-- ==========================================
+-- FUNGSI FIRE (LOOKVECTOR 18.7 PREDICTION)
+-- ==========================================
+local function fire()
+    if State.attackCooldown then return end
+    State.attackCooldown = true
+    task.delay(2, function() State.attackCooldown = false end)
+
+    local myChar = LocalPlayer.Character
+    local startPart = myChar and (myChar:FindFirstChild("Head") or myChar:FindFirstChild("HumanoidRootPart"))
+    if not startPart then return end
+    
+    local startPos = startPart.Position
+    local targetInfo = getClosestSurvivor()
+    local aimDir
+
+    if targetInfo and targetInfo.Part then
+        local targetPart = targetInfo.Part
+        local targetPos = targetPart.Position
+        local speed = Config.SpearSpeed
+        local gravity = Config.Gravity
+
+        local distance = (targetPos - startPos).Magnitude
+        local t = distance / speed
+        
+        local finalTargetPos = targetPos
+        if Config.AutoPredict then
+            local lookVector = targetPart.CFrame.LookVector
+            finalTargetPos = targetPos + (lookVector * 18.7 * t)
+        end
+
+        local drop = 0.5 * gravity * (t ^ 2)
+        local distanceLift = distance * Config.LiftPower
+        local aimPos = finalTargetPos + Vector3.new(0, drop + distanceLift, 0)
+
+        aimDir = (aimPos - startPos).Unit
+        
+        if targetInfo.Humanoid then
+            local hum = targetInfo.Humanoid
+            local startHealth = hum.Health
+            local hitConn
+            hitConn = hum.HealthChanged:Connect(function(newHealth)
+                if newHealth < startHealth then
+                    spawnHitNotification(targetInfo.Player.Character)
+                    if hitConn then hitConn:Disconnect() end
+                end
+            end)
+            task.delay(2, function() if hitConn then hitConn:Disconnect() end end)
+        end
+    else
+        aimDir = workspace.CurrentCamera.CFrame.LookVector
+    end
+
+    pcall(function()
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        local killers = remotes and remotes:FindFirstChild("Killers")
+        local veil = killers and killers:FindFirstChild("Veil")
+        local spear = veil and veil:FindFirstChild("Spearthrow")
+        if spear then
+            spear:FireServer(aimDir, Config.SpearSpeed, startPos)
+        end
+    end)
+end
+
+-- ==========================================
+-- METAMETHOD HOOK
+-- ==========================================
+pcall(function()
+    local old
+    old = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if not checkcaller() and method == "FireServer" and self.Name == "Spearthrow" and Config.Enabled then
+            return nil
+        end
+        return old(self, ...)
+    end)
+end)
+
+-- ==========================================
+-- INPUT CONTROLS
+-- ==========================================
+UserInputService.InputBegan:Connect(function(input, gp)
+    local isTouch = input.UserInputType == Enum.UserInputType.Touch
+    if gp and not isTouch then return end
+    
+    local char = LocalPlayer.Character
+    local isSpearMode = char and char:GetAttribute("spearmode") == true
+    if not Config.Enabled or not isSpearMode then return end
+    
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        State.chargingSpear = true
+    elseif isTouch then
+        local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+        local slasher = pGui and pGui:FindFirstChild("Slasher-mob")
+        local ctrl = slasher and slasher:FindFirstChild("Controls")
+        local attackBtn = ctrl and ctrl:FindFirstChild("attack")
+        
+        if attackBtn and attackBtn.Visible then
+            local pos = input.Position
+            local absPos = attackBtn.AbsolutePosition
+            local absSize = attackBtn.AbsoluteSize
+            if pos.X >= absPos.X and pos.X <= absPos.X + absSize.X
+            and pos.Y >= absPos.Y and pos.Y <= absPos.Y + absSize.Y then
+                State.chargingSpear = true
+                State.touchInput = input
+            end
+        end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if State.chargingSpear and (input == State.touchInput or input.UserInputType == Enum.UserInputType.MouseButton1) then
+        State.chargingSpear = false
+        if State.touchInput == input then State.touchInput = nil end
+        fire()
+    end
+end)
+
+-- ==========================================
+-- RENDER LOOP: ESP, TRAJECTORY & HIT INDICATOR
+-- ==========================================
+RunService.RenderStepped:Connect(function()
+    local cam = workspace.CurrentCamera
+    local myChar = LocalPlayer.Character
+    local isSpearMode = myChar and myChar:GetAttribute("spearmode") == true
+
+    if not isLocalPlayerKiller() or not Config.Enabled then
+        if FOVCircle then FOVCircle.Visible = false end
+        for i = 1, SEGMENTS do TrajectoryParts[i].Transparency = 1 end
+        HitDot.Transparency = 1
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character then
+                local hl = p.Character:FindFirstChild("MIYAKO_Highlight")
+                if hl then hl:Destroy() end
+            end
+        end
+        return
+    end
+
+    if FOVCircle then
+        if Config.ShowFOV and isSpearMode then
+            FOVCircle.Visible = true
+            FOVCircle.Radius = Config.FOV
+            FOVCircle.Position = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+        else
+            FOVCircle.Visible = false
+        end
+    end
+
+    for i = 1, SEGMENTS do TrajectoryParts[i].Transparency = 1 end
+    HitDot.Transparency = 1
+
+    local target = getClosestSurvivor()
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if isSurvivorPlayer(p) and p.Character then
+            local char = p.Character
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local isLockedTarget = (target and target.Player == p)
+            local hl = char:FindFirstChild("MIYAKO_Highlight")
+            
+            if isLockedTarget and hum and hum.Health > 0 then
+                if not hl then
+                    hl = Instance.new("Highlight")
+                    hl.Name = "MIYAKO_Highlight"
+                    hl.Parent = char
+                end
+                hl.FillColor = Color3.fromRGB(0, 255, 100)
+                hl.FillTransparency = 0.65
+                hl.OutlineColor = Color3.fromRGB(0, 255, 150)
+                hl.OutlineTransparency = 0.4
+            else
+                if hl then hl:Destroy() end
+            end
+        end
+    end
+
+    if not (isSpearMode and State.chargingSpear) then return end
+
+    local indicatorColor = target and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(170, 0, 255)
+    for i = 1, SEGMENTS do
+        TrajectoryParts[i].Color = indicatorColor
+    end
+    HitDot.Color = indicatorColor
+
+    if not target then return end
+
+    local originPart = myChar:FindFirstChild("Head") or myChar:FindFirstChild("HumanoidRootPart")
+    if not originPart then return end
+
+    local originPos = originPart.Position
+    local targetPart = target.Part
+    local targetPos = targetPart.Position
+    local speed = Config.SpearSpeed
+    local gravity = Config.Gravity
+
+    local distance = (targetPos - originPos).Magnitude
+    local t = distance / speed
+    
+    local finalTargetPos = targetPos
+    if Config.AutoPredict then
+        local lookVector = targetPart.CFrame.LookVector
+        finalTargetPos = targetPos + (lookVector * 18.7 * t)
+    end
+
+    local drop = 0.5 * gravity * (t ^ 2)
+    local distanceLift = distance * Config.LiftPower
+    
+    local aimPos = finalTargetPos + Vector3.new(0, drop + distanceLift, 0)
+    local aimVelocity = (aimPos - originPos).Unit * speed
+
+    if Config.ShowTrajectory then
+        local timeStep = t / SEGMENTS
+        local currentPos = originPos
+
+        for i = 1, SEGMENTS do
+            local stepTime = i * timeStep
+            local nextPos = originPos + (aimVelocity * stepTime) - Vector3.new(0, 0.5 * gravity * (stepTime^2), 0)
+            
+            local part = TrajectoryParts[i]
+            local dist = (nextPos - currentPos).Magnitude
+            
+            part.Size = Vector3.new(0.15, 0.15, dist)
+            part.CFrame = CFrame.new((currentPos + nextPos) / 2, nextPos)
+            part.Transparency = 0.2 + (i / SEGMENTS) * 0.5 
+            
+            currentPos = nextPos
+        end
+
+        HitDot.Position = aimPos
+        HitDot.Transparency = 0.15
+    end
+end)
+
+
+-- ==========================================
+-- CENTER START & SMOOTH DRAGGABLE GUI
+-- ==========================================
+task.defer(function()
+    local parent = gethui and gethui() or game:GetService("CoreGui")
+    local old = parent:FindFirstChild("MIYAKO_SpearGUI_V1")
+    if old then old:Destroy() end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "MIYAKO_SpearGUI_V1"
+    gui.ResetOnSpawn = false
+    gui.IgnoreGuiInset = true
+    gui.Parent = parent
+
+    -- Hitung posisi tengah layar otomatis berdasarkan ViewportSize
+    local cam = workspace.CurrentCamera
+    local vpSize = cam.ViewportSize
+    local frameW, frameH = 220, 175
+    local centerX = (vpSize.X / 2) - (frameW / 2)
+    local centerY = (vpSize.Y / 2) - (frameH / 2)
+
+    -- Outer Main Frame (Posisi Awal di Tengah Layar)
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "Panel"
+    MainFrame.Size = UDim2.fromOffset(frameW, frameH)
+    MainFrame.Position = UDim2.new(0, centerX, 0, centerY)
+    MainFrame.AnchorPoint = Vector2.new(0, 0)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = gui
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+
+    -- UI Stroke Garis Ungu di Bingkai Luar
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Color = Color3.fromRGB(170, 0, 255)
+    UIStroke.Thickness = 2
+    UIStroke.Parent = MainFrame
+
+    -- Inner Container (Inset Padding)
+    local InnerContainer = Instance.new("Frame")
+    InnerContainer.Size = UDim2.new(1, -6, 1, -6)
+    InnerContainer.Position = UDim2.new(0, 3, 0, 3)
+    InnerContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    InnerContainer.ClipsDescendants = true
+    InnerContainer.Parent = MainFrame
+    Instance.new("UICorner", InnerContainer).CornerRadius = UDim.new(0, 6)
+
+    -- Background Image (93427694236333)
+    local BgImage = Instance.new("ImageLabel")
+    BgImage.Size = UDim2.new(1, 0, 1, 0)
+    BgImage.BackgroundTransparency = 1
+    BgImage.Image = "rbxassetid://93427694236333"
+    BgImage.ScaleType = Enum.ScaleType.Crop
+    BgImage.Parent = InnerContainer
+
+    local Overlay = Instance.new("Frame")
+    Overlay.Size = UDim2.new(1, 0, 1, 0)
+    Overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Overlay.BackgroundTransparency = 0.35
+    Overlay.BorderSizePixel = 0
+    Overlay.Parent = InnerContainer
+
+    -- Header Panel
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1, 0, 0, 30)
+    Header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Header.BackgroundTransparency = 0.4
+    Header.BorderSizePixel = 0
+    Header.Parent = Overlay
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, -60, 1, 0)
+    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Text = "MIYAKO SPEAR"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 13
+    Title.Parent = Header
+
+    local BtnMin = Instance.new("TextButton")
+    BtnMin.Size = UDim2.fromOffset(30, 30)
+    BtnMin.Position = UDim2.new(1, -60, 0, 0)
+    BtnMin.BackgroundTransparency = 1
+    BtnMin.Text = "-"
+    BtnMin.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BtnMin.Font = Enum.Font.GothamBold
+    BtnMin.TextSize = 20
+    BtnMin.Parent = Header
+
+    local BtnClose = Instance.new("TextButton")
+    BtnClose.Size = UDim2.fromOffset(30, 30)
+    BtnClose.Position = UDim2.new(1, -30, 0, 0)
+    BtnClose.BackgroundTransparency = 1
+    BtnClose.Text = "X"
+    BtnClose.TextColor3 = Color3.fromRGB(255, 50, 50)
+    BtnClose.Font = Enum.Font.GothamBold
+    BtnClose.TextSize = 16
+    BtnClose.Parent = Header
+
+    -- Smooth Draggable Logic
+    local dragging, dragInput, dragStart, startPos
+    local targetPosition = MainFrame.Position
+
+    Header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            targetPosition = startPos
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    Header.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            local camera = workspace.CurrentCamera
+            local viewportSize = camera.ViewportSize
+            
+            local newX = startPos.X.Offset + delta.X
+            local newY = startPos.Y.Offset + delta.Y
+            
+            local frameWidth = MainFrame.AbsoluteSize.X
+            local frameHeight = MainFrame.AbsoluteSize.Y
+            
+            newX = math.clamp(newX, 0, viewportSize.X - frameWidth)
+            newY = math.clamp(newY, 0, viewportSize.Y - frameHeight)
+            
+            targetPosition = UDim2.new(0, newX, 0, newY)
+        end
+    end)
+
+    RunService.RenderStepped:Connect(function(dt)
+        if MainFrame and MainFrame.Parent then
+            local currentPos = MainFrame.Position
+            local alpha = math.clamp(dt * 20, 0, 1)
+            local smoothX = currentPos.X.Offset + (targetPosition.X.Offset - currentPos.X.Offset) * alpha
+            local smoothY = currentPos.Y.Offset + (targetPosition.Y.Offset - currentPos.Y.Offset) * alpha
+            MainFrame.Position = UDim2.new(0, smoothX, 0, smoothY)
+        end
+    end)
+
+    -- Isi Menu
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Size = UDim2.new(1, 0, 1, -30)
+    ContentFrame.Position = UDim2.new(0, 0, 0, 30)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.Parent = Overlay
+
+    -- Toggle Silent Aim (Default OFF)
+    local BtnAim = Instance.new("TextButton")
+    BtnAim.Size = UDim2.new(1, -20, 0, 32)
+    BtnAim.Position = UDim2.new(0, 10, 0, 8)
+    BtnAim.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    BtnAim.Text = "SILENT AIM: OFF"
+    BtnAim.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BtnAim.Font = Enum.Font.GothamBold
+    BtnAim.TextSize = 11
+    BtnAim.Parent = ContentFrame
+    Instance.new("UICorner", BtnAim).CornerRadius = UDim.new(0, 4)
+
+    -- Toggle Predict (Default OFF)
+    local BtnPredict = Instance.new("TextButton")
+    BtnPredict.Size = UDim2.new(1, -20, 0, 32)
+    BtnPredict.Position = UDim2.new(0, 10, 0, 46)
+    BtnPredict.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    BtnPredict.Text = "PREDICT: OFF"
+    BtnPredict.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BtnPredict.Font = Enum.Font.GothamBold
+    BtnPredict.TextSize = 11
+    BtnPredict.Parent = ContentFrame
+    Instance.new("UICorner", BtnPredict).CornerRadius = UDim.new(0, 4)
+
+    -- Label LIFT
+    local LiftLabel = Instance.new("TextLabel")
+    LiftLabel.Size = UDim2.new(1, -20, 0, 15)
+    LiftLabel.Position = UDim2.new(0, 10, 0, 85)
+    LiftLabel.BackgroundTransparency = 1
+    LiftLabel.Text = "LIFT"
+    LiftLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    LiftLabel.Font = Enum.Font.GothamMedium
+    LiftLabel.TextSize = 10
+    LiftLabel.Parent = ContentFrame
+
+    local LiftControls = Instance.new("Frame")
+    LiftControls.Size = UDim2.new(1, -20, 0, 25)
+    LiftControls.Position = UDim2.new(0, 10, 0, 102)
+    LiftControls.BackgroundTransparency = 1
+    LiftControls.Parent = ContentFrame
+
+    local BtnMinus = Instance.new("TextButton")
+    BtnMinus.Size = UDim2.new(0, 40, 1, 0)
+    BtnMinus.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    BtnMinus.Text = "-"
+    BtnMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BtnMinus.Font = Enum.Font.GothamBold
+    BtnMinus.TextSize = 16
+    BtnMinus.Parent = LiftControls
+    Instance.new("UICorner", BtnMinus).CornerRadius = UDim.new(0, 4)
+
+    local ValLabel = Instance.new("TextLabel")
+    ValLabel.Size = UDim2.new(1, -90, 1, 0)
+    ValLabel.Position = UDim2.new(0, 45, 0, 0)
+    ValLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    ValLabel.BackgroundTransparency = 0.5
+    ValLabel.Text = string.format("%.3f", Config.LiftPower)
+    ValLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ValLabel.Font = Enum.Font.GothamBold
+    ValLabel.TextSize = 13
+    ValLabel.Parent = LiftControls
+    Instance.new("UICorner", ValLabel).CornerRadius = UDim.new(0, 4)
+
+    local BtnPlus = Instance.new("TextButton")
+    BtnPlus.Size = UDim2.new(0, 40, 1, 0)
+    BtnPlus.Position = UDim2.new(1, -40, 0, 0)
+    BtnPlus.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+    BtnPlus.Text = "+"
+    BtnPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BtnPlus.Font = Enum.Font.GothamBold
+    BtnPlus.TextSize = 16
+    BtnPlus.Parent = LiftControls
+    Instance.new("UICorner", BtnPlus).CornerRadius = UDim.new(0, 4)
+
+    -- Interaksi Tombol
+    BtnAim.MouseButton1Click:Connect(function()
+        Config.Enabled = not Config.Enabled
+        if Config.Enabled then
+            BtnAim.Text = "SILENT AIM: ON"
+            BtnAim.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        else
+            BtnAim.Text = "SILENT AIM: OFF"
+            BtnAim.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        end
+    end)
+
+    BtnPredict.MouseButton1Click:Connect(function()
+        Config.AutoPredict = not Config.AutoPredict
+        if Config.AutoPredict then
+            BtnPredict.Text = "PREDICT: ON"
+            BtnPredict.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        else
+            BtnPredict.Text = "PREDICT: OFF"
+            BtnPredict.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        end
+    end)
+
+    local function updatePowerText()
+        ValLabel.Text = string.format("%.3f", Config.LiftPower)
+    end
+
+    BtnPlus.MouseButton1Click:Connect(function()
+        Config.LiftPower = Config.LiftPower + 0.001
+        updatePowerText()
+    end)
+
+    BtnMinus.MouseButton1Click:Connect(function()
+        Config.LiftPower = Config.LiftPower - 0.001
+        if Config.LiftPower < 0 then Config.LiftPower = 0 end 
+        updatePowerText()
+    end)
+
+    local isMinimized = false
+    BtnMin.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        if isMinimized then
+            BtnMin.Text = "+"
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(220, 30)}):Play()
+        else
+            BtnMin.Text = "-"
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(220, 175)}):Play()
+        end
+    end)
+
+    BtnClose.MouseButton1Click:Connect(function()
+        gui:Destroy()
+    end)
+end)
+
+print("[MIYAKO] Ultimate Tuned Silent Spear Loaded - Center GUI & Default OFF Active!")
